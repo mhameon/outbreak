@@ -25,7 +25,6 @@ module.exports = {
   },
   plugins: [
     'mocha',
-    'react',
     '@typescript-eslint'
   ],
   overrides: [
@@ -35,14 +34,8 @@ module.exports = {
         '**.tsx'
       ],
       rules: {
-        '@typescript-eslint/explicit-function-return-type': [
-          'error',
-          {
-            allowExpressions: true
-          }
-        ],
         '@typescript-eslint/no-unused-vars': [
-          'error',
+          'warn',
           {
             args: 'none',
             ignoreRestSiblings: true,
@@ -64,5 +57,15 @@ module.exports = {
       }
     }
   ],
-  rules: {}
+  rules: {
+    'array-bracket-spacing': [
+      'error',
+      'always',
+      {
+        arraysInArrays: false,
+        objectsInArrays: false,
+        singleValue: true
+      }
+    ]
+  }
 }
