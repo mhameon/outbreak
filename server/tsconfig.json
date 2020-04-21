@@ -21,16 +21,12 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": [
-        "./src/shared/*"
+      "@service/*": [
+        "./src/service/*"
       ]
     }
   },
   "include": [
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "./src/**/*.test.ts",
-    "./src/public/"
+    "src"
   ]
 }

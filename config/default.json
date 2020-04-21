@@ -1,11 +1,6 @@
 {
   "server": {
-    "http": {
-      "port": 8080
-    },
-    "socket": {
-      "port": 8081
-    }
+    "port": 8080
   },
   "logger": {
     "level": "silly"
