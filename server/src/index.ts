@@ -1,4 +1,5 @@
 import 'module-alias/register'
-import server from './server/server'
+import config from 'config'
+import server from './server'
 
-server.start()
+server.listen(config.get('server.port'))
