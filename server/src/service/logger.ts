@@ -2,7 +2,7 @@ import config from 'config'
 import winston from 'winston'
 
 const outputFormat = winston.format.printf(line => {
-  return `${line.timestamp} ${line.ms.padStart(7)} | ${line.level.padEnd(7)} | ${line.message}`
+  return `${line.timestamp} ${line.ms.padStart(7)} | ${line.level.padEnd(7)} | ${line.stack ?? line.message}`
 })
 
 const logger = winston.createLogger({
@@ -11,6 +11,7 @@ const logger = winston.createLogger({
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
     winston.format.splat(),
     winston.format.ms(),
+    winston.format.errors({ stack: true }),
     outputFormat
   ),
   transports: [
@@ -23,6 +24,7 @@ if (process.env.NODE_ENV !== 'production') {
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.timestamp({ format: 'HH:mm:ss.SSS' }),
+      winston.format.errors({ stack: true }),
       outputFormat
     )
   }))
