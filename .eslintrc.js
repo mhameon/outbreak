@@ -25,6 +25,7 @@ module.exports = {
   },
   plugins: [
     'mocha',
+    'react-hooks',
     '@typescript-eslint'
   ],
   overrides: [
@@ -40,6 +41,28 @@ module.exports = {
             args: 'none',
             ignoreRestSiblings: true,
             vars: 'all'
+          }
+        ],
+        '@typescript-eslint/quotes': [
+          'error',
+          'single'
+        ],
+        '@typescript-eslint/semi': [
+          'error',
+          'never'
+        ],
+        '@typescript-eslint/space-before-function-paren': [
+          'error',
+          {
+            anonymous: 'always',
+            asyncArrow: 'always',
+            named: 'always'
+          }
+        ],
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowExpressions: true
           }
         ],
         '@typescript-eslint/indent': [
@@ -58,6 +81,8 @@ module.exports = {
     }
   ],
   rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
     'array-bracket-spacing': [
       'error',
       'always',
