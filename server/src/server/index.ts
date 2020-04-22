@@ -1,4 +1,4 @@
-import middleware from '../middleware'
+import middleware from './middleware'
 import Server from './server'
 
 const server = new Server()
