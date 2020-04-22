@@ -6,11 +6,6 @@ module.exports = {
     node: true,
     mocha: true,
   },
-  extends: [
-    'plugin:react/recommended',
-    'plugin:mocha/recommended',
-    'standard'
-  ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
@@ -28,13 +23,44 @@ module.exports = {
     'react-hooks',
     '@typescript-eslint'
   ],
+  extends: [
+    'standard',
+    'plugin:mocha/recommended'
+  ],
+  rules: {
+    'array-bracket-spacing': [
+      'error',
+      'always',
+      {
+        arraysInArrays: false,
+        objectsInArrays: false,
+        singleValue: true
+      }
+    ]
+  },
   overrides: [
     {
+      extends: [
+        'plugin:import/typescript',
+        'plugin:@typescript-eslint/recommended'
+      ],
       files: [
         '**.ts',
         '**.tsx'
       ],
       rules: {
+        'import/order': [
+          'error',
+          {
+            alphabetize: {
+              order: 'asc'
+            }
+          }
+        ],
+        'eol-last': [
+          'error',
+          'always'
+        ],
         '@typescript-eslint/no-unused-vars': [
           'warn',
           {
@@ -69,28 +95,7 @@ module.exports = {
           'error',
           2
         ],
-        'import/order': [
-          'error',
-          {
-            alphabetize: {
-              order: 'asc'
-            }
-          }
-        ],
       }
     }
   ],
-  rules: {
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    'array-bracket-spacing': [
-      'error',
-      'always',
-      {
-        arraysInArrays: false,
-        objectsInArrays: false,
-        singleValue: true
-      }
-    ]
-  }
 }
