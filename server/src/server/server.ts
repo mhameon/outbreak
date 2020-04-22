@@ -5,11 +5,12 @@ import express, { Express } from 'express'
 import socketIO, { Socket } from 'socket.io'
 
 class Server {
+  static maxShutdownDelayInSeconds = 5
+
   private readonly app: Express
   private readonly http: http.Server
   private readonly io: socketIO.Server
 
-  private shutdownDelayInSeconds = 3
   private isShuttingDown = false
   private clientCount = 0
 
@@ -24,76 +25,80 @@ class Server {
     process.on('SIGTERM', this.gracefulShutdown.bind(this))
   }
 
+  get express (): Express {
+    return this.app
+  }
+
   public listen (port: number): void {
     this.isShuttingDown = false
 
     log.silly('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
+
     this.http.listen(port, () => {
-      const addressInfo = this.http.address() as AddressInfo
-      log.info(
-        '🟢 Server started, listening %s:%s (%s)',
-        addressInfo.address,
-        addressInfo.port,
-        addressInfo.family
-      )
-    })
+      const { address, family } = this.http.address() as AddressInfo
+      log.info('🟢 Server started, listening %s:%s (%s)', address, port, family)
 
-    this.io.on('connection', (socket: Socket) => {
-      if (!this.isShuttingDown) {
-        this.clientCount++
-        log.http('Connection %s, total %d client(s)', socket.id, this.clientCount)
-      } else {
-        log.http('Client refused')
-        socket.disconnect(true)
-      }
+      this.io.on('connection', (socket: Socket) => {
+        if (this.acceptConnection()) {
+          this.clientCount++
+          log.http('Connection %s, total %d client(s)', socket.id, this.clientCount)
+        } else {
+          log.http('Client refused')
+          socket.disconnect(true)
+        }
 
-      socket.on('disconnect', (reason: string) => {
-        socket.disconnect(true)
-        this.clientCount--
-        log.http('Disconnection %s (%s), %d client(s) remains', socket.id, reason, this.clientCount)
+        socket.on('error', (error) => {
+          log.error(error)
+        })
+
+        socket.on('disconnect', (reason: string) => {
+          socket.disconnect(true)
+          this.clientCount--
+          log.http('Disconnection %s (%s), %d client(s) remains', socket.id, reason, this.clientCount)
+        })
       })
     })
   }
 
-  public close (reason?: string) {
+  public acceptConnection (): boolean {
+    return !this.isShuttingDown
+  }
+
+  public close (reason?: string): void {
     if (!this.isShuttingDown) {
       this.isShuttingDown = true
       reason = reason ? `${reason} received` : 'close() called'
       log.info('Server shutdown initiated (%s)...', reason)
 
-      if (this.clientCount <= 0) {
-        this.stop()
-      } else {
-        log.verbose('Emit `shutdown` to %d client(s), server will close in %ds', this.clientCount, this.shutdownDelayInSeconds)
+      if (this.clientCount > 0) {
+        log.verbose('Emit `shutdown` to %d client(s)', this.clientCount)
         this.io.sockets.emit('shutdown')
-        this.delayedStop()
+        this.stopWhenClientsAreDisconnected()
+      } else {
+        this.stopNow()
       }
     }
   }
 
-  public getExpressApp (): Express {
-    return this.app
-  }
-
-  private delayedStop () {
-    let shutdownCountdown = this.shutdownDelayInSeconds
+  private stopWhenClientsAreDisconnected (): void {
+    const pollingFrequency = 500
+    let iterationsRemaining = Server.maxShutdownDelayInSeconds * 1000 / pollingFrequency
     const timeout = setInterval(() => {
-      log.verbose('%d...', shutdownCountdown--)
-      if (shutdownCountdown <= 0) {
+      if (this.clientCount <= 0 || iterationsRemaining <= 0) {
         clearTimeout(timeout)
-        this.stop()
+        this.stopNow()
       }
-    }, 1000)
+      iterationsRemaining--
+    }, pollingFrequency)
   }
 
-  private stop () {
+  private stopNow (): void {
+    log.verbose('Closing server...')
     this.http.close((failure?: Error) => {
-      log.info('🔴 Server exited')
+      log.info('🔴 Server closed')
       if (failure) {
-        log.error('%o', failure)
-        process.exit(1)
+        log.error(failure)
       }
-      // process.exit(0)
     })
   }
 

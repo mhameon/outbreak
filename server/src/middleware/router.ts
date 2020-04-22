@@ -1,26 +1,12 @@
 import path from 'path'
-import express, { Request, Response } from 'express'
+import express from 'express'
 
-export default function addRoutes (app: express.Application) {
-  const rootPath = process.env.PWD ?? process.cwd()
+const root = process.env.PWD ?? process.cwd()
 
-  console.log(path.join(rootPath, '../app/build'))
+const router = express.Router()
 
-  app.use('/static', express.static(path.join(rootPath, '../app/build/static')))
-  app.use('/', express.static(path.join(rootPath, '../app/build')))
-  // app.get('/', (req: Request, res: Response) => res.sendFile(path.join(rootPath, '../app/build')))
+// React app
+router.use('/', express.static(path.join(root, '../app/build')))
+router.use('/static', express.static(path.join(root, '../app/build/static')))
 
-  app.get('/raw', (req, res) => {
-    res.sendFile(path.join(rootPath, 'public/index.html'))
-  })
-
-  app.get('/raw/js/socket.io.js', (req, res) => {
-    const socketIoClient = path.join(
-      path.dirname(require.resolve('socket.io-client/package.json')),
-      `dist/socket.io.slim${process.env.NODE_ENV === 'production' ? '' : '.dev'}.js`
-    )
-    res.sendFile(socketIoClient)
-  })
-
-  return app
-}
+export default router

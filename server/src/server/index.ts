@@ -3,6 +3,8 @@ import Server from './server'
 
 const server = new Server()
 
-middleware.addRoutes(server.getExpressApp())
+// server.register(new GameEngine())
+
+server.express.use(middleware.router)
 
 export default server

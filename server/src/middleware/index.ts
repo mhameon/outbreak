@@ -1,5 +1,5 @@
-import addRoutes from './router'
+import router from './router'
 
 export default {
-  addRoutes
+  router
 }
