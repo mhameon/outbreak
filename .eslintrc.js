@@ -1,6 +1,5 @@
 module.exports = {
   env: {
-    browser: true,
     commonjs: true,
     es6: true,
     node: true,
@@ -18,84 +17,45 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  plugins: [
-    'mocha',
-    'react-hooks',
-    '@typescript-eslint'
-  ],
   extends: [
-    'standard',
+    'eslint:recommended',
     'plugin:mocha/recommended'
   ],
-  rules: {
-    'array-bracket-spacing': [
-      'error',
-      'always',
-      {
-        arraysInArrays: false,
-        objectsInArrays: false,
-        singleValue: true
-      }
-    ]
-  },
-  overrides: [
-    {
-      extends: [
-        'plugin:import/typescript',
-        'plugin:@typescript-eslint/recommended'
-      ],
-      files: [
-        '**.ts',
-        '**.tsx'
-      ],
-      rules: {
-        'import/order': [
-          'error',
-          {
-            alphabetize: {
-              order: 'asc'
-            }
-          }
-        ],
-        'eol-last': [
-          'error',
-          'always'
-        ],
-        '@typescript-eslint/no-unused-vars': [
-          'warn',
-          {
-            args: 'none',
-            ignoreRestSiblings: true,
-            vars: 'all'
-          }
-        ],
-        '@typescript-eslint/quotes': [
-          'error',
-          'single'
-        ],
-        '@typescript-eslint/semi': [
-          'error',
-          'never'
-        ],
-        '@typescript-eslint/space-before-function-paren': [
-          'error',
-          {
-            anonymous: 'always',
-            asyncArrow: 'always',
-            named: 'always'
-          }
-        ],
-        '@typescript-eslint/explicit-function-return-type': [
-          'error',
-          {
-            allowExpressions: true
-          }
-        ],
-        '@typescript-eslint/indent': [
-          'error',
-          2
-        ],
-      }
-    }
+  plugins: [
+    'mocha',
+    '@typescript-eslint'
   ],
+  rules: {
+    'array-bracket-spacing': [ 'error', 'always', {
+      arraysInArrays: false,
+      objectsInArrays: false,
+      singleValue: true
+    } ],
+    'eol-last': [ 'error', 'always' ],
+    'import/order': [ 'error', { alphabetize: { order: 'asc' } } ],
+    'object-curly-spacing': [ 'error', 'always' ],
+  },
+  overrides: [ {
+    extends: [
+      'plugin:import/typescript',
+      'plugin:@typescript-eslint/recommended'
+    ],
+    files: [ '**.ts', '**.tsx' ],
+    rules: {
+      '@typescript-eslint/no-unused-vars': [ 'warn', {
+        args: 'none',
+        ignoreRestSiblings: true,
+        vars: 'all'
+      } ],
+      '@typescript-eslint/quotes': [ 'error', 'single' ],
+      '@typescript-eslint/semi': [ 'error', 'never' ],
+      '@typescript-eslint/space-before-function-paren': [ 'error', {
+        anonymous: 'always',
+        asyncArrow: 'always',
+        named: 'always'
+      } ],
+      '@typescript-eslint/explicit-function-return-type': [ 'error', { allowExpressions: true } ],
+      '@typescript-eslint/indent': [ 'error', 2 ],
+    }
+  } ],
 }

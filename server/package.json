@@ -7,18 +7,24 @@
     "start": "NODE_CONFIG_DIR=../config node build",
     "clean": "npx rimraf build",
     "build": "npm run clean && echo 'Compiling Typescript' && npx tsc --version && npx tsc --pretty",
-    "watch:server": "npx tsc-watch --onSuccess 'npm start'",
+    "watch:server": "npx tsc-watch --onSuccess 'npm run start'",
     "lint": "npx eslint 'src/**'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "npm run build"
   },
   "author": "Matt",
   "devDependencies": {
-    "eslint": "^6.8.0",
     "@types/config": "0.0.36",
     "@types/express": "^4.17.6",
     "@types/mocha": "^7.0.2",
-    "@types/socket.io": "^2.1.4"
+    "@types/socket.io": "^2.1.4",
+    "eslint": "^6.8.0",
+    "@typescript-eslint/parser": "^2.29.0",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import-order": "^2.1.4",
+    "eslint-plugin-mocha": "^6.3.0"
   },
   "dependencies": {
     "config": "^3.3.1",
