@@ -3,8 +3,12 @@ import WorldMap from '../../WorldMap'
 import { Tile } from '../../../@types/outbreak'
 
 class CityMapBuilder extends MapBuilder {
+  getName (): string {
+    return 'Random City' // Todo build map name generator (related to map theme)
+  }
+
   generate (width: number, height: number): WorldMap {
-    this.map = new WorldMap(width, height)
+    this.map = new WorldMap(width, height, this.getName())
 
     this.map.add(Tile.Block, { x: 0, y: 0 })
 

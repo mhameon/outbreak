@@ -11,30 +11,30 @@ class WorldMap {
   public readonly name: string
   private tiles: Map<Index, Tileset>
 
-  constructor (width: number, height: number) {
+  constructor (width: number, height: number, name = 'Unknown map') {
     this.tiles = new Map()
     this.size = { width, height }
-    this.name = 'Random Name' // Todo build map name generator (related to map theme)
+    this.name = name
   }
 
   private static index (at: Coords): Index {
     return `${at.x},${at.y}`
   }
 
-  isInside (at: Coords): boolean {
+  contains (at: Coords): boolean {
     return at.x >= 0 && at.x < this.size.width && at.y >= 0 && at.y < this.size.height
   }
 
   add (tile: Tile, at: Coords): void {
-    this.assertIsInside(at)
+    this.assertMapContains(at)
     const index = WorldMap.index(at)
     if (this.tiles.has(index)) {
-      if (tile === Tile.Walkable && this.has(Tile.Block, at)) {
-        const tiles = (this.get(at) as Tileset)
+      const tiles = (this.get(at) as Tileset)
+      if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
         tiles.delete(Tile.Block)
         this.tiles.set(index, tiles)
       } else {
-        this.tiles.set(index, (this.get(at) as Tileset).add(tile))
+        this.tiles.set(index, tiles.add(tile))
       }
     } else {
       if (tile !== Tile.Walkable) {
@@ -44,12 +44,12 @@ class WorldMap {
   }
 
   get (at: Coords): Tileset {
-    this.assertIsInside(at)
+    this.assertMapContains(at)
     return this.tiles.get(WorldMap.index(at)) ?? WorldMap.emptyTileset
   }
 
   has (tile: Tile | Tile[], at: Coords): boolean {
-    this.assertIsInside(at)
+    this.assertMapContains(at)
     const search = ([] as Tile[]).concat(tile)
     const tiles = this.get(at)
 
@@ -57,12 +57,12 @@ class WorldMap {
   }
 
   isWalkable (at: Coords): boolean {
-    this.assertIsInside(at)
+    this.assertMapContains(at)
     return !this.has(Tile.Block, at)
   }
 
-  private assertIsInside (at: Coords): void {
-    if (!this.isInside(at)) {
+  private assertMapContains (at: Coords): void {
+    if (!this.contains(at)) {
       throw new OutOfMapError(at, this.size)
     }
   }

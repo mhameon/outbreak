@@ -1,12 +1,16 @@
 import WorldMap from '../map/WorldMap'
-import AsciiMapRenderer from '../map/renderer/ascii/AsciiMapRenderer'
+import { Renderers, Renderer, MapRenderer } from '../map/renderer'
 
 class Outbreak {
+  static useRenderer: Renderer = 'Ascii'
+
   readonly map: WorldMap
   private turn = 1
+  private renderer: MapRenderer
 
   constructor (map: WorldMap) {
     this.map = map
+    this.renderer = new Renderers[Outbreak.useRenderer](this.map)
   }
 
   get currentTurn (): number {
@@ -17,9 +21,8 @@ class Outbreak {
     this.turn++
   }
 
-  render (): void{
-    const renderer = new AsciiMapRenderer(this.map)
-    console.log(renderer.render())
+  render (): void {
+    console.log(this.renderer.render())
   }
 }
 

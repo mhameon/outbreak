@@ -1,9 +1,8 @@
 import middleware from './middleware'
 import Server from './server'
+import GameEngine from '@engine/GameEngine'
 
-const server = new Server()
-
-// server.register(new GameEngine())
+const server = new Server(new GameEngine())
 
 server.express.use(middleware.router)
 

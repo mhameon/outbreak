@@ -9,8 +9,10 @@ export type Size = {
 }
 
 export const enum Tile {
+  /*** Basic behaviours ***/
   Walkable,
   Block,
+  /*** Kind of tile ***/
   Road,
   Water,
 }

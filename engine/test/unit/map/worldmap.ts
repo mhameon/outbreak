@@ -48,7 +48,7 @@ describe('WorldMap class', function () {
   })
 
   it('fails when working outside the map', function () {
-    assert.strictEqual(map.isInside({ x: 10, y: 10 }), false)
+    assert.strictEqual(map.contains({ x: 10, y: 10 }), false)
 
     const outside = { x: 10, y: 10 }
     const error = /Coords 10,10 are outside map \(5x5\)/
