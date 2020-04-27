@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+/build/
 
 # misc
 .DS_Store
@@ -21,3 +21,5 @@
 *.crt
 *.csr
 *.key
+
+/src/outbreak

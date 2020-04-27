@@ -5,15 +5,17 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "NODE_CONFIG_DIR=../config node build",
-    "clean": "npx rimraf build",
-    "build": "npm run clean && echo 'Compiling Typescript' && npx tsc --version && npx tsc --pretty",
-    "watch:server": "npx tsc-watch --onSuccess 'npm run start'",
+    "start:dev": "npx tsc-watch --onSuccess 'npm run start'",
+    "build": "npm run clean && npm run create:symlink && echo 'Using TypeScript' && npx tsc --version && npx tsc",
     "lint": "npx eslint 'src/**'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "clean": "npx rimraf build",
+    "create:symlink": "./symlink.sh"
   },
   "author": "Matt",
   "devDependencies": {
+    "@types/node": "^13.13.4",
     "@types/config": "0.0.36",
     "@types/express": "^4.17.6",
     "@types/mocha": "^7.0.2",
@@ -21,9 +23,9 @@
     "eslint": "^6.8.0",
     "@typescript-eslint/parser": "^2.29.0",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "eslint-plugin-typescript-sort-keys": "^0.8.0",
     "eslint-plugin-typescript": "^0.14.0",
     "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-import-order": "^2.1.4",
     "eslint-plugin-mocha": "^6.3.0"
   },
   "dependencies": {
@@ -38,6 +40,6 @@
     "winston": "^3.2.1"
   },
   "_moduleAliases": {
-    "@service": "build/service"
+    "@engine": "build/engine"
   }
 }

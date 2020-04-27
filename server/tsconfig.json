@@ -9,20 +9,20 @@
     "removeComments": true,
     "experimentalDecorators": true,
     "target": "es6",
+    "lib": [
+      "es2018"
+    ],
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "importHelpers": true,
-    "types": [
-      "node"
-    ],
     "typeRoots": [
       "node_modules/@types"
     ],
     "baseUrl": ".",
     "paths": {
-      "@service/*": [
-        "./src/service/*"
+      "@engine/*": [
+        "./src/engine/*"
       ]
     }
   },
