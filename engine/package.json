@@ -1,28 +1,31 @@
 {
-  "name": "outbreak-engine",
+  "name": "outbreak-game-engine",
   "version": "1.0.0",
   "description": "Zombie outbreak game engine",
   "main": "index.ts",
   "scripts": {
     "clean": "npx rimraf build",
-    "build": "npm run clean && echo 'Compiling Typescript' && npx tsc --version && npx tsc --pretty",
+    "build": "npm run clean && echo 'Compiling Typescript' && tsc --version && tsc --pretty",
     "watch:server": "npx tsc-watch --onSuccess 'npm start'",
-    "lint": "npx eslint 'src/**'",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint 'src/**'",
+    "test": "ts-mocha -p tsconfig.json test/**/*.ts",
     "postinstall": "npm run build"
   },
-  "author": "",
+  "author": "Matt",
   "license": "ISC",
   "devDependencies": {
     "@types/config": "0.0.36",
+    "@types/expect": "^24.3.0",
     "@types/mocha": "^7.0.2",
-    "eslint": "^6.8.0",
-    "@typescript-eslint/parser": "^2.29.0",
+    "@types/node": "^13.13.4",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "eslint-plugin-typescript": "^0.14.0",
+    "@typescript-eslint/parser": "^2.29.0",
+    "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-import-order": "^2.1.4",
-    "eslint-plugin-mocha": "^6.3.0"
+    "eslint-plugin-mocha": "^6.3.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "eslint-plugin-typescript-sort-keys": "^0.8.0",
+    "ts-mocha": "^7.0.0"
   },
   "dependencies": {
     "config": "^3.3.1",
