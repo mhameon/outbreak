@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "npx rimraf build",
     "build": "npm run clean && echo 'Compiling Typescript' && tsc --version && tsc --pretty",
-    "watch:server": "npx tsc-watch --onSuccess 'npm start'",
+    "watch:server": "tsc-watch --onSuccess 'npm start'",
     "lint": "eslint 'src/**'",
     "test": "ts-mocha -p tsconfig.json test/**/*.ts",
     "postinstall": "npm run build"
