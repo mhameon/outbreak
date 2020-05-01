@@ -15,15 +15,15 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
+  plugins: [
+    '@typescript-eslint',
+    'mocha',
+    'import'
+  ],
   extends: [
     'eslint:recommended',
     'plugin:mocha/recommended',
     'plugin:import/recommended'
-  ],
-  plugins: [
-    'mocha',
-    '@typescript-eslint',
-    'import'
   ],
   rules: {
     'array-bracket-spacing': [ 'error', 'always', {
