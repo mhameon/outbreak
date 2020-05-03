@@ -4,6 +4,7 @@
   "description": "Zombie outbreak game engine",
   "main": "index.ts",
   "scripts": {
+    "start": "node build/experiment",
     "clean": "npx rimraf build",
     "build": "npm run clean && echo 'Compiling Typescript' && tsc --version && tsc --pretty",
     "watch:server": "tsc-watch --onSuccess 'npm start'",

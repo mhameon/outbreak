@@ -1,5 +1,5 @@
 import WorldMap from '../../../src/map/WorldMap'
-import { Tile } from '../../../src/@types/outbreak'
+import { Tile, Direction, Tileset } from '../../../src/@types/outbreak'
 
 import * as assert from 'assert'
 
@@ -21,6 +21,20 @@ describe('WorldMap class', function () {
     const tile = map.get(origin)
     assert.ok(tile.has(Tile.Block))
     assert.strictEqual(tile.has(Tile.Walkable), false)
+  })
+
+  it('getAround(at)', function () {
+    const around = map.getAround({ x: 1, y: 0 })
+    assert.strictEqual(around.get(Direction.NorthWest), undefined)
+    assert.strictEqual(around.get(Direction.North), undefined)
+    assert.strictEqual(around.get(Direction.NorthEast), undefined)
+
+    assert.ok((around.get(Direction.West) as Tileset).has(Tile.Block))
+    assert.ok((around.get(Direction.East) as Tileset).has(Tile.Walkable))
+
+    assert.ok((around.get(Direction.SouthWest) as Tileset).has(Tile.Walkable))
+    assert.ok((around.get(Direction.South) as Tileset).has(Tile.Walkable))
+    assert.ok((around.get(Direction.SouthEast) as Tileset).has(Tile.Walkable))
   })
 
   it('has(tile, at)', function () {

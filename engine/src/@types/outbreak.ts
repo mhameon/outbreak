@@ -3,23 +3,42 @@ export type Coords = {
   y: number
 }
 
+export function isCoords (arg: any): arg is Coords {
+  return arg.x !== undefined && arg.y !== undefined
+}
+
+export function isCoordsArray (arg: any): arg is Array<Coords> {
+  return arg.length > 0 && isCoords(arg[0])
+}
+
 export type Size = {
   width: number
   height: number
 }
 
 export const enum Tile {
-  /*** Basic behaviours ***/
+  /*** Properties ***/
   Walkable,
   Block,
-  /*** Kind of tile ***/
+
+  /*** Cosmetic ***/
   Road,
   Water,
 }
 
+export type Index = string
+export type Tileset = Set<Tile>
+export type Around = Map<Direction, Tileset>
+
 export const enum Direction {
+  NorthWest,
   North,
+  NorthEast,
   West,
-  South,
   East,
+  SouthWest,
+  South,
+  SouthEast
 }
+
+export type GameId = string

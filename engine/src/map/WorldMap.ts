@@ -1,9 +1,12 @@
-import { Size, Coords, Tile } from '../@types/outbreak'
+import { Size, Coords, Tile, isCoordsArray, isCoords, Direction, Index, Tileset, Around } from '../@types/outbreak'
 import { OutOfMapError } from './MapErrors'
 
-type Index = string
-type Tileset = Set<Tile>
 
+/**
+ * A 2D map describing the game board.
+ *
+ * Each `Coords` handles a `Tileset`
+ */
 class WorldMap {
   private static emptyTileset = new Set([ Tile.Walkable ])
 
@@ -21,15 +24,27 @@ class WorldMap {
     return `${at.x},${at.y}`
   }
 
-  contains (at: Coords): boolean {
-    return at.x >= 0 && at.x < this.size.width && at.y >= 0 && at.y < this.size.height
+  contains (point: Coords): boolean {
+    return point.x >= 0 && point.x < this.size.width && point.y >= 0 && point.y < this.size.height
   }
 
-  add (tile: Tile, at: Coords): void {
-    this.assertMapContains(at)
-    const index = WorldMap.index(at)
+  add (tile: Tile, at: Coords | Array<Coords>): void {
+    let point
+    if (isCoordsArray(at)) {
+      point = at.pop() as Coords
+      if (isCoordsArray(at)) {
+        this.add(tile, at)
+      }
+    } else if (isCoords(at)) {
+      point = at
+    } else {
+      return
+    }
+
+    this.assertMapContains(point)
+    const index = WorldMap.index(point)
     if (this.tiles.has(index)) {
-      const tiles = (this.get(at) as Tileset)
+      const tiles = (this.get(point) as Tileset)
       if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
         tiles.delete(Tile.Block)
         this.tiles.set(index, tiles)
@@ -46,6 +61,26 @@ class WorldMap {
   get (at: Coords): Tileset {
     this.assertMapContains(at)
     return this.tiles.get(WorldMap.index(at)) ?? WorldMap.emptyTileset
+  }
+
+  getAround (at: Coords): Around {
+    const around: Around = new Map()
+    const from: Coords = { x: at.x - 1, y: at.y - 1 }
+    const to: Coords = { x: at.x + 1, y: at.y + 1 }
+    let direction = 0
+    for (let y = from.y; y <= to.y; y++) {
+      for (let x = from.x; x <= to.x; x++) {
+        if (x !== at.x || y !== at.y) {
+          try {
+            around.set(direction, this.get({ x, y }))
+          } catch (e) {
+            // Do nothing
+          }
+          direction++
+        }
+      }
+    }
+    return around
   }
 
   has (tile: Tile | Tile[], at: Coords): boolean {
