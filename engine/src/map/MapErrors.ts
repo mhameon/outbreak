@@ -12,6 +12,6 @@ export class InvalidArgumentError extends CustomError {
 
 export class OutOfMapError extends CustomError {
   constructor (at: Coords, size: Size) {
-    super(`Coords ${at.x},${at.y} are outside map (${size.width}x${size.height})`)
+    super(`Coords ${at.x},${at.y} is outside map (${size.width}x${size.height})`)
   }
 }

@@ -3,33 +3,6 @@ export type Coords = {
   y: number
 }
 
-export function isCoords (arg: any): arg is Coords {
-  return arg.x !== undefined && arg.y !== undefined
-}
-
-export function isCoordsArray (arg: any): arg is Array<Coords> {
-  return arg.length > 0 && isCoords(arg[0])
-}
-
-export type Size = {
-  width: number
-  height: number
-}
-
-export const enum Tile {
-  /*** Properties ***/
-  Walkable,
-  Block,
-
-  /*** Cosmetic ***/
-  Road,
-  Water,
-}
-
-export type Index = string
-export type Tileset = Set<Tile>
-export type Around = Map<Direction, Tileset>
-
 export const enum Direction {
   NorthWest,
   North,
@@ -41,4 +14,40 @@ export const enum Direction {
   SouthEast
 }
 
+export type Size = {
+  width: number
+  height: number
+}
+
+export enum Tile {
+  /*** Properties ***/
+  Walkable,
+  Block,
+
+  Level0,
+  Level1,
+  Level2,
+  Level3,
+  Level4,
+  Level5,
+
+  /*** Cosmetic ***/
+  Road,
+  Water,
+  Building,
+}
+
+export type Index = string
+export type Tileset = Set<Tile>
+
+export type Around = Map<Direction, Tileset>
+
 export type GameId = string
+
+export type Seed = number | string
+
+/** A matrix is an array of numbers of N dimensions */
+export type Matrix = Array<Matrix | number> // Recursive type
+
+export type Matrix1d = number[]
+export type Matrix2d = number[][]

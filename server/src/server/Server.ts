@@ -3,7 +3,8 @@ import type { AddressInfo } from 'net'
 import express, { Express } from 'express'
 import socketIO, { Socket } from 'socket.io'
 import { logger as log } from '../service'
-import GameEngine from '@engine/GameEngine'
+import GameManager from '@engine/game/GameManager'
+import { GameId } from '@engine/@types/outbreak'
 
 // Todo
 //  - Security: Properly check if clients are authorize to connect (see domains/origins, CORS...)
@@ -14,13 +15,13 @@ class Server {
   private readonly http: http.Server
   private readonly io: socketIO.Server
 
-  private readonly engine: GameEngine
+  private readonly games: GameManager
 
   private isShuttingDown = false
   private clientCount = 0
 
-  constructor (engine: GameEngine) {
-    this.engine = engine
+  constructor (manager: GameManager) {
+    this.games = manager
 
     this.express = express()
     this.http = http.createServer(this.express)
@@ -44,11 +45,26 @@ class Server {
       this.io.on('connect', (socket: Socket) => {
         if (this.acceptConnection()) {
           this.clientCount++
-          const { 'user-agent': userAgent, host } = socket.request.headers
-          log.http('Connection %s: %s, total %d client(s)', socket.id, host, this.clientCount)
-          log.http('           %s: %s', socket.id, userAgent)
-          // log.http('%o', socket.request.headers)
-          //this.engine.createGame('test')
+          const { 'user-agent': userAgent, origin, referer } = socket.request.headers
+          log.http('Connection %s: %s, total %d client(s)', socket.id, origin ? `origin=${origin}` : `referer=${referer}`, this.clientCount)
+          log.http('           %s', userAgent)
+
+          //-- ⬇⬇ Experimental ⬇⬇ --
+          let gameId: GameId
+          if (this.games.count() === 0) {
+            gameId = this.games.make()
+            log.info('Created game %s', gameId)
+          } else {
+            gameId = this.games.list()[0].id
+          }
+
+          socket.join(gameId, () => {
+            //console.log(socket.rooms) // { roomId: roomId, ... }
+            log.info('Joined game %s, welcome %s', gameId, socket.id)
+            this.io.to(gameId).emit('msg', 'a new play has joined the game')
+          })
+          // ⬆⬆ Experimental ⬆⬆ --
+
         } else {
           log.http('Client refused')
           socket.disconnect(true)

@@ -1,52 +1,61 @@
 module.exports = {
-    extends: [
-        '../.eslintrc.js',
-        'plugin:react/recommended'
+  root: true,
+  ...require('../.eslintrc.js'),
+  ...{
+    plugins: [
+      'react-hooks'
     ],
+    extends: [
+      'plugin:react/recommended'
+    ],
+    globals: {
+      window: true
+    },
     settings: {
-        react: {
-            version: 'detect'
-        }
+      react: {
+        version: 'detect'
+      }
     },
     rules: {
-        'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
     overrides: [ {
-        plugins: [
-            'react'
+      plugins: [
+        'react'
+      ],
+      files: [
+        '**.jsx',
+        '**.tsx'
+      ],
+      rules: {
+        'jsx-quotes': [
+          'error',
+          'prefer-double'
         ],
-        files: [
-            '**.jsx',
-            '**.tsx'
+        'react/jsx-first-prop-new-line': [
+          'error',
+          'multiline'
         ],
-        rules: {
-            'jsx-quotes': [
-                'error',
-                'prefer-double'
-            ],
-            'react/jsx-first-prop-new-line': [
-                'error',
-                'multiline'
-            ],
-            'react/jsx-max-props-per-line': [
-                'error',
-                {
-                    maximum: 1,
-                    when: 'always'
-                }
-            ],
-            'react/jsx-sort-props': [
-                'error',
-                {
-                    callbacksLast: true,
-                    shorthandFirst: true,
-                    ignoreCase: true,
-                    noSortAlphabetically: false,
-                    reservedFirst: true
-                }
-            ]
-        }
+        'react/jsx-max-props-per-line': [
+          'error',
+          {
+            maximum: 1,
+            when: 'always'
+          }
+        ],
+        'react/jsx-sort-props': [
+          'error',
+          {
+            callbacksLast: true,
+            shorthandFirst: true,
+            ignoreCase: true,
+            noSortAlphabetically: false,
+            reservedFirst: true
+          }
+        ]
+      }
     }
     ],
+  }
 }

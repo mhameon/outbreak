@@ -1,11 +1,12 @@
 import Outbreak from './Outbreak'
 import CityMapBuilder from '../map/builder/city/CityMapBuilder'
+import { GameId } from '../@types/outbreak'
 
 class OutbreakFactory {
   // Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
-  create (options = {}): Outbreak {
-    const map = (new CityMapBuilder()).generate(30, 10)
-    return new Outbreak(map)
+  create (id: GameId, options = {}): Outbreak {
+    const map = (new CityMapBuilder(60, 25)).generate()
+    return new Outbreak(id, map)
   }
 }
 

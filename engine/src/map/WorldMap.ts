@@ -1,6 +1,6 @@
-import { Size, Coords, Tile, isCoordsArray, isCoords, Direction, Index, Tileset, Around } from '../@types/outbreak'
+import { Size, Coords, Tile, Index, Tileset, Around } from '../@types/outbreak'
 import { OutOfMapError } from './MapErrors'
-
+import { isCoordsArray, isCoords } from '../@types/guards'
 
 /**
  * A 2D map describing the game board.
@@ -9,7 +9,6 @@ import { OutOfMapError } from './MapErrors'
  */
 class WorldMap {
   private static emptyTileset = new Set([ Tile.Walkable ])
-
   public readonly size: Size
   public readonly name: string
   private tiles: Map<Index, Tileset>
@@ -41,21 +40,39 @@ class WorldMap {
       return
     }
 
-    this.assertMapContains(point)
-    const index = WorldMap.index(point)
-    if (this.tiles.has(index)) {
-      const tiles = (this.get(point) as Tileset)
-      if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
-        tiles.delete(Tile.Block)
-        this.tiles.set(index, tiles)
+    if (this.contains(point)) {
+      const index = WorldMap.index(point)
+      if (this.tiles.has(index)) {
+        const tiles = (this.get(point) as Tileset)
+        if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
+          tiles.delete(Tile.Block)
+          this.tiles.set(index, tiles)
+        } else {
+          this.tiles.set(index, tiles.add(tile))
+        }
       } else {
-        this.tiles.set(index, tiles.add(tile))
-      }
-    } else {
-      if (tile !== Tile.Walkable) {
-        this.tiles.set(index, new Set([ tile ]))
+        if (tile !== Tile.Walkable) {
+          this.tiles.set(index, new Set([ tile ]))
+        }
       }
     }
+  }
+
+  set (tile: Tile, at: Coords | Array<Coords>): void {
+    let point
+    if (isCoordsArray(at)) {
+      point = at.pop() as Coords
+      if (isCoordsArray(at)) {
+        this.set(tile, at)
+      }
+    } else if (isCoords(at)) {
+      point = at
+    } else {
+      return
+    }
+
+    this.tiles.delete(WorldMap.index(point))
+    this.add(tile, point)
   }
 
   get (at: Coords): Tileset {
@@ -65,8 +82,8 @@ class WorldMap {
 
   getAround (at: Coords): Around {
     const around: Around = new Map()
-    const from: Coords = { x: at.x - 1, y: at.y - 1 }
-    const to: Coords = { x: at.x + 1, y: at.y + 1 }
+    const from = { x: at.x - 1, y: at.y - 1 }
+    const to = { x: at.x + 1, y: at.y + 1 }
     let direction = 0
     for (let y = from.y; y <= to.y; y++) {
       for (let x = from.x; x <= to.x; x++) {

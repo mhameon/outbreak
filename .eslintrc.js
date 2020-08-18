@@ -68,11 +68,6 @@ module.exports = {
       } ],
       '@typescript-eslint/quotes': [ 'error', 'single' ],
       '@typescript-eslint/semi': [ 'error', 'never' ],
-      '@typescript-eslint/space-before-function-paren': [ 'error', {
-        anonymous: 'always',
-        asyncArrow: 'always',
-        named: 'always'
-      } ],
       '@typescript-eslint/explicit-function-return-type': [ 'error', { allowExpressions: true } ],
       '@typescript-eslint/indent': [ 'error', 2 ],
       'import/no-unresolved': [ 'off', { caseSensitive: false } ],

@@ -17,6 +17,22 @@ describe('WorldMap class', function () {
     assert.strictEqual(map.size.height, 5)
   })
 
+  it('add(tile, at)', function () {
+    assert.ok(map.has(Tile.Block, origin))
+
+    map.add(Tile.Block, origin)
+    map.add(Tile.Block, origin)
+    map.add(Tile.Water, origin)
+    map.add(Tile.Water, origin)
+    assert.strictEqual(map.get(origin).size, 2)
+  })
+
+  it('set(tile, at)', function () {
+    map.set(Tile.Road, origin)
+    assert.ok(map.has([ Tile.Road ], origin))
+    assert.strictEqual(map.has(Tile.Block, origin), false)
+  })
+
   it('get(at)', function () {
     const tile = map.get(origin)
     assert.ok(tile.has(Tile.Block))
@@ -65,9 +81,8 @@ describe('WorldMap class', function () {
     assert.strictEqual(map.contains({ x: 10, y: 10 }), false)
 
     const outside = { x: 10, y: 10 }
-    const error = /Coords 10,10 are outside map \(5x5\)/
+    const error = /Coords 10,10 is outside map \(5x5\)/
     assert.throws(() => map.isWalkable(outside), error)
-    assert.throws(() => map.add(Tile.Block, outside), error)
     assert.throws(() => map.has(Tile.Block, outside), error)
     assert.throws(() => map.get(outside), error)
   })
