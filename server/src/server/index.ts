@@ -1,8 +1,8 @@
 import middleware from './middleware'
-import Server from './server'
+import GameServer from './GameServer'
 import GameManager from '@engine/game/GameManager'
 
-const server = new Server(new GameManager())
+const server = new GameServer(new GameManager())
 
 server.express.use(middleware.router)
 

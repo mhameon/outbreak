@@ -2,13 +2,15 @@ import http from 'http'
 import type { AddressInfo } from 'net'
 import express, { Express } from 'express'
 import socketIO, { Socket } from 'socket.io'
-import { logger as log } from '../service'
+import { getLogger } from '../service'
 import GameManager from '@engine/game/GameManager'
 import { GameId } from '@engine/@types/outbreak'
 
+const log = getLogger('GameServer')
+
 // Todo
 //  - Security: Properly check if clients are authorize to connect (see domains/origins, CORS...)
-class Server {
+class GameServer {
   static maxShutdownDelayInSeconds = 5
 
   readonly express: Express
@@ -36,11 +38,9 @@ class Server {
   listen (port: number): void {
     this.isShuttingDown = false
 
-    log.silly('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-
     this.http.listen(port, () => {
       const { address, family } = this.http.address() as AddressInfo
-      log.info('🟢 Server started, awaiting connections on %s:%s (%s)', address, port, family)
+      log.info('🟢 Server listening, awaiting connections on %s:%s (%s)', address, port, family)
 
       this.io.on('connect', (socket: Socket) => {
         if (this.acceptConnection()) {
@@ -51,17 +51,17 @@ class Server {
 
           //-- ⬇⬇ Experimental ⬇⬇ --
           let gameId: GameId
-          if (this.games.count() === 0) {
+          if (this.needToCreateNewGame()) {
             gameId = this.games.make()
             log.info('Created game %s', gameId)
           } else {
-            gameId = this.games.list()[0].id
+            gameId = this.getAvailableGame()
           }
 
           socket.join(gameId, () => {
             //console.log(socket.rooms) // { roomId: roomId, ... }
             log.info('Joined game %s, welcome %s', gameId, socket.id)
-            this.io.to(gameId).emit('msg', 'a new play has joined the game')
+            this.io.to(gameId).emit('msg', 'Player %s has joined the game', socket.id)
           })
           // ⬆⬆ Experimental ⬆⬆ --
 
@@ -103,9 +103,17 @@ class Server {
     }
   }
 
+  private needToCreateNewGame (): boolean {
+    return this.games.count() === 0
+  }
+
+  private getAvailableGame (): GameId {
+    return this.games.list()[0].id
+  }
+
   private stopWhenClientsAreDisconnected (): void {
     const pollingFrequency = 500
-    let iterationsRemaining = Server.maxShutdownDelayInSeconds * 1000 / pollingFrequency
+    let iterationsRemaining = GameServer.maxShutdownDelayInSeconds * 1000 / pollingFrequency
     const timeout = setInterval(() => {
       if (this.clientCount <= 0 || iterationsRemaining <= 0) {
         clearTimeout(timeout)
@@ -119,7 +127,7 @@ class Server {
     log.verbose('Closing server...')
 
     if (this.clientCount > 0) {
-      log.warn('Still %d client(s) after %ds delay, force close', this.clientCount, Server.maxShutdownDelayInSeconds)
+      log.warn('Still %d client(s) after %ds delay, force close', this.clientCount, GameServer.maxShutdownDelayInSeconds)
       this.io.clients((error: Error, clients: string[]) => {
         if (error) {
           log.error(error)
@@ -132,6 +140,7 @@ class Server {
 
     this.http.close((failure?: Error) => {
       log.info('🔴 Server closed')
+      log.silly('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
       if (failure) {
         log.error(failure)
       }
@@ -148,4 +157,4 @@ class Server {
   }
 }
 
-export default Server
+export default GameServer
