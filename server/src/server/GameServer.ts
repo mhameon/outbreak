@@ -38,6 +38,11 @@ class GameServer {
   listen (port: number): void {
     this.isShuttingDown = false
 
+    if ( this.http.listening ){
+      log.warn('Server already listening')
+      return
+    }
+
     this.http.listen(port, () => {
       const { address, family } = this.http.address() as AddressInfo
       log.info('🟢 Server listening, awaiting connections on %s:%s (%s)', address, port, family)
@@ -140,7 +145,7 @@ class GameServer {
 
     this.http.close((failure?: Error) => {
       log.info('🔴 Server closed')
-      log.silly('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
+      log.debug('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
       if (failure) {
         log.error(failure)
       }

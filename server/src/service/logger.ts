@@ -13,7 +13,7 @@ const taggedLoggers: Record<string, winston.Logger> = {}
  * @param {string} [channel] If specified, logs will be write in `logs/<channel>.log` (in addition to default log file)
  * @return winston.Logger
  */
-export default function getLogger (tag = 'default', channel?: string): winston.Logger {
+function getLogger (tag = 'default', channel?: string): winston.Logger {
   const outputFormat = winston.format.printf(line => {
     return `${line.timestamp} ${line.ms.padStart(7)} | ${(line.label ?? '').padEnd(16)} | ${line.level.padEnd(7)} | ${line.stack ?? line.message}`
   })
@@ -39,6 +39,7 @@ export default function getLogger (tag = 'default', channel?: string): winston.L
       ),
       transports
     })
+
     if (process.env.NODE_ENV !== 'production' && !channel) {
       logger.add(new winston.transports.Console({
         stderrLevels: [],
@@ -53,7 +54,11 @@ export default function getLogger (tag = 'default', channel?: string): winston.L
         )
       }))
     }
+
+    taggedLoggers[tag] = logger
   }
 
   return winston.loggers.get(tag)
 }
+
+export default getLogger

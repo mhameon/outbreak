@@ -47,6 +47,7 @@ function Client (props: { path: string }): JSX.Element {
         setAttempt(0)
       })
       .on('reconnecting', (attempt: number) => {
+        console.log('reconnecting... ' + attempt)
         setAttempt(attempt)
       })
       .on('reconnect_error', (error: Error) => console.log('reconnect_error', error.message))
