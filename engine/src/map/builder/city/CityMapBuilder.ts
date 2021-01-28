@@ -4,7 +4,7 @@ import { Tile, Coords, Seed } from '../../../@types/outbreak'
 import { InvalidArgumentError } from '../../MapErrors'
 import { line, calculateDestination } from '../../geometry'
 import chalk from 'chalk'
-import { matrix, random } from '../generator/helpers'
+import { matrix } from '../generator/helpers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tumult = require('tumult')
 

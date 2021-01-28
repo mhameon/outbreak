@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import io from 'socket.io-client'
+import { io } from 'socket.io-client'
 import logo from './logo.svg'
 
 import './App.css'
@@ -7,14 +7,19 @@ import './App.css'
 const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`
 // const socket = io(uri, { autoConnect: false })
-const socket = io(uri)
+const socket = io(uri, {
+  withCredentials: true,
+  // extraHeaders: {
+  //   "my-custom-header": "abcd",
+  // },
+})
 
 function Client (props: { path: string }): JSX.Element {
-  const [ connecting, isConnecting ] = useState(false)
-  const [ attempt, setAttempt ] = useState(0)
-  const [ connection, setConnection ] = useState({
+  const [connecting, isConnecting] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const [connection, setConnection] = useState({
     id: 'Unknown',
-    isConnected: false
+    isConnected: false,
   })
 
   function connect (): void {

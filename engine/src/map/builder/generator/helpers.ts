@@ -18,6 +18,7 @@ export const random = {
   /** Randomly choose one entry in `values` */
   choose: (...values: any[]): any => values[random.range(0, values.length - 1)],
 
+  /** Has a `percent` in 100 chance of returning `true` */
   chance: (percent: number): boolean => Math.random() > percent / 100
 }
 
@@ -34,7 +35,7 @@ export const matrix = {
     return array.map(absolutize)
   },
 
-  /** Normalize a Matrix (converts entries between 0 and 1 with magnitude scale conservation) */
+  /** Normalize a Matrix (converts all entries to values between 0 to 1 with magnitude scale conservation) */
   normalize: (array: Matrix): Matrix => {
     const min = matrix.min(array)
     const max = matrix.max(array)
@@ -108,7 +109,7 @@ export const matrix = {
 
     output += '\n'
     if (width === 0 || height === 0) {
-      return 'Cannot render empty matrix !'
+      throw new Error('Cannot render empty matrix !')
     }
 
     let item: number
