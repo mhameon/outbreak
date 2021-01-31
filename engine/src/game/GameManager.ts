@@ -18,7 +18,7 @@ class GameManager {
   }
 
   private static buildGameId (): GameId {
-    return crypto.randomBytes(12).toString('hex')
+    return `game_${crypto.randomBytes(12).toString('hex')}`
   }
 
   make (): GameId {

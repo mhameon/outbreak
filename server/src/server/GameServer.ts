@@ -11,7 +11,7 @@ const log = getLogger('GameServer')
 
 // Todo
 //  - Security: Properly check if clients are authorize to connect (see domains/origins, CORS...)
-class GameServer {
+export class GameServer {
   static maxShutdownDelayInSeconds = 5
 
   readonly express: Express
@@ -28,10 +28,11 @@ class GameServer {
 
     this.express = express()
     this.http = http.createServer(this.express)
-
     this.io = new io.Server(this.http, {
       cors: {
-        origin: 'http://localhost:3000', // todo handle app server url (or via config/env)
+        origin: [ // todo handle app server url (or via config/env)
+          'http://localhost:3000'
+        ],
         methods: [ 'GET', 'POST' ],
         //allowedHeaders: [ 'my-custom-header' ],
         credentials: true,
@@ -40,7 +41,6 @@ class GameServer {
 
     process.on('SIGINT', this.gracefulShutdown.bind(this))
     process.on('SIGTERM', this.gracefulShutdown.bind(this))
-
     process.on('uncaughtException', this.uncaughtException.bind(this))
   }
 
@@ -53,8 +53,8 @@ class GameServer {
     }
 
     this.http.listen(port, () => {
-      const { address, family } = this.http.address() as AddressInfo
-      log.info('🟢 Server listening, awaiting connections on %s:%s (%s)', address, port, family)
+      const { address } = this.http.address() as AddressInfo
+      log.info('🟢 Server listening, awaiting connections on %s:%s', address === '::' ? 'localhost':address, port)
 
       this.io.on('connect', (socket: io.Socket) => {
         if (this.acceptConnection()) {
@@ -63,20 +63,23 @@ class GameServer {
           log.http('Connection %s: %s, total %d client(s)', socket.id, origin ? `origin=${origin}` : `referer=${referer}`, this.clientCount)
           log.http('           %s', userAgent)
 
+          socket.join('lobby')
+
+
           //-- ⬇⬇ Experimental ⬇⬇ --
-          let gameId: GameId
+          let game: GameId
           if (this.needToCreateNewGame()) {
-            gameId = this.games.make()
-            log.info('Created game %s', gameId)
+            game = this.games.make()
+            log.info('Created %s', game)
           }
           else {
-            gameId = this.getAvailableGame()
+            game = this.getAvailableGame()
           }
 
-          socket.join(gameId)
+          socket.join(game)
           //console.log(socket.rooms) // { roomId: roomId, ... }
-          log.info('Joined game %s, welcome %s', gameId, socket.id)
-          this.io.to(gameId).emit('msg', 'Player %s has joined the game', socket.id)
+          log.info('Player %s just joined %s', socket.id, game)
+          this.io.to(game).emit('msg', 'Player %s has joined the game', socket.id)
 
           // ⬆⬆ Experimental ⬆⬆ --
 
@@ -90,10 +93,16 @@ class GameServer {
           log.error(error)
         })
 
+        socket.on('disconnecting', (reason) => {
+          //console.log(socket.rooms) // Set { ... }
+          log.http('Disconnecting %s (%s)', socket.id, reason)
+          log.debug(' \\_ leaving %d rooms (%s)', socket.rooms.size,[ ...socket.rooms ].join(', '))
+        })
+
         socket.on('disconnect', (reason: string) => {
           socket.disconnect(true)
           this.clientCount--
-          log.http('Disconnection %s (%s), %d client(s) remains', socket.id, reason, this.clientCount)
+          log.http('Disconnected %s (%s), %d client(s) remains', socket.id, reason, this.clientCount)
         })
       })
     })
@@ -145,15 +154,7 @@ class GameServer {
 
     if (this.clientCount > 0) {
       log.warn('Still %d client(s) after %ds delay, force close', this.clientCount, GameServer.maxShutdownDelayInSeconds)
-      // this.io.clients((error: Error, clients: string[]) => {
-      //   if (error) {
-      //     log.error(error)
-      //   }
-      //   clients.forEach((socketId: string) => {
-      //     this.io.sockets.connected[socketId].disconnect(true)
-      //   })
-      // })
-      for (const [ _, socket ] of this.io.of('/').sockets) {
+      for (const [ id, socket ] of this.io.sockets.sockets) {
         socket.disconnect(true)
       }
     }
@@ -176,5 +177,3 @@ class GameServer {
     this.close(signal)
   }
 }
-
-export default GameServer

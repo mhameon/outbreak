@@ -6,13 +6,11 @@ const log = getLogger('CLI')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Command = (...args: any[]) => any
 
-class CommandLineInterpreter {
+export class CommandLineInterpreter {
   private readonly registeredCommands: Record<string, { execute: Command; description: string }> = {}
   private readonly cli: readline.Interface
 
   constructor () {
-    this.registerDefaultCommands()
-
     this.cli = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '' })
     this.cli.prompt()
     this.cli
@@ -34,6 +32,8 @@ class CommandLineInterpreter {
       .on('close', () => {
         process.kill(process.pid, 'SIGINT')
       })
+
+    this.registerDefaultCommands()
   }
 
   registerCommand (name: string, description: string, command: Command): CommandLineInterpreter {
@@ -48,20 +48,21 @@ class CommandLineInterpreter {
 
   private registerDefaultCommands (): void {
     this.registerCommand('help', 'Show registered commands', () => {
-      const pad = 32
+      const pad = 40
+
       console.log('')
       Object.entries(this.registeredCommands).sort().forEach(([ name, command ]) => {
-        console.log(`  ${(name + ' ').padEnd(pad, '.')} ${command.description}`)
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const args: string[] = (command.execute as any).toString()
           .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
           .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
           .split(/,/)
 
+        let allArguments = ''
         if (args.filter(i => i).length) {
-          console.log(`  ${''.padEnd(pad + 2)} Args: ${args.join(', ')}`)
+          allArguments = `${args.map(arg => `<${arg}>`).join(' ')} `
         }
+        console.log(`   ${(name + ' ' + allArguments).padEnd(pad, '.')} ${command.description}`)
       })
       console.log('')
     })
@@ -69,11 +70,5 @@ class CommandLineInterpreter {
     this.registerCommand('exit', 'Send SIGINT signal', () => {
       this.cli.close()
     })
-
-    this.registerCommand('echo', 'Simply repeat input', (message?: string) => {
-      console.log(`Echo: ${message ?? 'nothing'}`)
-    })
   }
 }
-
-export default CommandLineInterpreter

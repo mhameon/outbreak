@@ -1,10 +1,10 @@
-import CommandLineInterpreter from './CommandLineInterpreter'
+import { CommandLineInterpreter } from './CommandLineInterpreter'
 import { getLogger } from '../'
 
 const log = getLogger('CLI')
 
 let singleton: CommandLineInterpreter
-export default function runCommandLineInterpreter (enabled: boolean): CommandLineInterpreter | void {
+export function runCommandLineInterpreter (enabled: boolean): CommandLineInterpreter | void {
   if (enabled) {
     log.info('🟢 The 💻 CLI is enabled - type "help" for available commands')
     if (singleton) {
