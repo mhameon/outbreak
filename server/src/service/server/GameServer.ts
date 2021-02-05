@@ -59,24 +59,23 @@ export class GameServer {
       const { 'user-agent': userAgent } = socket.request.headers
       log.http(
         '🟢 Here come a new challenger! Total %d client(s)', this.connectedClientCounter,
-        { socket_id: socket.id, user_agent: userAgent },
+        { socketId: socket.id, user_agent: userAgent },
       )
 
-      socket.join(LOBBY)
-      this.rooms.add(LOBBY)
+      this.joinRoom(socket, LOBBY)
 
       this.registerDisconnectionHandler(socket)
       this.registerErrorHandler(socket)
       this.registerEventLogger(socket) //todo idea: is it possible to log response if callback?
 
 
-      socket.on('game:join', ({ id: GameId } = {}, response: (data: { gameId: GameId }) => void) => {
+      socket.on('game:join', ({ id: GameId } = {}, ack: (data: { gameId: GameId }) => void) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
         //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAMEID_PREFIX))
         //   if (game) {
         //     socket.emit('msg', `Already in ${game}`)
-        //     // //response({ gameId: game })
+        //     // //ack({ gameId: game })
         //     // return
         //     next(new ConnectionRefusedError(`Already in ${game}`))
         //   }
@@ -104,14 +103,14 @@ export class GameServer {
         else {
           gameId = this.getAvailableGame()
         }
-        socket.leave(LOBBY)
-        socket.join(gameId)
-        this.rooms.add(gameId)
-        log.info('Player just joined %s', gameId, { socket_id: socket.id, game_id: gameId })
+        this.leaveRoom(socket, LOBBY)
+        this.joinRoom(socket, gameId)
+
+        log.info('Player just joined %s', gameId, { socketId: socket.id, gameId })
         socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
         socket.emit('msg', `You joined the game, ${socket.id}`)
 
-        response({ gameId })
+        ack({ gameId })
       })
     })
 
@@ -212,22 +211,22 @@ export class GameServer {
       .on('disconnecting', (reason) => {
         const gameRooms = [ ...socket.rooms ].filter(room => room.startsWith(GameManager.GAMEID_PREFIX))
 
-        log
-          .http('🟠 Disconnecting (%s)', reason, { socket_id: socket.id })
-        // .debug('├─ leaving %d rooms (%s)', socket.rooms.size, [ ...socket.rooms ].join(', '))
-        // .debug('└─ game rooms: ' + gameRooms.join(', '))
+        log.http('🟠 Disconnecting (%s)', reason, { socketId: socket.id })
 
         if (gameRooms.length === 1) {
-          const remainingSocketsInGame = this.io.sockets.in(gameRooms[0]).sockets
-          if (remainingSocketsInGame.size === 1 && remainingSocketsInGame.has(socket.id)) {
-            try {
-              this.game.delete(gameRooms[0])
-              log.debug('Last player leave %s, deleted', gameRooms[0], { socket_id: socket.id, game_id: gameRooms[0] })
+          const gameId = gameRooms[0]
+
+          this.leaveRoom(socket, gameId, (wasLast) => {
+            if (wasLast) {
+              this.game.delete(gameId)
+              log.debug('Last player leave %s, deleted', gameRooms[0], { socketId: socket.id, gameId })
             }
-            catch (e) {
-              log.error(e)
-            }
-          }
+          })
+
+          // if (this.leaveRoom(socket, gameId)) {
+          //   this.game.delete(gameId)
+          //   log.debug('Last player leave %s, deleted', gameRooms[0], { socketId: socket.id, gameId })
+          // }
         }
         else {
           assert(gameRooms.length === 0, 'A player can\'t only be in one game at the time')
@@ -237,28 +236,56 @@ export class GameServer {
         //log.debug('Bye %o', this.clients.get(socket))
         this.clients.delete(socket)
         socket.disconnect(true)
-        log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socket_id: socket.id })
+        log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socketId: socket.id })
       })
   }
 
   private registerErrorHandler (socket: io.Socket): void {
     socket.on('error', (err) => {
-      log.error(err, { socket_id: socket.id })
+      log.error(err, { socketId: socket.id })
     })
   }
 
   private registerEventLogger (socket: io.Socket): void {
     socket.onAny((event, ...args) => {
-      let callback = false
-      if (args[args.length - 1] instanceof Function) {
-        callback = true
+      let has_ack = false
+      const [ ack ] = args.slice(-1)
+      if (ack instanceof Function) {
+        has_ack = true
         args.pop()
       }
       log.http(
-        '⚡ Receive event',
-        { socket_id: socket.id, event, args: util.inspect(args.length === 1 ? args[0] : args), callback },
+        '⚡ Receive event "%s"', event,
+        { socketId: socket.id, event, args: util.inspect(args.length === 1 ? args[0] : args), has_ack },
       )
     })
+  }
+
+  private joinRoom (socket: io.Socket, room: string): boolean {
+    let isFirst = false
+    if (!this.rooms.has(room)) {
+      this.rooms.add(room)
+      isFirst = true
+    }
+    socket.join(room)
+    log.debug('Join room "%s"', room, { socketId: socket.id, room, isFirst })
+    return isFirst
+  }
+
+  private leaveRoom (socket: io.Socket, room: string, callback?:(wasLast:boolean)=>void): void {
+    let wasLast = false
+    if (socket.rooms.has(room)) {
+      socket.leave(room)
+      const socketsInRoom = [ ...this.io.sockets.sockets.values() ].filter(socket => socket.rooms.has(room))
+      if (socketsInRoom.length === 0) {
+        this.rooms.delete(room)
+        wasLast = true
+      }
+      log.debug('Leave room "%s"', room, { socketId: socket.id, room, wasLast })
+    }
+    if ( callback ){
+      callback(wasLast)
+    }
   }
 
   private needToCreateNewGame (): boolean {

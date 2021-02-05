@@ -14,9 +14,8 @@ if (cli) {
       server.close()
     })
     .registerCommand('server:status', 'Display server status', () => {
-      console.log(
+      console.log('\n',
         {
-          env: process.env.NODE_ENV,
           memoryUsage: `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)} M`,
           uptime: +process.uptime().toFixed(3),
         },
@@ -25,6 +24,7 @@ if (cli) {
       if (server.status.clients.length) {
         console.table(server.status.clients, [ 'id', 'rooms' ])
       }
+      console.log('\n')
     })
 }
 
