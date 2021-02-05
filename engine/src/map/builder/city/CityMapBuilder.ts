@@ -1,3 +1,4 @@
+import AsciiMapRenderer from '../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
 import { Tile, Coords, Seed } from '../../../@types/outbreak'
@@ -17,8 +18,8 @@ class CityMapBuilder extends MapBuilder {
     return 'Random City' // Todo build map name generator (related to map theme)
   }
 
-  generate (): WorldMap {
-    this.seed = 1588630129416 //+(new Date()) //this.map?.name
+  generate (seed?: Seed): WorldMap {
+    this.seed = seed ?? 1588630129416 //+(new Date()) //this.map?.name
     //this.seed = +(new Date()) //this.map?.name
     const buildupAreaThreshold = .4
 
@@ -51,15 +52,20 @@ class CityMapBuilder extends MapBuilder {
         level = `Level${buildingFloor}`
         this.map.add(Tile[level as TileLevel], { x, y })
         // outbreak.map.add(Tile.Road, { x, y })
-      } else {
+      }
+      else {
         rgb = Math.round(255 * item)
         output += chalk.bgRgb(rgb, rgb, rgb)(' ')
       }
       x++
     }
 
-    console.log(`seed=${this.seed}, Buildup area>=${buildupAreaThreshold} (${buildingFloorThresholds.length} floors max)`)
+    console.log(this.getSeeder())
+    console.log(`Buildup area>=${buildupAreaThreshold} (${buildingFloorThresholds.length} floors max)`)
     console.log(output)
+
+    // const ascii = new AsciiMapRenderer(this.map)
+    // console.log(ascii.render())
 
     const w25 = Math.floor(this.map.size.width / 4)
     const h25 = Math.floor(this.map.size.height / 4)
@@ -102,7 +108,7 @@ class CityMapBuilder extends MapBuilder {
       for (let x = 0; x < this.map.size.width; x++) {
         heightmap.push(
           // noise.octavate(2, x / noiseFrequency, y / noiseFrequency)
-          noise.octavate(2, x * .1, y * .1)
+          noise.octavate(2, x * .1, y * .1),
         )
       }
     }

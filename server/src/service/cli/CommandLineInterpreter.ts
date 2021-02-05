@@ -1,4 +1,4 @@
-import { getLogger } from '../'
+import { getLogger } from '../logger/logger'
 import * as readline from 'readline'
 
 const log = getLogger('CLI')
@@ -6,25 +6,32 @@ const log = getLogger('CLI')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Command = (...args: any[]) => any
 
+interface CommandDescriptor {
+  execute: Command
+  description: string
+}
+
 export class CommandLineInterpreter {
-  private readonly registeredCommands: Record<string, { execute: Command; description: string }> = {}
+  private readonly registeredCommands = new Map<string, CommandDescriptor>()
   private readonly cli: readline.Interface
 
   constructor () {
     this.cli = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '' })
     this.cli.prompt()
     this.cli
-      .on('line', (input: string) => {
+      .on('line', async (input: string) => {
         input = input.trim()
         const args: string[] = input.split(' ')
         if (args.length >= 1) {
-          const command = (args.shift() as string).toLowerCase()
-          if (command) {
-            if (command in this.registeredCommands) {
-              log.info('💻 "%s"', input)
-              this.registeredCommands[command].execute(...args)
-            } else {
-              log.error('💻 "%s" command not found', command)
+          const instruction = (args.shift() as string).toLowerCase()
+          if (instruction) {
+            if (this.registeredCommands.has(instruction)) {
+              log.verbose('💻 "%s"', input)
+              const command = this.registeredCommands.get(instruction) as CommandDescriptor
+              await command.execute(...args)
+            }
+            else {
+              log.warn('💻 "%s" command not found', instruction)
             }
           }
         }
@@ -38,37 +45,39 @@ export class CommandLineInterpreter {
 
   registerCommand (name: string, description: string, command: Command): CommandLineInterpreter {
     name = name.toLowerCase()
-    if (name in this.registeredCommands) {
+    if (this.registeredCommands.has(name)) {
       throw Error(`A command "${name}" is already registered`)
     }
-    this.registeredCommands[name] = { execute: command, description }
-
+    this.registeredCommands.set(name, { execute: command, description })
     return this
   }
 
   private registerDefaultCommands (): void {
+    this.registerCommand('exit', 'Send SIGINT signal', () => {
+      this.cli.close()
+    })
+
     this.registerCommand('help', 'Show registered commands', () => {
-      const pad = 40
+      const pad = 45
 
       console.log('')
-      Object.entries(this.registeredCommands).sort().forEach(([ name, command ]) => {
+      for (const [ name, command ] of this.registeredCommands.entries()) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const args: string[] = (command.execute as any).toString()
           .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
           .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
           .split(/,/)
 
-        let allArguments = ''
+        let displayArgs = ''
         if (args.filter(i => i).length) {
-          allArguments = `${args.map(arg => `<${arg}>`).join(' ')} `
+          displayArgs = `${args.map(arg => {
+            const [ parameter, optional ] = arg.split('=')
+            return optional ? `[${parameter}]` : `${parameter}`
+          }).join(' ')} `
         }
-        console.log(`   ${(name + ' ' + allArguments).padEnd(pad, '.')} ${command.description}`)
-      })
+        console.log(`   ${(name + ' ' + displayArgs).padEnd(pad, '·')} ${command.description}`)
+      }
       console.log('')
-    })
-
-    this.registerCommand('exit', 'Send SIGINT signal', () => {
-      this.cli.close()
     })
   }
 }

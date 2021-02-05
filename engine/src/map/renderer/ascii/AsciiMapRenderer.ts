@@ -21,16 +21,13 @@ class AsciiMapRenderer extends MapRenderer {
   render (): string {
     let tiles
     let ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + '\n'
-    ascii += '╔' + String().padEnd(this.map.size.width, '═') + '╗\n'
     for (let y = 0; y < this.map.size.height; y++) {
-      ascii += '║'
       for (let x = 0; x < this.map.size.width; x++) {
         tiles = this.map.get({ x, y })
         ascii += this.draw(tiles)
       }
-      ascii += '║\n'
+      ascii += '\n'
     }
-    ascii += '╚' + String().padEnd(this.map.size.width, '═') + '╝'
 
     return ascii
   }

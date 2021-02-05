@@ -26,8 +26,8 @@ class Outbreak {
     return this.turn
   }
 
-  resolveTurn (): void {
-    this.turn++
+  resolveTurn (): number {
+    return ++this.turn
   }
 
   render (): void {

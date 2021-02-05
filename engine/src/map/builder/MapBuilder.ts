@@ -1,15 +1,26 @@
+import { Seed } from '../../@types/outbreak'
 import WorldMap from '../WorldMap'
+
+export type Seeder = {
+  builder: string
+  seed: Seed
+}
 
 abstract class MapBuilder {
   protected map: WorldMap
+  protected seed?: Seed
 
   constructor (width: number, height: number) {
     this.map = new WorldMap(width, height, this.getName())
   }
 
-  public abstract getName (): string
+  getSeeder (): Seeder{
+    return { builder: this.constructor.name, seed: this.seed || '' }
+  }
 
-  public abstract generate (): WorldMap
+  abstract getName (): string
+
+  abstract generate (seed?:Seed): WorldMap
 }
 
 export default MapBuilder

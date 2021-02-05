@@ -5,16 +5,14 @@ import AsciiMapRenderer from './ascii/AsciiMapRenderer'
 export type Renderer = 'Ascii' // | 'ThreeJS'
 
 type AbstractMapRenderer = typeof MapRenderer
-
-interface DerivedMapRenderer extends AbstractMapRenderer {
+interface ConcreteMapRenderer extends AbstractMapRenderer {
 }
 
-type AvailableRenderers = {
-  [key in Renderer]: DerivedMapRenderer
-}
+type AvailableRenderers = Record<Renderer, ConcreteMapRenderer>
 
 export { MapRenderer }
 export const Renderers: AvailableRenderers = {
-  'Ascii': AsciiMapRenderer
+  'Ascii': AsciiMapRenderer,
+  // 'ThreeJS': ThreeJSMapRenderer,
 }
 

@@ -2,7 +2,7 @@ import { Coords } from '../@types/outbreak'
 
 const PI = 3.14159265
 
-export function calculateDestination (origin: Coords, angleInDegree: number, length: number): Coords {
+function calculateDestination (origin: Coords, angleInDegree: number, length: number): Coords {
   const radian = angleInDegree * PI / 180
   return {
     x: Math.floor(origin.x + (length * Math.cos(radian))),
@@ -10,9 +10,8 @@ export function calculateDestination (origin: Coords, angleInDegree: number, len
   }
 }
 
-
 // http://members.chello.at/~easyfilter/bresenham.html
-export function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {
+function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {
   width *= .9
 
   let { x: x0, y: y0 } = from
@@ -62,7 +61,7 @@ export function lineWidth (from: Coords, to: Coords, width: number): Array<Coord
 }
 
 // http://members.chello.at/~easyfilter/bresenham.html
-export function line (from: Coords, to: Coords, width = 1): Array<Coords> {
+function line (from: Coords, to: Coords, width = 1): Array<Coords> {
   if (width > 1) {
     return lineWidth(from, to, width)
   }
@@ -70,7 +69,7 @@ export function line (from: Coords, to: Coords, width = 1): Array<Coords> {
   let { x, y } = from
   const { x: x1, y: y1 } = to
 
-  const pixels = []
+  const pixels: Array<Coords> = []
 
   const dx = Math.abs(x1 - x)
   const dy = -Math.abs(y1 - y)
@@ -96,4 +95,9 @@ export function line (from: Coords, to: Coords, width = 1): Array<Coords> {
   }
 
   return pixels
+}
+
+export {
+  calculateDestination,
+  line
 }

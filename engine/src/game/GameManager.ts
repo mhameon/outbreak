@@ -1,4 +1,5 @@
 import { GameId } from '../@types/outbreak'
+import { NotFoundError } from '../map/MapErrors'
 import Outbreak from '../outbreak/Outbreak'
 import crypto from 'crypto'
 import OutbreakFactory from '../outbreak/OutbreakFactory'
@@ -11,17 +12,15 @@ type Game = {
 }
 
 class GameManager {
-  private games: Map<GameId, Outbreak>
+  static GAMEID_PREFIX = 'game:'
 
-  constructor () {
-    this.games = new Map()
-  }
+  private readonly games: Map<GameId, Outbreak> = new Map()
 
   private static buildGameId (): GameId {
-    return `game_${crypto.randomBytes(12).toString('hex')}`
+    return `${GameManager.GAMEID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
   }
 
-  make (): GameId {
+  create (): GameId {
     const gameId = GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
     this.games.set(gameId, outbreak)
@@ -31,9 +30,14 @@ class GameManager {
 
   get (id: GameId): Outbreak {
     if (!this.games.has(id)) {
-      throw new Error(`Game "${id}" doesn't exist`)
+      throw new NotFoundError(id, 'GameId')
     }
     return this.games.get(id) as Outbreak
+  }
+
+  delete (id: GameId): void {
+    this.get(id)
+    this.games.delete(id)
   }
 
   list (): Array<Game> {
@@ -43,7 +47,7 @@ class GameManager {
         id: gameId,
         name: game.name,
         // players: game.players,
-        createdAt: game.createdAt
+        createdAt: game.createdAt,
       })
     })
     return list
