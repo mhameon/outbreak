@@ -8,7 +8,7 @@ const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`
 // const socket = io(uri, { autoConnect: false })
 const socket = io(uri, {
-  transports:['websocket'],
+  transports: ['websocket'],
   withCredentials: true,
   // extraHeaders: {
   //   "my-custom-header": "abcd",
@@ -41,11 +41,11 @@ function Client (props: { path: string }): JSX.Element {
     })
   }
 
-  function play():void{
+  function play (): void {
     console.log('I want to play!')
     //socket.emit('game:join',null, (response:any) =>{
     //socket.emit('game:join','asked one', 'param1', 'param2', (response:any) =>{
-    socket.emit('game:join', {id: 'asked one' }, (response:any) =>{
+    socket.emit('game:join', { id: 'asked one' }, (response: any) => {
       console.log(response)
     })
   }
