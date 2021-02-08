@@ -6,6 +6,7 @@ import './App.css'
 
 const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`
+
 // const socket = io(uri, { autoConnect: false })
 const socket = io(uri, {
   transports: ['websocket'],
@@ -18,10 +19,13 @@ const socket = io(uri, {
 function Client (props: { path: string }): JSX.Element {
   const [connecting, isConnecting] = useState(false)
   const [attempt, setAttempt] = useState(0)
-  const [connection, setConnection] = useState({
-    id: 'Unknown',
+  const [connection, setConnection] = useState<{ id?: string; gameId?: string; isConnected: boolean }>({
+    id: undefined,
+    gameId: undefined,
     isConnected: false,
   })
+
+  const [gameId, setGameId] = useState('')
 
   function connect (): void {
     if (!connecting) {
@@ -34,19 +38,37 @@ function Client (props: { path: string }): JSX.Element {
   function disconnect (): void {
     console.log('disconnect()')
     isConnecting(false)
-    const s = socket.disconnect()
+    socket.disconnect()
+    setGameId('')
     setConnection({
-      id: s.id,
-      isConnected: s.connected,
+      id: undefined,
+      gameId: undefined,
+      isConnected: false,
     })
   }
 
-  function play (): void {
+  function join (): void {
     console.log('I want to play!')
     //socket.emit('game:join',null, (response:any) =>{
     //socket.emit('game:join','asked one', 'param1', 'param2', (response:any) =>{
-    socket.emit('game:join', { id: 'asked one' }, (response: any) => {
-      console.log(response)
+    socket.emit('game:join', { gameId }, (response: any) => {
+      setConnection({
+        id: connection.id,
+        gameId: response.gameId,
+        isConnected: connection.isConnected,
+      })
+    })
+  }
+
+  function leave (): void {
+    socket.emit('game:leave', { gameId: connection.gameId }, (response: any) => {
+      if (response.ok) {
+        setConnection({
+          id: connection.id,
+          gameId: undefined,
+          isConnected: connection.isConnected,
+        })
+      }
     })
   }
 
@@ -87,6 +109,7 @@ function Client (props: { path: string }): JSX.Element {
         isConnecting(false)
         setConnection({
           id: socket.id,
+          gameId: undefined,
           isConnected: socket.connected,
         })
       })
@@ -111,7 +134,18 @@ function Client (props: { path: string }): JSX.Element {
           {connection.isConnected
             ?
             <div>
-              <button onClick={play}>Play!</button>
+              <input
+                disabled={!!connection.gameId}
+                style={{ width: '200px' }}
+                type="text"
+                value={connection.gameId || gameId}
+                onChange={e => setGameId(e.target.value)}
+              />
+
+              <button onClick={leave}>Leave</button>
+              <button onClick={join}>Join</button>
+
+              <br/>
               <button onClick={disconnect}>Déconnecter</button>
             </div>
             :

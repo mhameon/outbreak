@@ -1,0 +1,38 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es6",
+    "lib": [
+      "es2018"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "strict": true,
+    "outDir": "build/",
+    "sourceMap": true,
+    "incremental": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "baseUrl": ".",
+    "paths": {
+      "@engine/*": [
+        "./src/engine/*"
+      ],
+      "@server/*": [
+        "./src/server/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "test",
+    "config"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "server": {
+    "port": 8080,
+    "cli": {
+      "enabled": true
+    }
+  },
+  "logger": {
+    "level": "silly",
+    "exception": true
+  }
+}
