@@ -6,7 +6,7 @@ import { getLogger } from '@shared/logger/logger'
 
 const log = getLogger('CLI')
 
-// Usage: `CommandLineInterpreterPlugin(true)(server)`
+// Usage: `serverCLI(true, server)` or `serverCLI(true)(server)`
 // {@link https://medium.com/@FabriceTavilla/le-currying-en-javascript-cdcf98fae54e|Currying}
 export function serverCLI (enabled: boolean, server?: GameServer): Plugin<CommandLineInterface> {
   if (enabled) {

@@ -4,6 +4,7 @@ import winston from 'winston'
 const { combine, splat, timestamp, errors, printf, ms, colorize, metadata, json } = winston.format
 
 export type LogMethod = winston.LeveledLogMethod
+export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
 
 // todo use Logger interface to hide winston in getLogger(): Logger
 export interface Logger {

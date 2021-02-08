@@ -1,2 +1,2 @@
 export { getLogger } from './logger'
-export type { LogMethod, Logger } from './logger'
+export type { LogLevel, LogMethod, Logger } from './logger'

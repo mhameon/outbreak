@@ -19,9 +19,9 @@ const socket = io(uri, {
 function Client (props: { path: string }): JSX.Element {
   const [connecting, isConnecting] = useState(false)
   const [attempt, setAttempt] = useState(0)
-  const [connection, setConnection] = useState<{ id?: string; gameId?: string; isConnected: boolean }>({
+  const [connection, setConnection] = useState<{ id?: string; gameId: string | null; isConnected: boolean }>({
     id: undefined,
-    gameId: undefined,
+    gameId: null,
     isConnected: false,
   })
 
@@ -42,7 +42,7 @@ function Client (props: { path: string }): JSX.Element {
     setGameId('')
     setConnection({
       id: undefined,
-      gameId: undefined,
+      gameId: null,
       isConnected: false,
     })
   }
@@ -63,11 +63,7 @@ function Client (props: { path: string }): JSX.Element {
   function leave (): void {
     socket.emit('game:leave', { gameId: connection.gameId }, (response: any) => {
       if (response.ok) {
-        setConnection({
-          id: connection.id,
-          gameId: undefined,
-          isConnected: connection.isConnected,
-        })
+        setConnection({ ...connection, gameId: null })
       }
     })
   }
@@ -80,10 +76,7 @@ function Client (props: { path: string }): JSX.Element {
       .on('connect', () => {
         console.log('connected:', socket.id)
         isConnecting(false)
-        setConnection({
-          id: socket.id,
-          isConnected: socket.connected,
-        })
+        setConnection({ ...connection, gameId: null })
         setAttempt(0)
       })
       .on("connect_error", (err: Error) => {
@@ -107,18 +100,14 @@ function Client (props: { path: string }): JSX.Element {
       .on('disconnect', (reason: string) => {
         console.log(`disconnected (${reason})`)
         isConnecting(false)
-        setConnection({
-          id: socket.id,
-          gameId: undefined,
-          isConnected: socket.connected,
-        })
+        setConnection({ ...connection, gameId: null })
       })
 
     return () => {
       console.log('unmount')
       disconnect()
     }
-  }, [])
+  }, [connection])
 
   return (
     <div className="App">

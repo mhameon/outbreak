@@ -25,12 +25,22 @@ describe('WorldMap class', function () {
     map.add(Tile.Water, origin)
     map.add(Tile.Water, origin)
     assert.strictEqual(map.get(origin).size, 2)
+
+    map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+    assert.ok(map.has([ Tile.Road, Tile.Water, Tile.Block ], origin))
+    assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
+    assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
   })
 
   it('set(tile, at)', function () {
     map.set(Tile.Road, origin)
     assert.ok(map.has([ Tile.Road ], origin))
     assert.strictEqual(map.has(Tile.Block, origin), false)
+
+    map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+    assert.ok(map.has([ Tile.Road ], origin))
+    assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
+    assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
   })
 
   it('get(at)', function () {
@@ -88,7 +98,7 @@ describe('WorldMap class', function () {
     assert.throws(() => map.get(outside), error)
   })
 
-  it('Add Tile.Walkable removes Tile.Block', function () {
+  it('Add `Tile.Walkable` removes `Tile.Block`', function () {
     assert.strictEqual(map.isWalkable(origin), false)
 
     map.add(Tile.Walkable, origin)

@@ -2,7 +2,8 @@ import 'module-alias/register'
 import config from 'config'
 import { initializeGameServer, serverCLI } from '@server/service'
 
-const server = initializeGameServer()
+const { port, cli } = config.server
 
-server.registerPlugin(serverCLI(config.get('server.cli.enabled')))
-server.listen(config.get('server.port'))
+initializeGameServer()
+  .registerPlugin(serverCLI(cli.enabled))
+  .listen(port)

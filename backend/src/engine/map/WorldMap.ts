@@ -34,9 +34,11 @@ class WorldMap {
       if (isCoordsArray(at)) {
         this.add(tile, at)
       }
-    } else if (isCoords(at)) {
+    }
+    else if (isCoords(at)) {
       point = at
-    } else {
+    }
+    else {
       return
     }
 
@@ -47,10 +49,12 @@ class WorldMap {
         if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
           tiles.delete(Tile.Block)
           this.tiles.set(index, tiles)
-        } else {
+        }
+        else {
           this.tiles.set(index, tiles.add(tile))
         }
-      } else {
+      }
+      else {
         if (tile !== Tile.Walkable) {
           this.tiles.set(index, new Set([ tile ]))
         }
@@ -65,9 +69,11 @@ class WorldMap {
       if (isCoordsArray(at)) {
         this.set(tile, at)
       }
-    } else if (isCoords(at)) {
+    }
+    else if (isCoords(at)) {
       point = at
-    } else {
+    }
+    else {
       return
     }
 
@@ -90,7 +96,8 @@ class WorldMap {
         if (x !== at.x || y !== at.y) {
           try {
             around.set(direction, this.get({ x, y }))
-          } catch (e) {
+          }
+          catch (e) {
             // Do nothing
           }
           direction++

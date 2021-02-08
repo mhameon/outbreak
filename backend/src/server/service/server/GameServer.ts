@@ -1,5 +1,6 @@
 import { Plugin } from '@server/service/server/index'
 import assert from 'assert'
+import config from 'config'
 import http from 'http'
 import type { AddressInfo } from 'net'
 import express, { Express } from 'express'
@@ -14,8 +15,6 @@ type Player = any
 
 const LOBBY = 'lobby'
 
-// Todo
-//  - Security: Properly check if clients are authorize to connect (see domains/origins, CORS...)
 export class GameServer {
   static maxShutdownDelayInSeconds = 5
 
@@ -37,10 +36,7 @@ export class GameServer {
     this.http = http.createServer(this.express)
     this.io = new io.Server(this.http, {
       cors: {
-        origin: [ // todo handle app server url (or via config/env)
-          'http://localhost:3000',
-          //'http://172.18.41.139:3000',
-        ],
+        origin: [ config.server.http.host ],
         methods: [ 'GET', 'POST' ],
         //allowedHeaders: [ 'my-custom-header' ],
         credentials: true,
@@ -66,7 +62,7 @@ export class GameServer {
       this.registerErrorHandler(socket)
       registerEventLogger(socket) //todo idea: is it possible to log response if callback?
 
-      socket.on('game:join', (args: { gameId?: GameId }, ack: (data: { gameId: GameId }) => void) => {
+      socket.on('game:join', (args: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
         //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAME_ID_PREFIX))
@@ -96,14 +92,11 @@ export class GameServer {
           gameId = this.game.create()
         }
         else {
-          try {
-            log.debug('join %s', args.gameId)
-            this.game.get(args.gameId)
-            gameId = args.gameId
+          gameId = args.gameId
+          if (!this.game.has(gameId)) {
+            return ack({ gameId: null })
           }
-          catch (e) {
-            return
-          }
+          log.debug('join %s', gameId)
         }
 
         this.leaveRoom(socket, LOBBY)
@@ -112,7 +105,7 @@ export class GameServer {
         socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
         socket.emit('msg', `You joined the game, ${socket.id}`)
 
-        ack({ gameId })
+        return ack({ gameId })
       })
 
       socket.on('game:leave', (args: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
@@ -167,11 +160,13 @@ export class GameServer {
     }
   }
 
-  registerPlugin (plugin: Plugin<any>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registerPlugin (plugin: Plugin<any>): GameServer {
     if (plugin instanceof Function) {
       // Keep trace of registered plugins?
       plugin(this)
     }
+    return this
   }
 
   get connectedClientCounter (): number {
@@ -206,12 +201,14 @@ export class GameServer {
     })
 
     this.io.use((socket, next) => {
+      // Todo Properly check if clients are authorize to connect (valid session cookie)
       // Todo Check authentication & get user information
       const authenticated = true
       if (!authenticated) {
         next(new ConnectionRefusedError('Unauthenticated user', log.error))
       }
 
+      // Fixme Keep? Or move clients in each Outbreak via GameManager?
       this.clients.set(socket, {
         socketId: socket.id,
         connectedAt: new Date(),

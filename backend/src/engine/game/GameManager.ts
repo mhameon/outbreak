@@ -1,5 +1,5 @@
+import { NotFoundError } from '@shared/Errors'
 import { GameId } from '../type/outbreak'
-import { NotFoundError } from '../map/MapErrors'
 import Outbreak from '../outbreak/Outbreak'
 import crypto from 'crypto'
 import OutbreakFactory from '../outbreak/OutbreakFactory'
@@ -31,8 +31,12 @@ export class GameManager {
     return gameId
   }
 
+  has (gameId: GameId): boolean {
+    return this.games.has(gameId)
+  }
+
   get (gameId: GameId): Outbreak {
-    if (!this.games.has(gameId)) {
+    if (!this.has(gameId)) {
       throw new NotFoundError(gameId, 'GameId', log.error)
     }
     return this.games.get(gameId) as Outbreak

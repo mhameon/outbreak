@@ -10,7 +10,7 @@
 /.nyc_output
 
 # production
-/build/
+/build
 
 # misc
 .DS_Store
