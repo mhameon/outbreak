@@ -3,7 +3,6 @@ import type { Void } from '@shared/types'
 import { GameServer } from './GameServer'
 import { GameManager } from '@engine/game/GameManager'
 
-
 export type Plugin<T> = ((server: GameServer) => Void<T>) | Void<T>
 
 let server: GameServer

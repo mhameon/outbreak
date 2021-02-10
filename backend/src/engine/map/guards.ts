@@ -2,7 +2,6 @@
 import { Coords, Matrix2d } from '../type/outbreak'
 
 export function isNumber (arg: any): arg is number {
-  //return typeof arg === 'number'
   return !isNaN(+arg)
 }
 

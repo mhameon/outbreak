@@ -21,9 +21,8 @@ export class CityMapBuilder2 extends MapBuilder {
 
     const buildupAreaThreshold = .4
     const buildingFloorThresholds = [ .6, .8, .9, .94, 1 ]
-
     matrix.travel(world , ({ coords, value } ) => {
-      if (buildupAreaThreshold > 0 && value >= buildupAreaThreshold) {
+      if ( value >= buildupAreaThreshold) {
         const buildingFloor = 1 + buildingFloorThresholds.findIndex(v => v >= value)
         this.map.add(Tile.Building, coords)
         this.map.add(Tile[`Level${buildingFloor}` as TileLevel], coords)
