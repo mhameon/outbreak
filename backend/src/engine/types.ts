@@ -3,6 +3,17 @@ export type Coords = {
   y: number
 }
 
+/**
+ * ```
+ *  NW   N   NE
+ *    ↖  ↑  ↗
+ *     0 1 2
+ * W ← 3 · 4 → E
+ *     5 6 7
+ *    ↙  ↓  ↘
+ *  SW   S   SE
+ * ```
+ */
 export const enum Direction {
   NorthWest,
   North,

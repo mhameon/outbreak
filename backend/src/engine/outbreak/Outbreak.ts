@@ -1,6 +1,6 @@
 import WorldMap from '../map/WorldMap'
 import { Renderers, Renderer, MapRenderer } from '../map/renderer'
-import { GameId } from '../type/outbreak'
+import { GameId } from '../types'
 
 export class Outbreak {
   static useRenderer: Renderer = 'Ascii'

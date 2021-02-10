@@ -1,7 +1,7 @@
 import AsciiMapRenderer from '../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
-import { Tile, Coords, Seed } from '@engine/type/outbreak'
+import { Tile, Coords, Seed } from '@engine/types'
 import { InvalidArgumentError } from '@shared/Errors'
 import { line, calculateDestination } from '../../geometry'
 import chalk from 'chalk'

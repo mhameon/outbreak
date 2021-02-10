@@ -1,4 +1,4 @@
-import { Seed } from '../../type/outbreak'
+import { Seed } from '../../types'
 import WorldMap from '../WorldMap'
 
 export type Seeder = {

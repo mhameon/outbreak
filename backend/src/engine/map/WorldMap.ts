@@ -1,4 +1,4 @@
-import { Size, Coords, Tile, Index, Tileset, Around } from '../type/outbreak'
+import { Size, Coords, Tile, Index, Tileset, Around } from '../types'
 import { OutOfMapError } from './MapErrors'
 import { isCoordsArray, isCoords } from './guards'
 

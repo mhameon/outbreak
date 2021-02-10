@@ -1,5 +1,5 @@
 import WorldMap from '@engine/map/WorldMap'
-import { Tile, Direction, Tileset } from '@engine/type/outbreak'
+import { Tile, Direction, Tileset } from '@engine/types'
 
 import * as assert from 'assert'
 

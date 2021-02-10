@@ -1,4 +1,4 @@
-import { Coords } from '../type/outbreak'
+import { Coords } from '../types'
 
 const PI = 3.14159265
 

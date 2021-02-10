@@ -1,6 +1,6 @@
 import { Outbreak } from './Outbreak'
 import { CityMapBuilder2 } from '../map/builder/city/CityMapBuilder2'
-import { GameId, Size } from '../type/outbreak'
+import { GameId, Size } from '../types'
 
 type Options = {
   size: Size

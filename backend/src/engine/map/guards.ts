@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Coords, Matrix2d } from '../type/outbreak'
+import { Coords, Matrix2d } from '../types'
 
 export function isNumber (arg: any): arg is number {
   return !isNaN(+arg)

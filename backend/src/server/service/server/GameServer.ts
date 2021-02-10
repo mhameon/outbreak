@@ -7,7 +7,7 @@ import express, { Express } from 'express'
 import * as io from 'socket.io'
 import { log, registerEventLogger } from './serverLogger'
 import { GameManager } from '@engine/game/GameManager'
-import { GameId } from '@engine/type/outbreak'
+import { GameId } from '@engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 
 // Fixme: must be typed and lives in another file

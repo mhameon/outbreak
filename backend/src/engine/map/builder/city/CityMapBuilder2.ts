@@ -3,7 +3,7 @@ import NoiseFactory, { MatrixPipeline } from '@engine/map/builder/generator/Nois
 import MapBuilder from '@engine/map/builder/MapBuilder'
 import AsciiMapRenderer from '@engine/map/renderer/ascii/AsciiMapRenderer'
 import WorldMap from '@engine/map/WorldMap'
-import { Seed, Tile, TileLevel } from '@engine/type/outbreak'
+import { Seed, Tile, TileLevel } from '@engine/types'
 
 export class CityMapBuilder2 extends MapBuilder {
   generate (seed?: Seed): WorldMap {

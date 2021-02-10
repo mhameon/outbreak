@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Coords, Matrix, Matrix2d } from '@engine/type/outbreak'
+import { Coords, Matrix, Matrix2d } from '@engine/types'
 import { validate } from '@shared/validator'
 import chalk from 'chalk'
 import { isMatrix2d, isNumber } from '@engine/map/guards'

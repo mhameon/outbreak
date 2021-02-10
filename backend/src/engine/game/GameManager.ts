@@ -1,5 +1,6 @@
 import { NotFoundError } from '@shared/Errors'
-import { GameId } from '../type/outbreak'
+import { GameId } from '../types'
+// Fixme IoD: use interfaces & inject them in constructor
 import { Outbreak , OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
 

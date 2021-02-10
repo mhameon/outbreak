@@ -1,5 +1,5 @@
 import MapRenderer from '../MapRenderer'
-import { Tile, Tileset } from '@engine/type/outbreak'
+import { Tile, Tileset } from '@engine/types'
 import chalk from 'chalk'
 
 const Ascii = {
