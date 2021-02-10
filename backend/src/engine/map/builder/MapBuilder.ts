@@ -11,14 +11,12 @@ abstract class MapBuilder {
   protected seed?: Seed
 
   constructor (width: number, height: number) {
-    this.map = new WorldMap(width, height, this.getName())
+    this.map = new WorldMap(width, height)
   }
 
   getSeeder (): Seeder{
     return { builder: this.constructor.name, seed: this.seed || '' }
   }
-
-  abstract getName (): string
 
   abstract generate (seed?:Seed): WorldMap
 }

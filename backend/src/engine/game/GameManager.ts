@@ -1,8 +1,8 @@
 import { NotFoundError } from '@shared/Errors'
 import { GameId } from '../type/outbreak'
-import Outbreak from '../outbreak/Outbreak'
+import { Outbreak , OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
-import OutbreakFactory from '../outbreak/OutbreakFactory'
+
 import { getLogger } from '@shared/logger'
 
 const log = getLogger('GameManager')

@@ -14,10 +14,6 @@ type TileLevel = 'Level0' | 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 class CityMapBuilder extends MapBuilder {
   seed?: Seed
 
-  getName (): string {
-    return 'Random City' // Todo build map name generator (related to map theme)
-  }
-
   generate (seed?: Seed): WorldMap {
     this.seed = seed ?? 1588630129416 //+(new Date()) //this.map?.name
     //this.seed = +(new Date()) //this.map?.name
@@ -47,7 +43,7 @@ class CityMapBuilder extends MapBuilder {
         buildingFloor = 1 + buildingFloorThresholds.findIndex(v => item <= v)
 
         output += chalk.bgRgb(Math.round(200 * item), 0, 0).red(`${buildingFloor}`)
-        //this.map.add(Tile.Building, { x, y })
+
         this.map.add(Tile.Building, { x, y })
         level = `Level${buildingFloor}`
         this.map.add(Tile[level as TileLevel], { x, y })
@@ -63,6 +59,7 @@ class CityMapBuilder extends MapBuilder {
     console.log(this.getSeeder())
     console.log(`Buildup area>=${buildupAreaThreshold} (${buildingFloorThresholds.length} floors max)`)
     console.log(output)
+    console.log(matrix.debug(normalised))
     // const ascii = new AsciiMapRenderer(this.map)
     // console.log(ascii.render())
 

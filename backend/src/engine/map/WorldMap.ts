@@ -1,6 +1,6 @@
 import { Size, Coords, Tile, Index, Tileset, Around } from '../type/outbreak'
 import { OutOfMapError } from './MapErrors'
-import { isCoordsArray, isCoords } from '../type/guards'
+import { isCoordsArray, isCoords } from './guards'
 
 /**
  * A 2D map describing the game board.

@@ -2,7 +2,7 @@ import WorldMap from '../map/WorldMap'
 import { Renderers, Renderer, MapRenderer } from '../map/renderer'
 import { GameId } from '../type/outbreak'
 
-class Outbreak {
+export class Outbreak {
   static useRenderer: Renderer = 'Ascii'
 
   readonly id: GameId
@@ -34,5 +34,3 @@ class Outbreak {
     console.log(this.renderer.render())
   }
 }
-
-export default Outbreak

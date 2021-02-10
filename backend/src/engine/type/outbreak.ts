@@ -19,6 +19,7 @@ export type Size = {
   height: number
 }
 
+export type TileLevel = 'Level0' | 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 export enum Tile {
   /*** Properties ***/
   Walkable,

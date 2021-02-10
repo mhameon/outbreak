@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Matrix } from '@engine/type/outbreak'
+import { Coords, Matrix, Matrix2d } from '@engine/type/outbreak'
+import { validate } from '@shared/validator'
 import chalk from 'chalk'
-import { isNumber } from '@engine/type/guards'
+import { isMatrix2d, isNumber } from '@engine/map/guards'
 
 type MatrixEntry = Matrix | number
 type Comparators = 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
@@ -28,7 +29,7 @@ export const matrix = {
 
   /** Apply Math.abs() on all Matrix entries. Noise maps becomes "sharper". */
   sharpen: (array: Matrix): Matrix => {
-    function absolutize (entry: MatrixEntry): MatrixEntry {
+    const absolutize = (entry: MatrixEntry): MatrixEntry => {
       return isNumber(entry) ? Math.abs(entry) : entry.map(absolutize)
     }
 
@@ -41,7 +42,7 @@ export const matrix = {
     const max = matrix.max(array)
     const delta = max - min
 
-    function normalizer (entry: MatrixEntry): MatrixEntry {
+    const normalizer = (entry: MatrixEntry): MatrixEntry => {
       return isNumber(entry)
         ? delta === 0 ? min : (entry - min) / delta
         : entry.map(normalizer)
@@ -52,7 +53,7 @@ export const matrix = {
 
   /** Cap a Matrix with floor/ceil values */
   cap: (array: Matrix, floor: number, ceil: number): Matrix => {
-    function caper (entry: MatrixEntry): MatrixEntry {
+    const caper = (entry: MatrixEntry): MatrixEntry => {
       if (isNumber(entry)) {
         if (entry < floor) return floor
         if (entry > ceil) return ceil
@@ -64,6 +65,7 @@ export const matrix = {
     return array.map(caper)
   },
 
+  /** Add `value` to all matrix entries **/
   add: (array: Matrix, value: number): Matrix => {
     const threshold = value > 0 ? matrix.max(array) : matrix.min(array)
     //const min = matrix.max(array)
@@ -78,10 +80,10 @@ export const matrix = {
     // }
     //return []
 
-    function adder (entry: MatrixEntry): MatrixEntry {
+    const adder = (entry: MatrixEntry): MatrixEntry => {
       if (isNumber(entry)) {
         const newValue = entry + value
-        if ( value>0 ) {
+        if (value > 0) {
           return newValue > threshold ? threshold : newValue
         }
         return newValue < threshold ? threshold : newValue
@@ -92,17 +94,43 @@ export const matrix = {
     return array.map(adder)
   },
 
-  reverse: (array: Matrix): Matrix => {
+  inverse: (array: Matrix): Matrix => {
     const max = matrix.max(array)
-
-    function reverser (entry: MatrixEntry): MatrixEntry {
+    const reverser = (entry: MatrixEntry): MatrixEntry => {
       return isNumber(entry) ? max - entry : entry.map(reverser)
     }
-
     return array.map(reverser)
   },
 
-  debug: (array: Matrix, colorize?: Condition): string => {
+  /** Call callback for each matrix entries **/
+  travel: (array: Matrix | Matrix2d, callback: (entry: { coords: Coords; value: number }) => void): void => {
+    validate(array, isMatrix2d)
+
+    let x = 0, y = 0
+    const traveler = (entry: MatrixEntry): void => {
+      if (isNumber(entry)) {
+        callback({ coords: { x, y }, value: entry })
+        x++
+      }
+      else {
+        entry.forEach(traveler)
+        x = 0
+        y++
+      }
+    }
+
+    array.forEach(traveler)
+  },
+
+  /**
+   * Return a console friendly version of the matrix
+   * @param array
+   * @param colorize
+   * @return string
+   */
+  debug: (array: Matrix | Matrix2d, colorize?: Condition): string => {
+    validate(array, isMatrix2d)
+
     const height = array.length
     const width = array[0] ? (array[0] as number[]).length : 0
     let output = `${width}x${height}`
@@ -132,9 +160,9 @@ export const matrix = {
     }
 
     output += '\n'
-    if (width === 0 || height === 0) {
-      throw new Error('Cannot render empty matrix !')
-    }
+    // if (width === 0 || height === 0) {
+    //   throw new Error('Cannot render empty matrix !')
+    // }
 
     let item: number
     let rgb: number

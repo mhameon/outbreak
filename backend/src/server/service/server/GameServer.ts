@@ -53,7 +53,7 @@ export class GameServer {
       const { 'user-agent': userAgent, host } = socket.request.headers
       log.http(
         '🟢 Here come a new challenger! Total %d client(s)', this.connectedClientCounter,
-        { socketId: socket.id, host, user_agent: userAgent },
+        { socketId: socket.id, host, agent: userAgent },
       )
 
       this.joinRoom(socket, LOBBY)
@@ -254,12 +254,14 @@ export class GameServer {
 
   private joinRoom (socket: io.Socket, room: string): boolean {
     let isFirst = false
-    if (!this.rooms.has(room)) {
-      this.rooms.add(room)
-      isFirst = true
+    if (!socket.rooms.has(room)) {
+      if (!this.rooms.has(room)) {
+        this.rooms.add(room)
+        isFirst = true
+      }
+      socket.join(room)
+      log.info('💚 Join room `%s`', room, { socketId: socket.id, room, isFirst })
     }
-    socket.join(room)
-    log.info('💚 Join room `%s`', room, { socketId: socket.id, room, isFirst })
     return isFirst
   }
 

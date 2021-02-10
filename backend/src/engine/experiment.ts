@@ -1,3 +1,4 @@
+import 'module-alias/register'
 import { GameManager } from './game/GameManager'
 import NoiseFactory, { MatrixGeneratorArgs, MatrixPipeline } from './map/builder/generator/NoiseFactory'
 import { matrix } from './map/builder/generator/helpers'
