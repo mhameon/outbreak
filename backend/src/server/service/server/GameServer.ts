@@ -10,8 +10,15 @@ import { GameManager } from '@engine/game/GameManager'
 import { GameId } from '@engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 
-// Fixme: must be typed and lives in another file
+// Fixme: must be typed (and lives in another file?)
 type Player = any
+
+interface ServerStatus {
+  started: boolean
+  uptime: number
+  rooms: Array<string>
+  clients: Array<{ id: string; rooms: string[] }>
+}
 
 const LOBBY = 'lobby'
 
@@ -146,16 +153,12 @@ export class GameServer {
         return
       }
       log.http('Emit `shutdown` to %d client(s)', this.connectedClientCounter)
-      console.table(this.status.clients, [ 'id', 'rooms' ])
 
-      // this.io.sockets.emit or this.io.emit don't alaways emit (if join before)
-      //this.io.sockets.emit('shutdown')
+      // Strange bug: this.io.sockets.emit() or this.io.emit() don't always emit (if join a game before)
       this.io.emit('shutdown')
+      // Seems to works better. bug in io?
+      // for (const [ id, socket ] of this.io.sockets.sockets) { socket.emit('shutdown') }
 
-      // Works
-      // for (const [ id, socket ] of this.io.sockets.sockets) {
-      //   socket.emit('shutdown')
-      // }
       this.stopWhenClientsAreDisconnected()
     }
   }
@@ -173,8 +176,7 @@ export class GameServer {
     return this.io.sockets.sockets.size
   }
 
-  // Fixme define status type
-  get status (): any {
+  get status (): ServerStatus {
     const clients = []
     for (const [ id, socket ] of this.io.sockets.sockets) {
       clients.push({
@@ -186,8 +188,8 @@ export class GameServer {
 
     return {
       started: this.http.listening,
-      uptime: +uptime.toFixed(3),
-      rooms: this.rooms.values(),
+      uptime: Math.round(+uptime),
+      rooms: [ ...this.rooms.values() ],
       clients,
     }
   }
@@ -309,7 +311,7 @@ export class GameServer {
 
     if (this.connectedClientCounter > 0) {
       log.warn('Still %d client(s) after %ds delay, force close', this.connectedClientCounter, GameServer.maxShutdownDelayInSeconds)
-      for (const [ id, socket ] of this.io.sockets.sockets) {
+      for (const [ , socket ] of this.io.sockets.sockets) {
         socket.disconnect(true)
       }
     }

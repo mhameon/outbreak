@@ -33,15 +33,23 @@ export function initializeCommandLineInterface (server: GameServer): CommandLine
       server.close()
     })
     .registerCommand('server:status', 'Display server status', () => {
-      console.log('\n',
-        {
-          memoryUsage: `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)} M`,
-          uptime: +process.uptime().toFixed(3),
-        },
-        server.status,
-      )
-      if (server.status.clients.length) {
-        console.table(server.status.clients, [ 'id', 'rooms' ])
+      const status = server.status
+      const program = {
+        memoryUsage: (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+        uptime: Math.round(+process.uptime())
+      }
+
+      console.log('\n')
+      console.log(`Server     Mem: ${program.memoryUsage} M     Uptime: ${program.uptime} s`)
+      if ( status.started ){
+        console.log(`Listening  Yes (since ${status.uptime}s)`)
+      } else {
+        console.log('Listening  No')
+      }
+      console.log(`${status.rooms.length} room(s)   ${status.rooms.join(', ')}`)
+      console.log(`${status.clients.length} Connected client(s)`)
+      if (status.clients.length) {
+        console.table(status.clients, [ 'id', 'rooms' ])
       }
       console.log('\n')
     })
