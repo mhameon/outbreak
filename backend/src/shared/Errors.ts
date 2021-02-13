@@ -1,4 +1,5 @@
 import config from 'config'
+import { LeveledLogMethod } from 'winston'
 import { getLogger, Logger, LogMethod } from './logger'
 
 let unlabeled: Logger
@@ -7,11 +8,13 @@ if (config.get('logger.exception')) {
 }
 
 export abstract class CustomError extends Error {
-  constructor (message?: string, logErrorWith = unlabeled?.error) {
+  constructor (message?: string, logErrorWith: LeveledLogMethod | boolean = unlabeled?.error) {
     super(message)
     this.name = this.constructor.name
-    if (logErrorWith) {
-      logErrorWith(message)
+    if (logErrorWith !== false) {
+      logErrorWith === true
+        ? unlabeled?.error(message)
+        : logErrorWith(message)
     }
   }
 }
