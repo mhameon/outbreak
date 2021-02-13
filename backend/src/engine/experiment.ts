@@ -24,6 +24,9 @@ const barCode: MatrixPipeline = [
   matrix.normalize
 ]
 
-let nm3 = noise.build(barCode, { width: 20, height: 5 })
-console.log(matrix.debug(nm2, { lte: .3 }))
-nm3=matrix.add(nm2, -.3)
+let nm3
+nm3 = noise.build(barCode, { width: 20, height: 5 })
+console.log(matrix.debug(nm2, { colorize: { lte: .3 } }))
+nm3 = matrix.add(nm2, -.3)
+
+console.log(matrix.debug(nm3))

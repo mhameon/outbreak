@@ -1,15 +1,13 @@
 import AsciiMapRenderer from '../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
-import { Tile, Coords, Seed } from '@engine/types'
+import { Tile, TileLevel, Coords, Seed } from '@engine/types'
 import { InvalidArgumentError } from '@shared/Errors'
 import { line, calculateDestination } from '../../geometry'
 import chalk from 'chalk'
 import { matrix } from '../generator/helpers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tumult = require('tumult')
-
-type TileLevel = 'Level0' | 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
 class CityMapBuilder extends MapBuilder {
   seed?: Seed
