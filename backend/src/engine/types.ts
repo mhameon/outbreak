@@ -30,13 +30,12 @@ export type Size = {
   height: number
 }
 
-export type TileLevel = 'Level0' | 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
+export type TileLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 export enum Tile {
   /*** Properties ***/
   Walkable,
   Block,
 
-  Level0,
   Level1,
   Level2,
   Level3,
@@ -51,6 +50,7 @@ export enum Tile {
 
 export type Index = string
 export type Tileset = Set<Tile>
+export type MapSquare = { coords: Coords; tileset: Tileset }
 
 export type Around = Map<Direction, Tileset>
 

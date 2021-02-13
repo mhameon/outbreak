@@ -1,4 +1,4 @@
-import { Size, Coords, Tile, Index, Tileset, Around } from '../types'
+import { Size, Coords, Tile, Index, Tileset, Around, MapSquare } from '../types'
 import { OutOfMapError } from './MapErrors'
 import { isCoordsArray, isCoords } from './guards'
 
@@ -21,6 +21,11 @@ class WorldMap {
 
   private static index (at: Coords): Index {
     return `${at.x},${at.y}`
+  }
+
+  private static coords (index: Index): Coords {
+    const [ x, y ] = index.split(',')
+    return { x: Number(x), y: Number(y) }
   }
 
   contains (point: Coords): boolean {
@@ -55,9 +60,7 @@ class WorldMap {
         }
       }
       else {
-        if (tile !== Tile.Walkable) {
-          this.tiles.set(index, new Set([ tile ]))
-        }
+        this.set(tile, point)
       }
     }
   }
@@ -77,8 +80,11 @@ class WorldMap {
       return
     }
 
-    this.tiles.delete(WorldMap.index(point))
-    this.add(tile, point)
+    const index = WorldMap.index(point)
+    this.tiles.delete(index)
+    if (tile !== Tile.Walkable) {
+      this.tiles.set(index, new Set([ tile ]))
+    }
   }
 
   get (at: Coords): Tileset {
@@ -107,12 +113,17 @@ class WorldMap {
     return around
   }
 
+  each (callback: (square: MapSquare) => void): void {
+    this.tiles.forEach(
+      (tileset, index) => callback({ coords: WorldMap.coords(index), tileset }),
+    )
+  }
+
   has (tile: Tile | Tile[], at: Coords): boolean {
     this.assertMapContains(at)
     const search = ([] as Tile[]).concat(tile)
-    const tiles = this.get(at)
-
-    return search.every(t => tiles.has(t))
+    const tileset = this.get(at)
+    return search.every(tile => tileset.has(tile))
   }
 
   isWalkable (at: Coords): boolean {
