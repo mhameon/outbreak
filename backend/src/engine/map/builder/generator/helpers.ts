@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { Coords, Matrix, Matrix2d } from '@engine/types'
+import { Coords, Matrix, Matrix2d, Size } from '@engine/types'
 import { validate } from '@shared/validator'
 import chalk from 'chalk'
 import { isMatrix2d, isNumber } from '@engine/map/guards'
@@ -17,6 +15,7 @@ export const random = {
   },
 
   /** Randomly choose one entry in `values` */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   choose: (...values: any[]): any => values[random.range(0, values.length - 1)],
 
   /** Has a `percent` in 100 chance of returning `true` */
@@ -24,15 +23,26 @@ export const random = {
 }
 
 export const matrix = {
+
+  create: (size: Size, value: number | ((x: number, y: number) => number)): Matrix2d => (
+    Array.from({ length: size.height }, (_, y) =>
+      Array.from({ length: size.width }, (_, x) => (
+        value instanceof Function ? value(x, y) : value
+      )),
+    )
+  ),
+
   min: (array: Matrix): number => Math.min(...array.map(e => Array.isArray(e) ? matrix.min(e) : e)),
   max: (array: Matrix): number => Math.max(...array.map(e => Array.isArray(e) ? matrix.max(e) : e)),
 
-  /** Apply Math.abs() on all Matrix entries. Noise maps becomes "sharper". */
+  /**
+   * Apply Math.abs() on all Matrix entries. Noise maps becomes "sharper".
+   * Has no effect on normalized matrix (since only negative entries are affected)
+   */
   sharpen: (array: Matrix): Matrix => {
-    const absolutize = (entry: MatrixEntry): MatrixEntry => {
-      return isNumber(entry) ? Math.abs(entry) : entry.map(absolutize)
-    }
-
+    const absolutize = (entry: MatrixEntry): MatrixEntry => (
+      isNumber(entry) ? Math.abs(entry) : entry.map(absolutize)
+    )
     return array.map(absolutize)
   },
 
@@ -42,12 +52,11 @@ export const matrix = {
     const max = matrix.max(array)
     const delta = max - min
 
-    const normalizer = (entry: MatrixEntry): MatrixEntry => {
-      return isNumber(entry)
+    const normalizer = (entry: MatrixEntry): MatrixEntry => (
+      isNumber(entry)
         ? delta === 0 ? min : (entry - min) / delta
         : entry.map(normalizer)
-    }
-
+    )
     return array.map(normalizer)
   },
 
@@ -61,7 +70,6 @@ export const matrix = {
       }
       return entry.map(caper)
     }
-
     return array.map(caper)
   },
 
@@ -83,10 +91,9 @@ export const matrix = {
     const adder = (entry: MatrixEntry): MatrixEntry => {
       if (isNumber(entry)) {
         const newValue = entry + value
-        if (value > 0) {
-          return newValue > threshold ? threshold : newValue
-        }
-        return newValue < threshold ? threshold : newValue
+        return value > 0
+          ? (newValue > threshold ? threshold : newValue)
+          : (newValue < threshold ? threshold : newValue)
       }
       return entry.map(adder)
     }
@@ -96,9 +103,9 @@ export const matrix = {
 
   inverse: (array: Matrix): Matrix => {
     const max = matrix.max(array)
-    const reverser = (entry: MatrixEntry): MatrixEntry => {
-      return isNumber(entry) ? max - entry : entry.map(reverser)
-    }
+    const reverser = (entry: MatrixEntry): MatrixEntry => (
+      isNumber(entry) ? max - entry : entry.map(reverser)
+    )
     return array.map(reverser)
   },
 
@@ -124,11 +131,8 @@ export const matrix = {
 
   /**
    * Return a console friendly version of the matrix
-   * @param array
-   * @param colorize
-   * @return string
    */
-  debug: (array: Matrix | Matrix2d, colorize?: Condition): string => {
+  debug: (array: Matrix | Matrix2d, options: { colorize?: Condition } = {}): string => {
     validate(array, isMatrix2d)
 
     const height = array.length
@@ -137,9 +141,9 @@ export const matrix = {
     output += ` (min=${matrix.min(array)}, max=${matrix.max(array)})`
 
     let needColorization = (value: number): boolean => false
-    if (colorize) {
-      const comparator = Object.keys(colorize)[0] as Comparators
-      const value = colorize[comparator] as number
+    if (options.colorize) {
+      const comparator = Object.keys(options.colorize)[0] as Comparators
+      const value = options.colorize[comparator] as number
       const checker = {
         eq: (v: number) => v == value,
         gt: (v: number) => v > value,
