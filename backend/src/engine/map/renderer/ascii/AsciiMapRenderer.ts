@@ -18,9 +18,8 @@ const Ascii = {
 }
 
 class AsciiMapRenderer extends MapRenderer {
-  render (): string {
-    let tiles
-    let ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + '\n'
+  protected renderer (): string {
+    let tiles, ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + '\n'
     for (let y = 0; y < this.map.size.height; y++) {
       for (let x = 0; x < this.map.size.width; x++) {
         tiles = this.map.get({ x, y })

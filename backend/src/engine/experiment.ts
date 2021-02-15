@@ -1,7 +1,7 @@
 import 'module-alias/register'
+import { matrix } from '@engine/math'
 import { GameManager } from './game/GameManager'
-import NoiseFactory, { MatrixGeneratorArgs, MatrixPipeline } from './map/builder/generator/NoiseFactory'
-import { matrix } from './map/builder/generator/helpers'
+import { NoiseFactory, MatrixPipeline } from './math/NoiseFactory'
 
 // const gameManager = new GameManager()
 // const gameId = gameManager.make()
@@ -10,23 +10,25 @@ import { matrix } from './map/builder/generator/helpers'
 
 const noise = new NoiseFactory('seed3')
 
-const valleyGenerator = (args: MatrixGeneratorArgs): number => args.perlin.octavate(2, .1 * args.x, .1 * args.y, Math.sin(args.x * 1e-2))
-const valley: MatrixPipeline = [ valleyGenerator, matrix.sharpen, matrix.normalize ]
-const nm2 = noise.build(valley, { width: 60, height: 15 })
 
-console.log(matrix.debug(nm2))
-
-const not_nm2 = matrix.add(nm2,-0.2)
-console.log(matrix.debug(not_nm2))
-
-const barCode: MatrixPipeline = [
-  (args: MatrixGeneratorArgs): number => args.simplex.octavate(2, args.x, .3),
+const valley = noise.build({ width: 60, height: 15 },
+  (args): number => args.perlin.octavate(2, .1 * args.x, .1 * args.y, Math.sin(args.x * 1e-2)),
+  matrix.sharpen,
   matrix.normalize
-]
+)
 
-let nm3
-nm3 = noise.build(barCode, { width: 20, height: 5 })
-console.log(matrix.debug(nm2, { colorize: { lte: .3 } }))
-nm3 = matrix.add(nm2, -.3)
+console.log(matrix.debug(valley))
 
-console.log(matrix.debug(nm3))
+const not_valley = matrix.add(-0.2, valley)
+console.log(matrix.debug(not_valley))
+
+
+let barCode
+barCode = noise.build({ width: 20, height: 5 },
+  (args): number => args.simplex.octavate(2, args.x, .3),
+  matrix.normalize
+)
+console.log(matrix.debug(valley, { colorize: { lte: .3 } }))
+barCode = matrix.add(-.3, valley)
+
+console.log(matrix.debug(barCode))

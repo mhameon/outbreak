@@ -112,7 +112,7 @@ describe('WorldMap class', function () {
     map.add(Tile.Block, { x: 4, y: 4 })
     map.each(square => {
       iteration++
-      if ((square.coords.x === 0 && square.coords.y === 0) || (square.coords.x === 4 && square.coords.y === 4)){
+      if ((square.coords.x === 0 && square.coords.y === 0) || (square.coords.x === 4 && square.coords.y === 4)) {
         assert.ok(square.tileset.has(Tile.Block))
       }
     })

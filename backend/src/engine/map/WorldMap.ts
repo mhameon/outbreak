@@ -1,11 +1,9 @@
-import { Size, Coords, Tile, Index, Tileset, Around, MapSquare } from '../types'
+import { Size, Coords, Tile, Index, Tileset, Around, Square } from '../types'
 import { OutOfMapError } from './MapErrors'
 import { isCoordsArray, isCoords } from './guards'
 
 /**
  * A 2D map describing the game board.
- *
- * Each `Coords` handles a `Tileset`
  */
 class WorldMap {
   private static emptyTileset = new Set([ Tile.Walkable ])
@@ -113,11 +111,13 @@ class WorldMap {
     return around
   }
 
-  each (callback: (square: MapSquare) => void): void {
+  each (callback: (square: Square) => void): void {
     this.tiles.forEach(
       (tileset, index) => callback({ coords: WorldMap.coords(index), tileset }),
     )
   }
+
+  // Todo merge(map:WorldMap): void
 
   has (tile: Tile | Tile[], at: Coords): boolean {
     this.assertMapContains(at)

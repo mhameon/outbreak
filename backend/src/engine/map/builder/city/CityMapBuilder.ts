@@ -1,20 +1,18 @@
+import { matrix } from '@engine/math'
 import AsciiMapRenderer from '../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
 import { Tile, TileLevel, Coords, Seed } from '@engine/types'
 import { InvalidArgumentError } from '@shared/Errors'
-import { line, calculateDestination } from '../../geometry'
+import { line, calculateDestination } from '../../../math/geometry'
 import chalk from 'chalk'
-import { matrix } from '../generator/helpers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tumult = require('tumult')
 
 class CityMapBuilder extends MapBuilder {
-  seed?: Seed
 
-  generate (seed?: Seed): WorldMap {
-    this.seed = seed ?? 1588630129416 //+(new Date()) //this.map?.name
-    //this.seed = +(new Date()) //this.map?.name
+
+  protected build(): WorldMap {
     const buildupAreaThreshold = .4
 
     let output = ''

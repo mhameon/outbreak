@@ -50,7 +50,7 @@ export enum Tile {
 
 export type Index = string
 export type Tileset = Set<Tile>
-export type MapSquare = { coords: Coords; tileset: Tileset }
+export type Square = { coords: Coords; tileset: Tileset }
 
 export type Around = Map<Direction, Tileset>
 

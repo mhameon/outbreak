@@ -1,39 +1,56 @@
+import { isMatrix2d, isNumber } from '@engine/map/guards'
 import { Coords, Matrix, Matrix2d, Size } from '@engine/types'
 import { validate } from '@shared/validator'
 import chalk from 'chalk'
-import { isMatrix2d, isNumber } from '@engine/map/guards'
+
+export type MatrixTransformer = (matrix: Matrix) => Matrix
 
 type MatrixEntry = Matrix | number
 type Comparators = 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
 type Condition = { [K in Comparators]?: number }
 
-export const random = {
-  /** Randomly pick a number between `min` and `max` (included) */
-  range: (min: number, max: number, decimals = 0): number => {
-    const precision = Math.pow(10, decimals)
-    return Math.floor(precision * Math.random() * (max - min + 1) + min) / precision
-  },
 
-  /** Randomly choose one entry in `values` */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  choose: (...values: any[]): any => values[random.range(0, values.length - 1)],
+function add (value: number): MatrixTransformer
+function add (value: number, array: Matrix): Matrix
+/** Add `value` to all matrix entries **/
+function add (value: number, array?: Matrix): Matrix | MatrixTransformer {
+  if (array) {
+    const adder = (entry: MatrixEntry): MatrixEntry => isNumber(entry) ? entry + value : entry.map(adder)
+    return array.map(adder)
+  }
+  return (array: Matrix) => matrix.add(value, array) as Matrix
+}
 
-  /** Has a `percent` in 100 chance of returning `true` */
-  chance: (percent: number): boolean => Math.random() > percent / 100,
+function cap (floor: number, ceil: number): MatrixTransformer
+function cap (floor: number, ceil: number, array: Matrix): Matrix
+/** Cap a Matrix with floor/ceil values */
+function cap (floor: number, ceil: number, array?: Matrix): Matrix|MatrixTransformer {
+  if ( array ) {
+    const caper = (entry: MatrixEntry): MatrixEntry => {
+      if (isNumber(entry)) {
+        if (entry < floor) return floor
+        if (entry > ceil) return ceil
+        return entry
+      }
+      return entry.map(caper)
+    }
+    return array.map(caper)
+  }
+  return (array: Matrix) => matrix.cap(floor, ceil, array) as Matrix
 }
 
 export const matrix = {
 
-  create: (size: Size, value: number | ((x: number, y: number) => number)): Matrix2d => (
+  create: (size: Size, fill: number | ((x: number, y: number) => number)): Matrix2d => (
     Array.from({ length: size.height }, (_, y) =>
       Array.from({ length: size.width }, (_, x) => (
-        value instanceof Function ? value(x, y) : value
+        fill instanceof Function ? fill(x, y) : fill
       )),
     )
   ),
 
-  min: (array: Matrix): number => Math.min(...array.map(e => Array.isArray(e) ? matrix.min(e) : e)),
-  max: (array: Matrix): number => Math.max(...array.map(e => Array.isArray(e) ? matrix.max(e) : e)),
+  min: (array: Matrix): number => Math.min(...array.map(e => isNumber(e) ? e : matrix.min(e))),
+  max: (array: Matrix): number => Math.max(...array.map(e => isNumber(e) ? e : matrix.max(e))),
 
   /**
    * Apply Math.abs() on all Matrix entries. Noise maps becomes "sharper".
@@ -42,6 +59,13 @@ export const matrix = {
   sharpen: (array: Matrix): Matrix => {
     const absolutize = (entry: MatrixEntry): MatrixEntry => (
       isNumber(entry) ? Math.abs(entry) : entry.map(absolutize)
+    )
+    return array.map(absolutize)
+  },
+
+  sharpen2: (array: Matrix): Matrix => {
+    const absolutize = (entry: MatrixEntry): MatrixEntry => (
+      isNumber(entry) ? entry * entry : entry.map(absolutize)
     )
     return array.map(absolutize)
   },
@@ -61,45 +85,10 @@ export const matrix = {
   },
 
   /** Cap a Matrix with floor/ceil values */
-  cap: (array: Matrix, floor: number, ceil: number): Matrix => {
-    const caper = (entry: MatrixEntry): MatrixEntry => {
-      if (isNumber(entry)) {
-        if (entry < floor) return floor
-        if (entry > ceil) return ceil
-        return entry
-      }
-      return entry.map(caper)
-    }
-    return array.map(caper)
-  },
+  cap,
 
   /** Add `value` to all matrix entries **/
-  add: (array: Matrix, value: number): Matrix => {
-    const threshold = value > 0 ? matrix.max(array) : matrix.min(array)
-    //const min = matrix.max(array)
-    // if (isNumber(value)) {
-    //   const adder = (entry: MatrixEntry): MatrixEntry => {
-    //     return isNumber(entry) ? entry + (value as number) : entry.map(adder)
-    //   }
-    //
-    //   return array.map(adder)
-    // } else {
-    //   //todo add another matrix
-    // }
-    //return []
-
-    const adder = (entry: MatrixEntry): MatrixEntry => {
-      if (isNumber(entry)) {
-        const newValue = entry + value
-        return value > 0
-          ? (newValue > threshold ? threshold : newValue)
-          : (newValue < threshold ? threshold : newValue)
-      }
-      return entry.map(adder)
-    }
-
-    return array.map(adder)
-  },
+  add,
 
   inverse: (array: Matrix): Matrix => {
     const max = matrix.max(array)
@@ -109,8 +98,8 @@ export const matrix = {
     return array.map(reverser)
   },
 
-  /** Call callback for each matrix entries **/
-  travel: (array: Matrix | Matrix2d, callback: (entry: { coords: Coords; value: number }) => void): void => {
+  /** Call callback() for each matrix entries */
+  each: (callback: (entry: { coords: Coords; value: number }) => void, array: Matrix | Matrix2d): void => {
     validate(array, isMatrix2d)
 
     let x = 0, y = 0
@@ -140,6 +129,7 @@ export const matrix = {
     let output = `${width}x${height}`
     output += ` (min=${matrix.min(array)}, max=${matrix.max(array)})`
 
+    // noinspection JSUnusedLocalSymbols
     let needColorization = (value: number): boolean => false
     if (options.colorize) {
       const comparator = Object.keys(options.colorize)[0] as Comparators
@@ -160,7 +150,7 @@ export const matrix = {
       }
       needColorization = (value: number): boolean => checker[comparator](value)
 
-      output += ` ${symbols[comparator]}${value}`
+      output += chalk.red(` ${symbols[comparator]}${value}`)
     }
 
     output += '\n'
@@ -185,5 +175,4 @@ export const matrix = {
     }
     return output
   },
-}
-
+} as const
