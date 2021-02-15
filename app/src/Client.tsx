@@ -50,7 +50,8 @@ function Client (props: { path: string }): JSX.Element {
       if (response.gameId === null) {
         console.log(`${requestedGameId} doesn't exists`)
         setRequestedGameId('')
-      } else {
+      }
+      else {
         console.log(`Welcome to ${response.gameId} !`)
       }
     })
