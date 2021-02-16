@@ -63,7 +63,7 @@ class WorldMap {
     }
   }
 
-  set (tile: Tile, at: Coords | Array<Coords>): void {
+  set (tile: Tile | Tile[], at: Coords | Array<Coords>): void {
     let point
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
@@ -80,8 +80,13 @@ class WorldMap {
 
     const index = WorldMap.index(point)
     this.tiles.delete(index)
-    if (tile !== Tile.Walkable) {
-      this.tiles.set(index, new Set([ tile ]))
+    const tileset = new Set(([] as Tile[]).concat(tile))
+    if (tileset.size >= 2 && tileset.has(Tile.Walkable) && tileset.has(Tile.Block)) {
+      tileset.delete(Tile.Walkable)
+      tileset.delete(Tile.Block)
+    }
+    if (tileset.size >= 1 && (tileset.size !== 1 || !tileset.has(Tile.Walkable))) {
+      this.tiles.set(index, tileset)
     }
   }
 
@@ -116,8 +121,6 @@ class WorldMap {
       (tileset, index) => callback({ coords: WorldMap.coords(index), tileset }),
     )
   }
-
-  // Todo merge(map:WorldMap): void
 
   has (tile: Tile | Tile[], at: Coords): boolean {
     this.assertMapContains(at)

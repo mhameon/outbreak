@@ -41,6 +41,15 @@ describe('WorldMap class', function () {
     assert.ok(map.has([ Tile.Road ], origin))
     assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
     assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
+
+    map.set([ Tile.Water, Tile.Block ], origin)
+    assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
+
+    map.set([ Tile.Walkable ], origin)
+    assert.ok(map.has(Tile.Walkable, origin)) // default value for empty square
+
+    map.set([ Tile.Walkable, Tile.Block ], origin) // great idea stupid!
+    assert.ok(map.has(Tile.Walkable, origin)) // default value for empty square
   })
 
   it('get(at)', function () {
