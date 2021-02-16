@@ -1,29 +1,25 @@
 import config from 'config'
 import { LeveledLogMethod } from 'winston'
-import { getLogger, Logger, LogMethod } from './logger'
+import { getLogger, LogMethod } from './logger'
 
-let generic: Logger
+let logErrorWithDefault: LogMethod
 if (config.get('logger.exception')) {
-  generic = getLogger('Exception')
+  logErrorWithDefault = getLogger('Exception').error
 }
 
 export abstract class CustomError extends Error {
-  constructor (message?: string, logErrorWith: LeveledLogMethod | boolean = generic?.error) {
+  constructor (message?: string, logErrorWith?: LeveledLogMethod | boolean) {
     super(message)
     this.name = this.constructor.name
-    if (logErrorWith !== false) {
+    if (logErrorWith) {
       logErrorWith === true
-        ? generic?.error(message)
+        ? logErrorWithDefault(message)
         : logErrorWith(message)
     }
   }
 }
 
-export class InvalidArgumentError extends CustomError {
-  constructor (name: string, logErrorWith?: LogMethod) {
-    super(`Invalid argument ${name}`, logErrorWith)
-  }
-}
+export class InvalidArgumentError extends CustomError {}
 
 export class NotFoundError extends CustomError {
   constructor (id: string | number, type?: string, logErrorWith?: LogMethod) {

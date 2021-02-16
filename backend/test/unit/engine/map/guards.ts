@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isCoords, isCoordsArray, isMatrix2d, isNumber } from '@engine/map/guards'
+import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap } from '@engine/map/guards'
 import * as assert from 'assert'
+import WorldMap from '@engine/map/WorldMap'
 
 describe('map guards', function () {
   it('isNumber', function () {
@@ -26,5 +27,10 @@ describe('map guards', function () {
     assert.strictEqual(isMatrix2d([ 0, 0 ]), false)
     assert.ok(isMatrix2d([[ 0, 0 ]]))
     assert.strictEqual(isMatrix2d([[[ 0, 0 ]]]), false)
+  })
+
+  it('isWorldMap', function() {
+    assert.ok(isWorldMap(new WorldMap(5, 5)))
+    assert.strictEqual(isWorldMap('toto'), false)
   })
 })
