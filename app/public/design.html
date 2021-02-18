@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Design Experiments</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+
+      #screens-left {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 20%;
+        border-right: 1px solid #CCC;
+      }
+
+      #screens-right {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 20%;
+        border-left: 1px solid #CCC;
+      }
+
+      #screens-left,#screens-right{
+        perspective:400px;
+        perspective-origin: center center;
+
+        display: flex;
+        flex-direction: column;
+        justify-content:center;
+        align-items: stretch;
+      }
+
+      .screen {
+        background: #DDD;
+        border: 2px solid #999;
+        width: 90%;
+        min-height: 50px;
+
+        position: relative;
+        margin: 15px auto 0 auto;
+        padding: 2px;
+
+        flex-grow: 1;
+        backface-visibility: hidden;
+        transition: .2s ease-out;
+      }
+      #screens-left .screen {
+        transform: rotateY(10deg);
+      }
+      #screens-right .screen {
+        transform: rotateY(-10deg);
+      }
+
+      #screens-left .screen:hover ,#screens-right .screen:hover {
+        background: #CCC;
+        z-index: 1;
+      }
+      #screens-left .screen:hover {
+        transform: rotateY(5deg) translateZ(25px) ;
+      }
+      #screens-right .screen:hover {
+        transform: rotateY(-5deg) translateZ(25px) ;
+      }
+
+      .opened-app{
+        z-index: 100;
+        position: absolute !important;top:50px;bottom:50px;left:50px;right:50px;
+        background: #DDD;
+        border: 2px solid #999;
+      }
+
+    </style>
+</head>
+<body>
+<div class="opened-app" style="display: none"></div>
+<div id="screens-left">
+    <div class="screen right-3d">
+        1st squad's character
+    </div>
+    <div class="screen right-3d">
+        2nd squad's character
+    </div>
+    <div class="screen right-3d">
+        3rd squad's character
+    </div>
+    <div class="screen right-3d">
+        4th squad's character
+    </div>
+</div>
+<div id="screens-right">
+    <div class="screen right-3d">
+        1st squad's character
+    </div>
+    <div class="screen right-3d">
+        2nd squad's character
+    </div>
+    <div class="screen right-3d">
+        3rd squad's character
+    </div>
+    <div class="screen right-3d">
+        4th squad's character
+    </div>
+</div>
+</body>
+</html>
