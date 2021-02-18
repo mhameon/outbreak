@@ -1,6 +1,8 @@
 import { Size, Coords, Tile, Index, Tileset, Around, Square } from '../types'
 import { OutOfMapError } from './MapErrors'
 import { isCoordsArray, isCoords } from './guards'
+import { Seeder } from '@engine/map/builder/MapBuilder'
+import { InvalidArgumentError } from '@shared/Errors'
 
 /**
  * A 2D map describing the game board.
@@ -8,13 +10,15 @@ import { isCoordsArray, isCoords } from './guards'
 class WorldMap {
   private static emptyTileset = new Set([ Tile.Walkable ])
   public readonly size: Size
+  public readonly seeder?: Seeder
   public readonly name: string
   private tiles: Map<Index, Tileset>
 
-  constructor (width: number, height: number, name = 'Unknown map') {
+  constructor (size: Size, seeder?: Seeder) {
     this.tiles = new Map()
-    this.size = { width, height }
-    this.name = name
+    this.size = size
+    this.seeder = seeder
+    this.name = 'Unknown map'
   }
 
   private static index (at: Coords): Index {
@@ -37,11 +41,9 @@ class WorldMap {
       if (isCoordsArray(at)) {
         this.add(tile, at)
       }
-    }
-    else if (isCoords(at)) {
+    } else if (isCoords(at)) {
       point = at
-    }
-    else {
+    } else {
       return
     }
 
@@ -52,12 +54,10 @@ class WorldMap {
         if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
           tiles.delete(Tile.Block)
           this.tiles.set(index, tiles)
-        }
-        else {
+        } else {
           this.tiles.set(index, tiles.add(tile))
         }
-      }
-      else {
+      } else {
         this.set(tile, point)
       }
     }
@@ -70,11 +70,9 @@ class WorldMap {
       if (isCoordsArray(at)) {
         this.set(tile, at)
       }
-    }
-    else if (isCoords(at)) {
+    } else if (isCoords(at)) {
       point = at
-    }
-    else {
+    } else {
       return
     }
 
@@ -105,8 +103,7 @@ class WorldMap {
         if (x !== at.x || y !== at.y) {
           try {
             around.set(direction, this.get({ x, y }))
-          }
-          catch (e) {
+          } catch (e) {
             // Do nothing
           }
           direction++
@@ -114,6 +111,36 @@ class WorldMap {
       }
     }
     return around
+  }
+
+  extract (center: Coords, surface: Size): WorldMap {
+    this.assertMapContains(center)
+    if ((surface.width - 1) % 2 !== 0 || (surface.height - 1) % 2 !== 0) {
+      throw new InvalidArgumentError('An odd surface is expected')
+    }
+
+    const offsetX = (surface.width - 1) / 2
+    const offsetY = (surface.height - 1) / 2
+    const topLeft = {
+      x: center.x - offsetX < 0 ? 0 : center.x - offsetX,
+      y: center.y - offsetY < 0 ? 0 : center.y - offsetY
+    }
+    const bottomRight = {
+      x: center.x + offsetX > this.size.width - 1 ? this.size.width - 1 : center.x + offsetX,
+      y: center.y + offsetY > this.size.height - 1 ? this.size.height - 1 : center.y + offsetY
+    }
+
+    const region = new WorldMap({ width: 1 + bottomRight.x - topLeft.x, height: 1 + bottomRight.y - topLeft.y })
+    const destination: Coords = { x: 0, y: 0 }
+    for (let y = topLeft.y; y <= bottomRight.y; y++) {
+      destination.x = 0
+      for (let x = topLeft.x; x <= bottomRight.x; x++) {
+        region.set([ ...this.get({ x, y }) ], destination)
+        ++destination.x
+      }
+      ++destination.y
+    }
+    return region
   }
 
   each (callback: (square: Square) => void): void {

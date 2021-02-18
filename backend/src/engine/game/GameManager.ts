@@ -29,6 +29,7 @@ export class GameManager {
     const outbreak = OutbreakFactory.create(gameId)
     this.games.set(gameId, outbreak)
     log.info('Created `%s`', gameId, { gameId })
+    console.log(outbreak.render()) // Todo debug only
     return gameId
   }
 

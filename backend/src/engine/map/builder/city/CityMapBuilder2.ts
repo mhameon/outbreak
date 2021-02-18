@@ -1,8 +1,9 @@
 import { matrix, NoiseFactory } from '@engine/math'
 import MapBuilder from '@engine/map/builder/MapBuilder'
-import AsciiMapRenderer from '@engine/map/renderer/ascii/AsciiMapRenderer'
 import WorldMap from '@engine/map/WorldMap'
 import { Tile, TileLevel } from '@engine/types'
+import { line } from '@engine/math/geometry'
+import AsciiMapRenderer from '@engine/map/renderer/ascii/AsciiMapRenderer'
 
 const { normalize, cap } = matrix
 
@@ -30,7 +31,7 @@ export class CityMapBuilder2 extends MapBuilder {
       ({ perlin, x, y }) => perlin.octavate(2, x * .08, y * .08),
       cap(-1, 10), normalize,
     )
-    console.log(matrix.debug(world))
+    //console.log(matrix.debug(world))
 
     const thresholds = {
       buildLevels: [ .35, .5, .65, .8, .92, 1 ],
@@ -47,24 +48,25 @@ export class CityMapBuilder2 extends MapBuilder {
       }
     }, world)
 
-    // Idea: Use biggest population center as outbreak start location
-    const populationDensity = matrix.create(this.map.size, 0)
-    const levels = [ Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5 ]
-    this.map.each((square) => {
-      let sum = 0
-      const around = this.map.getAround(square.coords)
-      around.forEach(tileset => {
-        if (tileset.has(Tile.Building)) {
-          const level = levels.find(level => tileset.has(level)) ?? 0
-          sum += level
-        }
-      })
-      populationDensity[square.coords.y][square.coords.x] = sum / around.size
-    })
-    console.log(matrix.debug(matrix.normalize(populationDensity), { colorize: { gte: .85 } }))
+    this.map.set(Tile.Fire, line({ x: 0,y: 0 }, { x: 10,y: 8 }))
 
-    const ascii = new AsciiMapRenderer()
-    console.log(ascii.render(this.map))
+    console.log(new AsciiMapRenderer(this.map.extract({ x: 2,y: 2 }, { width: 5, height: 5 })).render())
+
+    // Idea: Use biggest population center as outbreak start location
+    // const populationDensity = matrix.create(this.map.size, 0)
+    // const levels = [ Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5 ]
+    // this.map.each((square) => {
+    //   let sum = 0
+    //   const around = this.map.getAround(square.coords)
+    //   around.forEach(tileset => {
+    //     if (tileset.has(Tile.Building)) {
+    //       const level = levels.find(level => tileset.has(level)) ?? 0
+    //       sum += level
+    //     }
+    //   })
+    //   populationDensity[square.coords.y][square.coords.x] = sum / around.size
+    // })
+    // console.log(matrix.debug(matrix.normalize(populationDensity), { colorize: { gte: .85 } }))
 
     return this.map
   }

@@ -1,14 +1,15 @@
-import { Seed } from '../../types'
+import { Seed, Size } from '../../types'
 import WorldMap from '../WorldMap'
 
-type Seeder = { builder: string; seed: Seed }
+export type Seeder = { builder: string; seed: Seed }
 
 abstract class MapBuilder {
-  protected map: WorldMap
+  protected map!: WorldMap
   protected seed: Seed = -1
+  protected size:Size
 
-  constructor (width: number, height: number) {
-    this.map = new WorldMap(width, height)
+  constructor (size:Size) {
+    this.size = size
   }
 
   getSeeder (): Seeder {
@@ -17,6 +18,9 @@ abstract class MapBuilder {
 
   generate (seed: Seed): WorldMap {
     this.seed = seed
+
+    this.map = new WorldMap(this.size, this.getSeeder())
+
     return this.build()
   }
 

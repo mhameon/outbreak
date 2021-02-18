@@ -5,8 +5,11 @@ import chalk from 'chalk'
 const Ascii = {
   Block: chalk.bgHex('#CCCCCC')(' '),
   Grass: chalk.bgHex('#23301A').hex('#465C38')('░'),
+  BurnedGrass: chalk.bgHex('#401d00').hex('#000000')('▒'),
   Road: chalk.bgHex('#414040').white('·'),
   Bridge: chalk.bgHex('#515050').white(' '),
+  BurnedRoad: chalk.bgHex('#414040').hex('#000000')('▒'),
+  Fire: chalk.bgHex('#ef390b').hex('#f8ea00')('░'),
   Water: chalk.bgHex('#253D9D').hex('#3F7DAA')('~'),
   Building: {
     'L1': chalk.bgHex('#888888')(' '),
@@ -19,14 +22,18 @@ const Ascii = {
 
 class AsciiMapRenderer extends MapRenderer {
   protected renderer (): string {
-    let tiles, ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + '\n'
-    for (let y = 0; y < this.map.size.height; y++) {
-      for (let x = 0; x < this.map.size.width; x++) {
+    const width = { length: this.map.size.width }
+    const height = { length: this.map.size.height }
+
+    const seeder = ` ${this.map.seeder?.builder}(${this.map.seeder?.seed})`
+    let tiles, ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + seeder + '\n'
+    Array.from(height, (_, y) => {
+      Array.from(width, (_, x) => {
         tiles = this.map.get({ x, y })
         ascii += AsciiMapRenderer.draw(tiles)
-      }
+      })
       ascii += '\n'
-    }
+    })
 
     return ascii
   }
@@ -47,12 +54,17 @@ class AsciiMapRenderer extends MapRenderer {
           case Tile.Level4: return Ascii.Building.L4
           case Tile.Level5: return Ascii.Building.L5
         }
+      case Tile.Fire:
+        return Ascii.Fire
       case Tile.Water:
         if (tiles.next().value === Tile.Road) {
           return Ascii.Bridge
         }
         return Ascii.Water
       case Tile.Road:
+        if (tiles.next().value === Tile.Water) {
+          return Ascii.Bridge
+        }
         return Ascii.Road
       default:
         return chalk.red('?')

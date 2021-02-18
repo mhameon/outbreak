@@ -89,12 +89,6 @@ export class GameServer {
           return
         }
 
-        // if (this.needToCreateNewGame()) {
-        //   gameId = this.game.create()
-        // }
-        // else {
-        //   gameId = this.getAvailableGame()
-        // }
         if (!args.gameId) {
           gameId = this.game.create()
         }
@@ -284,14 +278,6 @@ export class GameServer {
     if (callback) {
       callback(wasLast)
     }
-  }
-
-  private needToCreateNewGame (): boolean {
-    return this.game.count() === 0
-  }
-
-  private getAvailableGame (): GameId {
-    return this.game.list()[0].id
   }
 
   private stopWhenClientsAreDisconnected (): void {

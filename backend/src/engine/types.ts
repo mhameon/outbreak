@@ -46,6 +46,9 @@ export enum Tile {
   Road,
   Water,
   Building,
+
+  Fire,
+  Burned
 }
 
 export type Index = string

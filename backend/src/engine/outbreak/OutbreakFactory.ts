@@ -6,10 +6,14 @@ type Options = {
   size: Size
 }
 
+// Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
+const defaultOptions: Options = {
+  size: { width: 60, height: 25 }
+}
+
 export class OutbreakFactory {
-  // Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
-  static create (id: GameId, options: Partial<Options> = {}): Outbreak {
-    const map = (new CityMapBuilder2(60, 25)).generate(id)
+  static create (id: GameId, options: Options = defaultOptions): Outbreak {
+    const map = (new CityMapBuilder2(options.size)).generate(id)
     return new Outbreak(id, map)
   }
 }

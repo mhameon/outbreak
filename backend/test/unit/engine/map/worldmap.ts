@@ -2,54 +2,79 @@ import WorldMap from '@engine/map/WorldMap'
 import { Tile, Direction, Tileset } from '@engine/types'
 
 import * as assert from 'assert'
+import { InvalidArgumentError } from '@shared/Errors'
 
 describe('WorldMap class', function () {
   let map: WorldMap
   const origin = { x: 0, y: 0 }
 
   beforeEach(function () {
-    map = new WorldMap(5, 5)
+    map = new WorldMap({ width: 5, height: 5 })
     map.add(Tile.Block, origin)
   })
 
-  it('size', function () {
+  it('should return correct map size', function () {
     assert.strictEqual(map.size.width, 5)
     assert.strictEqual(map.size.height, 5)
   })
 
-  it('add(tile, at)', function () {
-    assert.ok(map.has(Tile.Block, origin))
-
-    map.add(Tile.Block, origin)
-    map.add(Tile.Block, origin)
-    map.add(Tile.Water, origin)
-    map.add(Tile.Water, origin)
-    assert.strictEqual(map.get(origin).size, 2)
-
-    map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
-    assert.ok(map.has([ Tile.Road, Tile.Water, Tile.Block ], origin))
-    assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
-    assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
+  describe('add(tile, at)', function() {
+    it('should find (has) the right tile', function () {
+      assert.ok(map.has(Tile.Block, origin))
+    })
+    it('should not add tiles twice', function () {
+      map.add(Tile.Block, origin)
+      map.add(Tile.Block, origin)
+      map.add(Tile.Water, origin)
+      map.add(Tile.Water, origin)
+      assert.strictEqual(map.get(origin).size, 2)
+    })
+  })
+  describe('add(tile, at[])', function() {
+    it('should add a tile at multiple coords', function () {
+      map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+      assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
+      assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
+      assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
+    })
   })
 
-  it('set(tile, at)', function () {
-    map.set(Tile.Road, origin)
-    assert.ok(map.has([ Tile.Road ], origin))
-    assert.strictEqual(map.has(Tile.Block, origin), false)
+  describe('set(tile, at)', function () {
+    it('should overwrite existing tile', function () {
+      map.set(Tile.Road, origin)
+      assert.ok(map.has([ Tile.Road ], origin))
+      assert.strictEqual(map.has(Tile.Block, origin), false)
+    })
+  })
+  describe('set(tile, at[])', function() {
+    it('should overwrite existing tiles at multiple coords', function () {
+      map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+      assert.ok(map.has([ Tile.Road ], origin))
+      assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
+      assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
+    })
+  })
+  describe('set(tile[], at)', function() {
+    it('should set multiple tiles', function() {
+      map.set([ Tile.Water, Tile.Block ], origin)
+      assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
+    })
+    it('should get default tile when set with nothing', function() {
+      map.set([], origin)
+      assert.ok(map.has(Tile.Walkable, origin))
+      assert.strictEqual(map.get(origin).size, 1)
+    })
+    it('should ignore incompatible tiles', function() {
+      map.set([ Tile.Walkable, Tile.Block, Tile.Road ], origin)
+      assert.ok(map.has(Tile.Road, origin))
+      assert.strictEqual(map.get(origin).size, 1)
 
-    map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
-    assert.ok(map.has([ Tile.Road ], origin))
-    assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
-    assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
-
-    map.set([ Tile.Water, Tile.Block ], origin)
-    assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
-
-    map.set([ Tile.Walkable ], origin)
-    assert.ok(map.has(Tile.Walkable, origin)) // default value for empty square
-
-    map.set([ Tile.Walkable, Tile.Block ], origin) // great idea stupid!
-    assert.ok(map.has(Tile.Walkable, origin)) // default value for empty square
+      // Todo add tests to handle all "incompatible" tiles
+      // this behaviours should be generalized in Worldmap
+      // map.set([ Tile.Fire, Tile.Water, Tile.Road ], origin)
+      // assert.ok(map.has(Tile.Road, origin))
+      // assert.strictEqual(map.get(origin).size, 1)
+    })
   })
 
   it('get(at)', function () {
@@ -126,5 +151,21 @@ describe('WorldMap class', function () {
       }
     })
     assert.strictEqual(iteration, 2)
+  })
+
+  describe('extract', function() {
+    it( 'should throw with invalid surface', function() {
+      try {
+        map.extract({ x: 3, y: 3 }, { width: 2, height: 3 })
+        assert.fail('InvalidArgumentError should be thrown')
+      } catch (e){
+        assert.ok(e instanceof InvalidArgumentError)
+        assert.strictEqual(e.message, 'An odd surface is expected')
+      }
+    })
+    describe('a "sub" WorldMap', function() {
+      it('should return a (small) WorldMap')
+      it('should return a (small) WorldMap, even when exceeding original WorldMap size')
+    })
   })
 })

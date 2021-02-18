@@ -30,7 +30,7 @@ describe('map guards', function () {
   })
 
   it('isWorldMap', function() {
-    assert.ok(isWorldMap(new WorldMap(5, 5)))
+    assert.ok(isWorldMap(new WorldMap({ width: 5, height: 5 })))
     assert.strictEqual(isWorldMap('toto'), false)
   })
 })

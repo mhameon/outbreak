@@ -1,21 +1,19 @@
 import WorldMap from '../map/WorldMap'
-import { Renderers, Renderer, MapRenderer } from '../map/renderer'
+import { Renderers } from '../map/renderer'
 import { GameId } from '../types'
 
 export class Outbreak {
-  static useRenderer: Renderer = 'Ascii'
+  private static renderer = new Renderers.Ascii()
 
   readonly id: GameId
   readonly createdAt: Date
   readonly map: WorldMap
   private turn = 1
-  private renderer: MapRenderer
 
   constructor (id: GameId, map: WorldMap) {
     this.id = id
     this.map = map
     this.createdAt = new Date()
-    this.renderer = new Renderers[Outbreak.useRenderer](this.map)
   }
 
   get name (): string {
@@ -30,7 +28,11 @@ export class Outbreak {
     return ++this.turn
   }
 
-  render (): void {
-    console.log(this.renderer.render())
+  render (): string {
+    return '' +
+      `Outbreak: ${this.id}  - ${this.createdAt.toISOString()}\n` +
+      `Turn    : ${this.turn}\n` +
+      `${Outbreak.renderer.render(this.map)}`
+
   }
 }
