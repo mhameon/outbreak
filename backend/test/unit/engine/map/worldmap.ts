@@ -18,7 +18,7 @@ describe('WorldMap class', function () {
     assert.strictEqual(map.size.height, 5)
   })
 
-  describe('add(tile, at)', function() {
+  describe('add(tile, at)', function () {
     it('should find (has) the right tile', function () {
       assert.ok(map.has(Tile.Block, origin))
     })
@@ -30,7 +30,7 @@ describe('WorldMap class', function () {
       assert.strictEqual(map.get(origin).size, 2)
     })
   })
-  describe('add(tile, at[])', function() {
+  describe('add(tile, at[])', function () {
     it('should add a tile at multiple coords', function () {
       map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
       assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
@@ -46,7 +46,7 @@ describe('WorldMap class', function () {
       assert.strictEqual(map.has(Tile.Block, origin), false)
     })
   })
-  describe('set(tile, at[])', function() {
+  describe('set(tile, at[])', function () {
     it('should overwrite existing tiles at multiple coords', function () {
       map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
       assert.ok(map.has([ Tile.Road ], origin))
@@ -54,17 +54,17 @@ describe('WorldMap class', function () {
       assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
     })
   })
-  describe('set(tile[], at)', function() {
-    it('should set multiple tiles', function() {
+  describe('set(tile[], at)', function () {
+    it('should set multiple tiles', function () {
       map.set([ Tile.Water, Tile.Block ], origin)
       assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
     })
-    it('should get default tile when set with nothing', function() {
+    it('should get default tile when set with nothing', function () {
       map.set([], origin)
       assert.ok(map.has(Tile.Walkable, origin))
       assert.strictEqual(map.get(origin).size, 1)
     })
-    it('should ignore incompatible tiles', function() {
+    it('should ignore incompatible tiles', function () {
       map.set([ Tile.Walkable, Tile.Block, Tile.Road ], origin)
       assert.ok(map.has(Tile.Road, origin))
       assert.strictEqual(map.get(origin).size, 1)
@@ -153,19 +153,66 @@ describe('WorldMap class', function () {
     assert.strictEqual(iteration, 2)
   })
 
-  describe('extract', function() {
-    it( 'should throw with invalid surface', function() {
+  describe('extract', function () {
+    it('should throw with invalid surface', function () {
       try {
         map.extract({ x: 3, y: 3 }, { width: 2, height: 3 })
         assert.fail('InvalidArgumentError should be thrown')
-      } catch (e){
+      } catch (e) {
         assert.ok(e instanceof InvalidArgumentError)
         assert.strictEqual(e.message, 'An odd surface is expected')
       }
     })
-    describe('a "sub" WorldMap', function() {
-      it('should return a (small) WorldMap')
-      it('should return a (small) WorldMap, even when exceeding original WorldMap size')
+    describe('a "sub" WorldMap', function () {
+      let world:WorldMap
+      before(function () {
+        // 1 1 1 1 1
+        // W . W . W
+        // . F . F .
+        // B . B . B
+        // . . . . R
+        world = new WorldMap({ width: 5, height: 5 })
+        world.set(Tile.Block, [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }])
+        world.set(Tile.Water, [{ x: 0, y: 1 }, { x: 2, y: 1 }, { x: 4, y: 1 }])
+        world.set(Tile.Fire, [{ x: 1, y: 2 }, { x: 3, y: 2 }])
+        world.set(Tile.Building, [{ x: 0, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }])
+        world.set(Tile.Road, { x: 4, y: 4 })
+      })
+      it('should return a (small) WorldMap', function () {
+        const slice = world.extract({ x: 2, y: 2 }, { width: 3, height: 3 })
+        assert.deepStrictEqual(slice.size, { width: 3, height: 3 })
+
+        assert.ok(world.has(Tile.Walkable, { x: 1, y: 1 }))
+        assert.ok(world.has(Tile.Water, { x: 2, y: 1 }))
+        assert.ok(world.has(Tile.Walkable, { x: 3, y: 1 }))
+
+        assert.ok(world.has(Tile.Fire, { x: 1, y: 2 }))
+        assert.ok(world.has(Tile.Walkable, { x: 2, y: 2 }))
+        assert.ok(world.has(Tile.Fire, { x: 3, y: 2 }))
+
+        assert.ok(world.has(Tile.Walkable, { x: 1, y: 3 }))
+        assert.ok(world.has(Tile.Building, { x: 2, y: 3 }))
+        assert.ok(world.has(Tile.Walkable, { x: 3, y: 3 }))
+      })
+      it('should return a (small) WorldMap, even when exceeding original WorldMap size', function() {
+        const slice = world.extract({ x: 3, y: 4 }, { width: 5, height: 5 })
+        assert.deepStrictEqual(slice.size, { width: 4, height: 3 })
+
+        assert.ok(world.has(Tile.Fire, { x: 1, y: 2 }))
+        assert.ok(world.has(Tile.Walkable, { x: 2, y: 2 }))
+        assert.ok(world.has(Tile.Fire, { x: 3, y: 2 }))
+        assert.ok(world.has(Tile.Walkable, { x: 4, y: 2 }))
+
+        assert.ok(world.has(Tile.Walkable, { x: 1, y: 3 }))
+        assert.ok(world.has(Tile.Building, { x: 2, y: 3 }))
+        assert.ok(world.has(Tile.Walkable, { x: 3, y: 3 }))
+        assert.ok(world.has(Tile.Building, { x: 4, y: 3 }))
+
+        assert.ok(world.has(Tile.Walkable, { x: 1, y: 4 }))
+        assert.ok(world.has(Tile.Walkable, { x: 2, y: 4 }))
+        assert.ok(world.has(Tile.Walkable, { x: 3, y: 4 }))
+        assert.ok(world.has(Tile.Road, { x: 4, y: 4 }))
+      })
     })
   })
 })

@@ -1,5 +1,5 @@
 import { Size, Coords, Tile, Index, Tileset, Around, Square } from '../types'
-import { OutOfMapError } from './MapErrors'
+import { OutOfMapError } from './WolrdMapErrors'
 import { isCoordsArray, isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
