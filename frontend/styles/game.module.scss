@@ -1,0 +1,86 @@
+$screen-rotateY:10deg;
+$screen-margin:10px;
+
+#base{
+  background: rgb(255,255,255);
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 75%, rgba(47,47,47,1) 94%, rgba(34,34,34,1) 100%);
+  position: absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+}
+
+#screensLeft, #screensRight {
+  position: absolute;
+  width: 250px;
+  overflow: hidden;
+  padding: 20px 0 20px 0;
+
+  // Flex
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+
+  // Perspective for children 3D transform
+  perspective: 400px;
+  perspective-origin: center center;
+
+  .screen {
+    position: relative;
+    width: 90%;
+    min-height: 50px;
+
+    margin: $screen-margin/2 auto;
+    padding: 5px;
+
+    background: #DDD;
+    border: 2px solid #999;
+
+    flex-grow: 1;
+
+    backface-visibility: hidden;
+    transition: .2s ease-out;
+
+    &:hover {
+      margin:0 auto 0 auto;
+      background: #CCC;
+      z-index: 1;
+      &:first-child{
+        margin:$screen-margin*2 auto 0 auto;
+      }
+      &:last-child{
+        margin:-$screen-margin*2 auto 0 auto;
+      }
+    }
+  }
+}
+
+#screensLeft {
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  .screen {
+    transform: rotateY($screen-rotateY);
+
+    &:hover {
+      transform: rotateY($screen-rotateY/2) translateZ(4*$screen-margin);
+    }
+  }
+}
+
+#screensRight {
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  .screen {
+    transform: rotateY(-$screen-rotateY);
+
+    &:hover {
+      transform: rotateY(-$screen-rotateY/2) translateZ(4*$screen-margin);
+    }
+  }
+}
