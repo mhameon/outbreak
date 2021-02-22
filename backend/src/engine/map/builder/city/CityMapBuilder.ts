@@ -1,5 +1,5 @@
 import { matrix } from '@engine/math'
-import AsciiMapRenderer from '../../renderer/ascii/AsciiMapRenderer'
+import AsciiMapRenderer from '../../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
 import { Tile, TileLevel, Coords, Seed } from '@engine/types'

@@ -25,7 +25,7 @@ class AsciiMapRenderer extends MapRenderer {
     const width = { length: this.map.size.width }
     const height = { length: this.map.size.height }
 
-    const seeder = ` ${this.map.seeder?.builder}(${this.map.seeder?.seed})`
+    const seeder = this.map.seeder ? ` ${this.map.seeder.builder}(${this.map.seeder.seed})` : ''
     let tiles, ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + seeder + '\n'
     Array.from(height, (_, y) => {
       Array.from(width, (_, x) => {

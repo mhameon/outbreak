@@ -1,5 +1,5 @@
 import WorldMap from '../map/WorldMap'
-import { Renderers } from '../map/renderer'
+import { Renderers } from '../renderer'
 import { GameId } from '../types'
 
 export class Outbreak {

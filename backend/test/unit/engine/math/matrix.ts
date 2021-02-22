@@ -9,7 +9,7 @@ describe('matrix', function () {
     assert.deepStrictEqual(array, [[ 0, 0, 0 ], [ 0, 0, 0 ]])
   })
 
-  it('create (filled with function=', function () {
+  it('create (filled with function)', function () {
     const array = matrix.create({ width: 3, height: 2 }, (x, y) => x + y)
     assert.deepStrictEqual(array, [[ 0, 1, 2 ], [ 1, 2, 3 ]])
   })

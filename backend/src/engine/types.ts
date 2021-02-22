@@ -31,11 +31,12 @@ export type Size = {
 }
 
 export type TileLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
+
 export enum Tile {
-  /*** Properties ***/
+  /*** Properties (Sidekick tiles) ***/
   Walkable,
   Block,
-
+  Burned,
   Level1,
   Level2,
   Level3,
@@ -43,12 +44,36 @@ export enum Tile {
   Level5,
 
   /*** Cosmetic ***/
+  Forest,
   Road,
   Water,
   Building,
 
   Fire,
-  Burned
+}
+
+export enum RenderTile {
+  Grass,
+  BurnedGrass,
+  Forest,
+  BurnedForest,
+  Road,
+  BurnedRoad,
+  Bridge,
+  Water,
+  Fire,
+  Building,
+  BuildingL1,
+  BuildingL2,
+  BuildingL3,
+  BuildingL4,
+  BuildingL5,
+  BurnedBuilding,
+  BurnedBuildingL1,
+  BurnedBuildingL2,
+  BurnedBuildingL3,
+  BurnedBuildingL4,
+  BurnedBuildingL5
 }
 
 export type Index = string

@@ -7,7 +7,7 @@ describe('validator', function () {
   it('reject with default message', function () {
     try {
       validate('a', isNumber)
-      assert.fail('InvalidArgumentError should throw')
+      assert.fail('InvalidArgumentError should have been thrown')
     } catch (e) {
       assert.ok(e instanceof InvalidArgumentError)
       assert.strictEqual(e.message, 'Argument validation fails with isNumber')
@@ -16,7 +16,7 @@ describe('validator', function () {
   it('reject with custom message', function () {
     try {
       validate('a', isNumber, 'custom message')
-      assert.fail('InvalidArgumentError should throw')
+      assert.fail('InvalidArgumentError should have been thrown')
     } catch (e) {
       assert.ok(e instanceof InvalidArgumentError)
       assert.strictEqual(e.message, 'custom message')

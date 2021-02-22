@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
 import MapRenderer from './MapRenderer'
 import AsciiMapRenderer from './ascii/AsciiMapRenderer'
 
-export type Renderer = 'Ascii' // | 'ThreeJS'
+export type Renderer = 'Ascii' // | 'ThreeJS' | 'HTML'
 
 type AbstractMapRenderer = typeof MapRenderer
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ConcreteMapRenderer extends AbstractMapRenderer {
 }
 

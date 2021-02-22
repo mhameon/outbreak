@@ -10,12 +10,14 @@ describe('WorldMap class', function () {
 
   beforeEach(function () {
     map = new WorldMap({ width: 5, height: 5 })
-    map.add(Tile.Block, origin)
+    map.set([ Tile.Block ], origin)
   })
 
-  it('should return correct map size', function () {
-    assert.strictEqual(map.size.width, 5)
-    assert.strictEqual(map.size.height, 5)
+  describe('size', function() {
+    it('should return correct map size', function () {
+      assert.strictEqual(map.size.width, 5)
+      assert.strictEqual(map.size.height, 5)
+    })
   })
 
   describe('add(tile, at)', function () {
@@ -69,11 +71,13 @@ describe('WorldMap class', function () {
       assert.ok(map.has(Tile.Road, origin))
       assert.strictEqual(map.get(origin).size, 1)
 
-      // Todo add tests to handle all "incompatible" tiles
-      // this behaviours should be generalized in Worldmap
-      // map.set([ Tile.Fire, Tile.Water, Tile.Road ], origin)
-      // assert.ok(map.has(Tile.Road, origin))
-      // assert.strictEqual(map.get(origin).size, 1)
+      map.set([ Tile.Fire, Tile.Water, Tile.Road ], origin)
+      assert.ok(map.has(Tile.Road, origin))
+      assert.strictEqual(map.get(origin).size, 1)
+
+      map.set([ Tile.Burned, Tile.Water ], origin)
+      assert.ok(map.has(Tile.Walkable, origin))
+      assert.strictEqual(map.get(origin).size, 1)
     })
   })
 
@@ -157,10 +161,10 @@ describe('WorldMap class', function () {
     it('should throw with invalid surface', function () {
       try {
         map.extract({ x: 3, y: 3 }, { width: 2, height: 3 })
-        assert.fail('InvalidArgumentError should be thrown')
+        assert.fail('InvalidArgumentError should have been thrown')
       } catch (e) {
         assert.ok(e instanceof InvalidArgumentError)
-        assert.strictEqual(e.message, 'An odd surface is expected')
+        assert.strictEqual(e.message, 'Expected Surface dimensions must be odd')
       }
     })
     describe('a "sub" WorldMap', function () {

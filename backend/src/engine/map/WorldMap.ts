@@ -1,8 +1,9 @@
 import { Size, Coords, Tile, Index, Tileset, Around, Square } from '../types'
-import { OutOfMapError } from './WolrdMapErrors'
+import { OutOfMapError } from './WorldMapErrors'
 import { isCoordsArray, isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
+import { getSanitizedTileset } from '@engine/map/tilerules'
 
 /**
  * A 2D map describing the game board.
@@ -19,19 +20,6 @@ class WorldMap {
     this.size = size
     this.seeder = seeder
     this.name = 'Unknown map'
-  }
-
-  private static index (at: Coords): Index {
-    return `${at.x},${at.y}`
-  }
-
-  private static coords (index: Index): Coords {
-    const [ x, y ] = index.split(',')
-    return { x: Number(x), y: Number(y) }
-  }
-
-  contains (point: Coords): boolean {
-    return point.x >= 0 && point.x < this.size.width && point.y >= 0 && point.y < this.size.height
   }
 
   add (tile: Tile, at: Coords | Array<Coords>): void {
@@ -63,12 +51,12 @@ class WorldMap {
     }
   }
 
-  set (tile: Tile | Tile[], at: Coords | Array<Coords>): void {
+  set (tiles: Tile | Tile[], at: Coords | Array<Coords>): void {
     let point
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
       if (isCoordsArray(at)) {
-        this.set(tile, at)
+        this.set(tiles, at)
       }
     } else if (isCoords(at)) {
       point = at
@@ -76,14 +64,10 @@ class WorldMap {
       return
     }
 
+    const tileset = getSanitizedTileset(tiles, true)
     const index = WorldMap.index(point)
     this.tiles.delete(index)
-    const tileset = new Set(([] as Tile[]).concat(tile))
-    if (tileset.size >= 2 && tileset.has(Tile.Walkable) && tileset.has(Tile.Block)) {
-      tileset.delete(Tile.Walkable)
-      tileset.delete(Tile.Block)
-    }
-    if (tileset.size >= 1 && (tileset.size !== 1 || !tileset.has(Tile.Walkable))) {
+    if (tileset.size >= 1 && !(tileset.size === 1 && tileset.has(Tile.Walkable))) {
       this.tiles.set(index, tileset)
     }
   }
@@ -116,7 +100,7 @@ class WorldMap {
   extract (center: Coords, surface: Size): WorldMap {
     this.assertMapContains(center)
     if ((surface.width - 1) % 2 !== 0 || (surface.height - 1) % 2 !== 0) {
-      throw new InvalidArgumentError('An odd surface is expected')
+      throw new InvalidArgumentError('Expected Surface dimensions must be odd')
     }
 
     const offsetX = (surface.width - 1) / 2
@@ -161,10 +145,23 @@ class WorldMap {
     return !this.has(Tile.Block, at)
   }
 
+  contains (point: Coords): boolean {
+    return point.x >= 0 && point.x < this.size.width && point.y >= 0 && point.y < this.size.height
+  }
+
   private assertMapContains (at: Coords): void {
     if (!this.contains(at)) {
       throw new OutOfMapError(at, this.size)
     }
+  }
+
+  private static index (at: Coords): Index {
+    return `${at.x},${at.y}`
+  }
+
+  private static coords (index: Index): Coords {
+    const [ x, y ] = index.split(',')
+    return { x: Number(x), y: Number(y) }
   }
 }
 

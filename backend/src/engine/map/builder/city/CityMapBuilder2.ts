@@ -3,7 +3,7 @@ import MapBuilder from '@engine/map/builder/MapBuilder'
 import WorldMap from '@engine/map/WorldMap'
 import { Tile, TileLevel } from '@engine/types'
 import { line } from '@engine/math/geometry'
-import AsciiMapRenderer from '@engine/map/renderer/ascii/AsciiMapRenderer'
+import AsciiMapRenderer from '@engine/renderer/ascii/AsciiMapRenderer'
 
 const { normalize, cap } = matrix
 
