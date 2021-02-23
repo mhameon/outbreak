@@ -1,5 +1,5 @@
 import { Outbreak } from './Outbreak'
-import { CityMapBuilder2 } from '../map/builder/city/CityMapBuilder2'
+import { CityMapBuilder } from '../map/builder/city/CityMapBuilder'
 import { GameId, Size } from '../types'
 
 type Options = {
@@ -13,7 +13,7 @@ const defaultOptions: Options = {
 
 export class OutbreakFactory {
   static create (id: GameId, options: Options = defaultOptions): Outbreak {
-    const map = (new CityMapBuilder2(options.size)).generate(id)
+    const map = (new CityMapBuilder(options.size)).generate(id)
     return new Outbreak(id, map)
   }
 }

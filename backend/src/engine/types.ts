@@ -36,7 +36,10 @@ export enum Tile {
   /*** Properties (Sidekick tiles) ***/
   Walkable,
   Block,
+
   Burned,
+  Burning,
+
   Level1,
   Level2,
   Level3,
@@ -44,24 +47,25 @@ export enum Tile {
   Level5,
 
   /*** Cosmetic ***/
+  Grass,
   Forest,
   Road,
   Water,
   Building,
-
-  Fire,
 }
 
 export enum RenderTile {
   Grass,
+  BurningGrass,
   BurnedGrass,
   Forest,
+  BurningForest,
   BurnedForest,
   Road,
+  BurningRoad,
   BurnedRoad,
   Bridge,
   Water,
-  Fire,
   Building,
   BuildingL1,
   BuildingL2,
@@ -69,6 +73,11 @@ export enum RenderTile {
   BuildingL4,
   BuildingL5,
   BurnedBuilding,
+  BurningBuildingL1,
+  BurningBuildingL2,
+  BurningBuildingL3,
+  BurningBuildingL4,
+  BurningBuildingL5,
   BurnedBuildingL1,
   BurnedBuildingL2,
   BurnedBuildingL3,
@@ -78,6 +87,7 @@ export enum RenderTile {
 
 export type Index = string
 export type Tileset = Set<Tile>
+export type Tiles = Tile | Tile[]
 export type Square = { coords: Coords; tileset: Tileset }
 
 export type Around = Map<Direction, Tileset>

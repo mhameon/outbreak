@@ -1,4 +1,4 @@
-import { Size, Coords, Tile, Index, Tileset, Around, Square } from '../types'
+import { Size, Coords, Tile, Tiles, Index, Tileset, Around, Square } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoordsArray, isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
@@ -9,50 +9,48 @@ import { getSanitizedTileset } from '@engine/map/tilerules'
  * A 2D map describing the game board.
  */
 class WorldMap {
-  private static emptyTileset = new Set([ Tile.Walkable ])
-  public readonly size: Size
-  public readonly seeder?: Seeder
-  public readonly name: string
+  static readonly emptyTileset: Tileset = new Set<Tile>([ Tile.Grass ])
+  readonly size: Size
+  readonly seeder?: Seeder
+  readonly name: string
   private tiles: Map<Index, Tileset>
 
   constructor (size: Size, seeder?: Seeder) {
     this.tiles = new Map()
     this.size = size
     this.seeder = seeder
-    this.name = 'Unknown map'
+    this.name = 'Unnamed map'
   }
 
-  add (tile: Tile, at: Coords | Array<Coords>): void {
-    let point
+  add (tiles: Tiles | Tileset, at: Coords | Array<Coords>): void {
+    let point!: Coords
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
       if (isCoordsArray(at)) {
-        this.add(tile, at)
+        this.add(tiles, at)
       }
     } else if (isCoords(at)) {
       point = at
-    } else {
-      return
     }
 
     if (this.contains(point)) {
       const index = WorldMap.index(point)
-      if (this.tiles.has(index)) {
-        const tiles = (this.get(point) as Tileset)
-        if (tile === Tile.Walkable && tiles.has(Tile.Block)) {
-          tiles.delete(Tile.Block)
-          this.tiles.set(index, tiles)
-        } else {
-          this.tiles.set(index, tiles.add(tile))
+      const tileset = getSanitizedTileset(tiles)
+
+      const existing = this.tiles.get(index)
+      if (existing){
+        const toAdd = getSanitizedTileset([ ...existing, ...tileset ], true)
+        if (toAdd.size){
+          this.tiles.set(index, toAdd)
         }
       } else {
-        this.set(tile, point)
+        this.tiles.set(index, tileset)
       }
     }
   }
 
-  set (tiles: Tile | Tile[], at: Coords | Array<Coords>): void {
-    let point
+  set (tiles: Tiles | Tileset, at: Coords | Array<Coords>): void {
+    let point!: Coords
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
       if (isCoordsArray(at)) {
@@ -60,8 +58,6 @@ class WorldMap {
       }
     } else if (isCoords(at)) {
       point = at
-    } else {
-      return
     }
 
     const tileset = getSanitizedTileset(tiles, true)
@@ -133,11 +129,9 @@ class WorldMap {
     )
   }
 
-  has (tile: Tile | Tile[], at: Coords): boolean {
-    this.assertMapContains(at)
-    const search = ([] as Tile[]).concat(tile)
+  has (tiles: Tiles, at: Coords): boolean {
     const tileset = this.get(at)
-    return search.every(tile => tileset.has(tile))
+    return ([] as Tile[]).concat(tiles).every(tile => tileset.has(tile))
   }
 
   isWalkable (at: Coords): boolean {

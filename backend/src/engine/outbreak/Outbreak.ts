@@ -29,10 +29,10 @@ export class Outbreak {
   }
 
   render (): string {
-    return '' +
-      `Outbreak: ${this.id}  - ${this.createdAt.toISOString()}\n` +
-      `Turn    : ${this.turn}\n` +
-      `${Outbreak.renderer.render(this.map)}`
-
+    return ''
+      + `Outbreak: ${this.id}  - ${this.createdAt.toISOString()}\n`
+      + `Turn    : ${this.turn}\n`
+      + `${Outbreak.renderer.render(this.map)}`
+      + `\n${Outbreak.renderer.render(this.map.extract({ x: 2,y: 2 }, { width: 5, height: 5 }))}`
   }
 }
