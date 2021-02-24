@@ -6,9 +6,10 @@ const log = getLogger('CLI')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Command = (...args: any[]) => any
 
-interface CommandDescriptor {
-  execute: Command
+export interface CommandDescriptor {
+  name?: string
   description: string
+  execute: Command
 }
 
 export class CommandLineInterface {
@@ -29,8 +30,7 @@ export class CommandLineInterface {
               log.verbose('💻 "%s"', input)
               const command = this.registeredCommands.get(instruction) as CommandDescriptor
               await command.execute(...args)
-            }
-            else {
+            } else {
               log.warn('💻 "%s" command not found', instruction)
             }
           }
@@ -57,25 +57,27 @@ export class CommandLineInterface {
       this.cli.close()
     })
 
-    this.registerCommand('help', 'Show registered commands', () => {
+    this.registerCommand('help', 'Show registered commands', (prefix = '') => {
       const pad = 45
 
       console.log('')
       for (const [ name, command ] of this.registeredCommands.entries()) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const args: string[] = (command.execute as any).toString()
-          .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
-          .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
-          .split(/,/)
+        if (prefix === '' || name.startsWith(prefix)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const args: string[] = (command.execute as any).toString()
+            .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
+            .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
+            .split(/,/)
 
-        let displayArgs = ''
-        if (args.filter(i => i).length) {
-          displayArgs = `${args.map(arg => {
-            const [ parameter, optional ] = arg.split('=')
-            return optional ? `[${parameter}]` : `${parameter}`
-          }).join(' ')} `
+          let displayArgs = ''
+          if (args.filter(i => i).length) {
+            displayArgs = `${args.map(arg => {
+              const [ parameter, optional ] = arg.split('=')
+              return optional ? `[${parameter}]` : `${parameter}`
+            }).join(' ')} `
+          }
+          console.log(`   ${(name + ' ' + displayArgs).padEnd(pad, '·')} ${command.description}`)
         }
-        console.log(`   ${(name + ' ' + displayArgs).padEnd(pad, '·')} ${command.description}`)
       }
       console.log('')
     })

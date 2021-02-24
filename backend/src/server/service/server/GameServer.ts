@@ -29,7 +29,7 @@ export class GameServer {
   private readonly http: http.Server
   private readonly io: io.Server
 
-  private readonly game: GameManager
+  readonly game: GameManager
   private readonly rooms = new Set<string>()
   private readonly clients = new WeakMap<io.Socket, Player>()
 
@@ -67,7 +67,7 @@ export class GameServer {
 
       this.registerDisconnectionHandler(socket)
       this.registerErrorHandler(socket)
-      registerEventLogger(socket) //todo idea: is it possible to log response if callback?
+      registerEventLogger(socket)
 
       socket.on('game:join', (args: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
@@ -102,6 +102,7 @@ export class GameServer {
 
         this.leaveRoom(socket, LOBBY)
         this.joinRoom(socket, gameId)
+        this.game.get(gameId).joinPlayer({ id: 'player' })
 
         socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
         socket.emit('msg', `You joined the game, ${socket.id}`)
@@ -110,7 +111,11 @@ export class GameServer {
       })
 
       socket.on('game:leave', (args: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
-        this.leaveRoom(socket, args.gameId)
+        this.leaveRoom(socket, args.gameId, (wasLast) => {
+          if (wasLast) {
+            this.game.delete(args.gameId)
+          }
+        })
         this.joinRoom(socket, LOBBY)
         return ack({ ok: true })
       })
@@ -200,14 +205,21 @@ export class GameServer {
       // Todo Properly check if clients are authorize to connect (valid session cookie)
       // Todo Check authentication & get user information
       const authenticated = true
+
       if (!authenticated) {
         next(new ConnectionRefusedError('Unauthenticated user', log.error))
       }
 
       // Fixme Keep? Or move clients in each Outbreak via GameManager?
       this.clients.set(socket, {
-        socketId: socket.id,
-        connectedAt: new Date(),
+        user: {
+          id: +new Date(),
+          name: 'Harcoded name ' + Math.random(),
+        },
+        socket: {
+          id: socket.id,
+          connectedAt: new Date()
+        }
       })
 
       next()

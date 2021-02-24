@@ -5,6 +5,7 @@ import { Outbreak , OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
 
 import { getLogger } from '@shared/logger'
+import { EventEmitter } from 'events'
 
 const log = getLogger('GameManager')
 
@@ -12,10 +13,10 @@ type Game = {
   id: GameId
   name: string
   // players: any[]
-  createdAt: Date
+  turn:number
 }
 
-export class GameManager {
+export class GameManager extends EventEmitter{
   static GAME_ID_PREFIX = 'game:'
 
   private readonly games: Map<GameId, Outbreak> = new Map()
@@ -47,6 +48,7 @@ export class GameManager {
   delete (gameId: GameId): void {
     this.get(gameId)
     this.games.delete(gameId)
+    this.emit('game:deletion', gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 
@@ -57,7 +59,7 @@ export class GameManager {
         id: gameId,
         name: game.name,
         // players: game.players,
-        createdAt: game.createdAt,
+        turn: game.currentTurn,
       })
     })
     return list
