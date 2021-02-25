@@ -9,7 +9,7 @@ let currentGameId: GameId = ''
 export function registerGameCommands (cli: CommandLineInterface, game: GameManager): void {
   game.on('game:deletion', (gameId: GameId) => {
     if (currentGameId === gameId) {
-      console.log(`${gameId} deleted, leaving CLI interaction mode`)
+      console.log(`${gameId} deleted, automatically leave CLI interaction mode`)
       currentGameId = ''
     }
   })
@@ -32,7 +32,7 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
           return { ...game, ...{ turn: game.turn || 'Not started', CLI } }
         }))
       } else {
-        console.log('No game on progress ¯\\_(ツ)_/¯')
+        console.log('No game in progress ¯\\_(ツ)_/¯')
       }
       console.log('')
     })
