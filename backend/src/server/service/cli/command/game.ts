@@ -36,6 +36,12 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
       }
       console.log('')
     })
+    .registerCommand('game:create', 'Create a new game and go inside', () => {
+      console.log('')
+      const gameId = game.create()
+      cli.executeCommand('game:enter', gameId)
+      console.log('')
+    })
     .registerCommand('game:enter', 'Enter in CLI interaction mode with gameId', (gameId: GameId) => {
       console.log('')
       if (currentGameId === '') {
@@ -67,6 +73,14 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
         console.log(outbreak.render())
       }
       console.log('')
-    }
-    )
+    })
+    .registerCommand('game:turn', 'Resolve turn', () => {
+      console.log('')
+      const outbreak = getOutbreak()
+      if (outbreak) {
+        outbreak.resolveTurn()
+        cli.executeCommand('game:show')
+      }
+      console.log('')
+    })
 }

@@ -1,5 +1,6 @@
 import { getLogger } from '@shared/logger/logger'
-import * as readline from 'readline'
+import readline, { CompleterResult } from 'readline'
+import { InvalidArgumentError } from '@shared/Errors'
 
 const log = getLogger('CLI')
 
@@ -15,11 +16,17 @@ export interface CommandDescriptor {
 export class CommandLineInterface {
   private readonly registeredCommands = new Map<string, CommandDescriptor>()
   private readonly cli: readline.Interface
+  private executeNextCommandSilently = false
 
   constructor () {
-    this.cli = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '' })
-    this.cli.prompt()
-    this.cli
+    this.cli = readline
+      .createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: true,
+        completer: this.autocomplete.bind(this),
+        prompt: ''
+      })
       .on('line', async (input: string) => {
         input = input.trim()
         const args: string[] = input.split(' ')
@@ -27,7 +34,10 @@ export class CommandLineInterface {
           const instruction = (args.shift() as string).toLowerCase()
           if (instruction) {
             if (this.registeredCommands.has(instruction)) {
-              log.verbose('💻 "%s"', input)
+              if (!this.executeNextCommandSilently) {
+                log.verbose('💻 "%s"', input)
+                this.executeNextCommandSilently = false
+              }
               const command = this.registeredCommands.get(instruction) as CommandDescriptor
               await command.execute(...args)
             } else {
@@ -35,12 +45,29 @@ export class CommandLineInterface {
             }
           }
         }
+        // readline.cursorTo(process.stdout, 0)
+        // this.cli.prompt(true)
       })
       .on('close', () => {
         process.kill(process.pid, 'SIGINT')
       })
 
     this.registerDefaultCommands()
+  }
+
+  executeCommand (command: string, ...parameters: string[]): void {
+    if (this.registeredCommands.has(command)) {
+      this.executeNextCommandSilently = true
+      this.cli.write(`${command}${parameters.length ? ' ' + parameters.join(' ') : ''}\r`)
+    }
+  }
+
+  createAlias (alias: string, command: string): CommandLineInterface {
+    const original = this.registeredCommands.get(command)
+    if (original) {
+      return this.registerCommand(alias, `Alias for ${command}`, (...args) => original.execute(...args))
+    }
+    throw new InvalidArgumentError(`Can't create alias for unknown command "${command}"`)
   }
 
   registerCommand (name: string, description: string, command: Command): CommandLineInterface {
@@ -53,33 +80,40 @@ export class CommandLineInterface {
   }
 
   private registerDefaultCommands (): void {
-    this.registerCommand('exit', 'Send SIGINT signal', () => {
-      this.cli.close()
-    })
+    this
+      .registerCommand('exit', 'Send SIGINT signal', () => {
+        this.cli.close()
+      })
+      .registerCommand('help', 'Show registered commands', (prefix = '') => {
+        console.log('')
+        for (const [ name, command ] of this.registeredCommands.entries()) {
+          if (prefix === '' || name.startsWith(prefix)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const args: string[] = (command.execute as any).toString()
+              .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
+              .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
+              .split(/,/)
 
-    this.registerCommand('help', 'Show registered commands', (prefix = '') => {
-      const pad = 45
-
-      console.log('')
-      for (const [ name, command ] of this.registeredCommands.entries()) {
-        if (prefix === '' || name.startsWith(prefix)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const args: string[] = (command.execute as any).toString()
-            .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
-            .match(/^\s*[^(]*\(\s*([^)]*)\)/m)[1]
-            .split(/,/)
-
-          let displayArgs = ''
-          if (args.filter(i => i).length) {
-            displayArgs = `${args.map(arg => {
-              const [ parameter, optional ] = arg.split('=')
-              return optional ? `[${parameter}]` : `${parameter}`
-            }).join(' ')} `
+            let displayArgs = ''
+            if (args.filter(i => i).length) {
+              displayArgs = `${args.map(arg => {
+                const [ parameter, optional ] = arg.split('=')
+                return optional ? `[${parameter}]` : `${parameter}`
+              }).join(' ')} `
+            }
+            console.log(`   ${(name + ' ' + displayArgs).padEnd(55, '·')} ${command.description}`)
           }
-          console.log(`   ${(name + ' ' + displayArgs).padEnd(pad, '·')} ${command.description}`)
         }
-      }
-      console.log('')
-    })
+        console.log('')
+      })
+      .createAlias('?', 'help')
+  }
+
+  private autocomplete (input: string): CompleterResult {
+    const registeredCommandNames = [ ...this.registeredCommands.keys() ]
+    const hits = registeredCommandNames.filter((command) => command.startsWith(input))
+
+    // Show all availableCommands if none found
+    return [ hits.length ? hits : registeredCommandNames, input ]
   }
 }
