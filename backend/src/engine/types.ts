@@ -1,3 +1,5 @@
+import { Values } from '@shared/types'
+
 export type Coords = {
   x: number
   y: number
@@ -14,16 +16,17 @@ export type Coords = {
  *  SW    S   SE
  * ```
  */
-export const enum Direction {
-  NorthWest,
-  North,
-  NorthEast,
-  West,
-  East,
-  SouthWest,
-  South,
-  SouthEast
-}
+// https://fettblog.eu/tidy-typescript-avoid-enums/
+export const Direction = {
+  NorthWest: 0,
+  North: 1,
+  NorthEast: 2,
+  West: 3,
+  East: 4,
+  SouthWest: 5,
+  South: 6,
+  SouthEast: 7
+} as const
 
 export type Size = {
   width: number
@@ -90,7 +93,7 @@ export type Tileset = Set<Tile>
 export type Tiles = Tile | Tile[]
 export type Square = { coords: Coords; tileset: Tileset }
 
-export type Around = Map<Direction, Tileset>
+export type Around = Map<Values<typeof Direction>, Tileset>
 
 export type GameId = string
 

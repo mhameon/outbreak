@@ -1,9 +1,10 @@
-import { Size, Coords, Tile, Tiles, Index, Tileset, Around, Square } from '../types'
+import { Size, Coords, Tile, Tiles, Index, Tileset, Around, Square, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoordsArray, isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
+import { Values } from '@shared/types'
 
 /**
  * A 2D map describing the game board.
@@ -38,9 +39,9 @@ class WorldMap {
       const tileset = getSanitizedTileset(tiles)
 
       const existing = this.tiles.get(index)
-      if (existing){
+      if (existing) {
         const toAdd = getSanitizedTileset([ ...existing, ...tileset ], true)
-        if (toAdd.size){
+        if (toAdd.size) {
           this.tiles.set(index, toAdd)
         }
       } else {
@@ -82,7 +83,7 @@ class WorldMap {
       for (let x = from.x; x <= to.x; x++) {
         if (x !== at.x || y !== at.y) {
           try {
-            around.set(direction, this.get({ x, y }))
+            around.set(direction as Values<typeof Direction>, this.get({ x, y }))
           } catch (e) {
             // Do nothing
           }
