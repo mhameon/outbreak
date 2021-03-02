@@ -2,11 +2,14 @@ import { Coords } from '@engine/types'
 
 const PI = 3.14159265
 
+/**
+ * Clockwise, angle in degrees, O° point to north
+ */
 function calculateDestination (origin: Coords, angleInDegree: number, length: number): Coords {
-  const radian = angleInDegree * PI / 180
+  const radian = PI / 2 - ((angleInDegree * PI / 180) + 2 * PI)
   return {
-    x: Math.floor(origin.x + (length * Math.cos(radian))),
-    y: Math.floor(origin.y + (length * Math.sin(radian))),
+    x: Math.round(length * Math.cos(radian)) + origin.x,
+    y: Math.round(-length * Math.sin(radian)) + origin.y,
   }
 }
 
