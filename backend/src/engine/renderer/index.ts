@@ -1,14 +1,10 @@
 import MapRenderer from './MapRenderer'
 import AsciiMapRenderer from './ascii/AsciiMapRenderer'
+import WorldMap from '@engine/map/WorldMap'
 
 export type Renderer = 'Ascii' // | 'ThreeJS' | 'HTML'
 
-type AbstractMapRenderer = typeof MapRenderer
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ConcreteMapRenderer extends AbstractMapRenderer {
-
-}
-
+type ConcreteMapRenderer = new (map?: WorldMap) => MapRenderer
 type AvailableRenderers = Record<Renderer, ConcreteMapRenderer>
 
 export { MapRenderer }
