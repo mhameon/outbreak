@@ -16,6 +16,12 @@ type Game = {
   turn:number
 }
 
+/**
+ * Handle & Manage games (Outbreak)
+ *
+ * emit events
+ * - `game:deletion`, (gameId: GameId)
+ */
 export class GameManager extends EventEmitter{
   static GAME_ID_PREFIX = 'game:'
 

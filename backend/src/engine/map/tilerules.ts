@@ -50,7 +50,8 @@ export const tilerules: Tilerules = {
   sidekicks: [
     Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5,
     Tile.Burning,
-    Tile.Burned
+    Tile.Burned,
+    //Tile.Block, Tile.Walkable
   ],
   rendering: [
     // Must be declared descending
@@ -59,6 +60,11 @@ export const tilerules: Tilerules = {
     { and: [ Tile.Burning, Tile.Building, Tile.Level3 ], gives: RenderTile.BurningBuildingL3 },
     { and: [ Tile.Burning, Tile.Building, Tile.Level4 ], gives: RenderTile.BurningBuildingL4 },
     { and: [ Tile.Burning, Tile.Building, Tile.Level5 ], gives: RenderTile.BurningBuildingL5 },
+    { and: [ Tile.Burned, Tile.Building, Tile.Level1 ], gives: RenderTile.BurnedBuildingL1 },
+    { and: [ Tile.Burned, Tile.Building, Tile.Level2 ], gives: RenderTile.BurnedBuildingL2 },
+    { and: [ Tile.Burned, Tile.Building, Tile.Level3 ], gives: RenderTile.BurnedBuildingL3 },
+    { and: [ Tile.Burned, Tile.Building, Tile.Level4 ], gives: RenderTile.BurnedBuildingL4 },
+    { and: [ Tile.Burned, Tile.Building, Tile.Level5 ], gives: RenderTile.BurnedBuildingL5 },
     { and: [ Tile.Water, Tile.Road ], gives: RenderTile.Bridge },
     { and: [ Tile.Building, Tile.Level1 ], gives: RenderTile.BuildingL1 },
     { and: [ Tile.Building, Tile.Level2 ], gives: RenderTile.BuildingL2 },
@@ -79,13 +85,8 @@ export const tilerules: Tilerules = {
  * Returns a sanitized Tileset by removing mutually exclusives tiles.
  * When `removeOrphanSidekickTiles` is true, the function sanitize lone sideckick tiles too.
  */
-export function getSanitizedTileset (tiles: Tiles|Tileset, removeOrphanSidekickTiles = false): Tileset {
-  let tileset: Tileset
-  if ( tiles instanceof Set){
-    tileset = tiles
-  } else {
-    tileset = new Set(([] as Tile[]).concat(tiles))
-  }
+export function getSanitizedTileset (tiles: Tiles | Tileset, removeOrphanSidekickTiles = false): Tileset {
+  const tileset: Tileset = new Set(tiles instanceof Set ? tiles : ([] as Tile[]).concat(tiles))
   tilerules.exclusions.forEach(excluded => {
     if (excluded.every(tile => tileset.has(tile))) {
       excluded.forEach(tile => tileset.delete(tile))
@@ -123,7 +124,7 @@ export function getRenderTile (tiles: Tiles): RenderTile {
     // Don't know how to type "enum keys", `any` does the trick...
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tileName: any = Tile[tilesArray[0]]
-    if (RenderTile[tileName]!== undefined) {
+    if (RenderTile[tileName] !== undefined) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return RenderTile[tileName] as any
     }

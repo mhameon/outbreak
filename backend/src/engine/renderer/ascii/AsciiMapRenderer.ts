@@ -7,7 +7,7 @@ import WorldMap from '@engine/map/WorldMap'
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')
 TileAtlas[RenderTile.BurningGrass] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
-TileAtlas[RenderTile.BurnedGrass] = chalk.bgHex('#401d00').hex('#000000')('░')
+TileAtlas[RenderTile.BurnedGrass] = chalk.hex('#401d00').bgHex('#000000')('░')
 TileAtlas[RenderTile.Forest] = chalk.bgHex('#23301A').hex('#465C38')('▒')
 TileAtlas[RenderTile.BurningForest] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
 TileAtlas[RenderTile.BurnedForest] = chalk.bgHex('#000000').hex('#23301A')('░')
@@ -28,11 +28,11 @@ TileAtlas[RenderTile.BurningBuildingL2] = chalk.bgHex('#ef390b').hex('#f8ea00')(
 TileAtlas[RenderTile.BurningBuildingL3] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
 TileAtlas[RenderTile.BurningBuildingL4] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
 TileAtlas[RenderTile.BurningBuildingL5] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
-// TileAtlas[RenderTile.BurnedBuildingL1,
-// TileAtlas[RenderTile.BurnedBuildingL2,
-// TileAtlas[RenderTile.BurnedBuildingL3,
-// TileAtlas[RenderTile.BurnedBuildingL4,
-// TileAtlas[RenderTile.BurnedBuildingL5
+TileAtlas[RenderTile.BurnedBuildingL1] = chalk.hex('#000000').bgHex('#888888')('▒')
+TileAtlas[RenderTile.BurnedBuildingL2] = chalk.hex('#000000').bgHex('#999999')('▒')
+TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('▒')
+TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
+TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
 
 class AsciiMapRenderer extends MapRenderer {
   protected renderer (): string {

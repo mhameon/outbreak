@@ -1,8 +1,9 @@
 import WorldMap from '@engine/map/WorldMap'
-import { Tile, Direction, Tileset } from '@engine/types'
+import { Tile, Direction, Tileset, Coords } from '@engine/types'
 
 import * as assert from 'assert'
 import { InvalidArgumentError } from '@shared/Errors'
+import { stringifyTileset } from '@engine/map/WorldMapErrors'
 
 describe('WorldMap class', function () {
   let map: WorldMap
@@ -69,6 +70,7 @@ describe('WorldMap class', function () {
     })
     it('should get default tile when set with nothing', function () {
       map.set([], origin)
+      assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
       assert.ok(map.has(Tile.Grass, origin))
       assert.strictEqual(map.get(origin).size, 1)
     })
@@ -94,10 +96,46 @@ describe('WorldMap class', function () {
     })
   })
 
-  it('get(at)', function () {
-    const tile = map.get(origin)
-    assert.ok(tile.has(Tile.Block))
-    assert.strictEqual(tile.has(Tile.Walkable), false)
+  describe('remove(tile, at)', function () {
+    let at:Coords
+    beforeEach(function() {
+      at = { x: 4, y: 0 }
+    })
+    it('should remove standalone tile', function () {
+      map.set(Tile.Water, at)
+      assert.ok(map.has(Tile.Water, at))
+
+      assert.strictEqual(map.has(Tile.Forest, at), false)
+      map.remove(Tile.Forest, at)
+      assert.strictEqual(map.has(Tile.Forest, at), false)
+
+      map.remove(Tile.Water, at)
+      assert.strictEqual(map.has(Tile.Water, at), false)
+    })
+    it('should remove sidekick', function() {
+      map.add(Tile.Burning, at)
+      console.log(map.get(at))
+      assert.ok(map.has(Tile.Burning , at))
+      // Fixme?
+      // assert.ok(map.has([ Tile.Burning, WorldMap.defaultTile ], at))
+    })
+  })
+
+  describe('get(at)', function () {
+    it('should returns correct tile', function() {
+      const tile = map.get(origin)
+      assert.ok(tile.has(Tile.Block))
+      assert.strictEqual(tile.has(Tile.Walkable), false)
+    })
+    it('should returns immutable default tile', function() {
+      assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
+
+      const at = { x: 1, y: 0 }
+      const tile = map.get(at) // Nothing defined here
+      assert.ok(tile.has(Tile.Grass))
+      tile.delete(Tile.Grass)
+      assert.ok(map.get(at).has(Tile.Grass))
+    })
   })
 
   it('getAround(at)', function () {
@@ -108,7 +146,7 @@ describe('WorldMap class', function () {
     assert.strictEqual(around.get(Direction.NorthEast), undefined)
 
     assert.ok((around.get(Direction.West) as Tileset).has(Tile.Block))
-    assert.ok((around.get(Direction.East) as Tileset).has(Tile.Grass))
+    assert.ok((around.get(Direction.East) as Tileset).has(Tile.Grass), stringifyTileset(around.get(Direction.East) as Tileset))
 
     assert.ok((around.get(Direction.SouthWest) as Tileset).has(Tile.Grass))
     assert.ok((around.get(Direction.South) as Tileset).has(Tile.Grass))
@@ -165,7 +203,7 @@ describe('WorldMap class', function () {
     map.add(Tile.Block, { x: 4, y: 4 })
     map.each(square => {
       iteration++
-      if ((square.coords.x === 0 && square.coords.y === 0) || (square.coords.x === 4 && square.coords.y === 4)) {
+      if ((square.at.x === 0 && square.at.y === 0) || (square.at.x === 4 && square.at.y === 4)) {
         assert.ok(square.tileset.has(Tile.Block))
       }
     })

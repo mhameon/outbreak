@@ -5,18 +5,22 @@ import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
 import { Values } from '@shared/types'
+import { EventEmitter } from 'events'
 
 /**
  * A 2D map describing the game board.
  */
-class WorldMap {
-  static readonly emptyTileset: Tileset = new Set<Tile>([ Tile.Grass ])
+class WorldMap extends EventEmitter {
+  static readonly defaultTile: Tile = Tile.Grass
+  static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
   readonly size: Size
   readonly seeder?: Seeder
   readonly name: string
+
   private tiles: Map<Index, Tileset>
 
   constructor (size: Size, seeder?: Seeder) {
+    super()
     this.tiles = new Map()
     this.size = size
     this.seeder = seeder
@@ -64,14 +68,48 @@ class WorldMap {
     const tileset = getSanitizedTileset(tiles, true)
     const index = WorldMap.index(point)
     this.tiles.delete(index)
-    if (tileset.size >= 1 && !(tileset.size === 1 && tileset.has(Tile.Walkable))) {
+    if (
+      tileset.size >= 1
+      && !(tileset.size === 1 && (tileset.has(Tile.Walkable) /*|| tileset.has(WorldMap.defaultTile)*/))
+    ) {
       this.tiles.set(index, tileset)
+    }
+  }
+
+  remove (tile: Tile, at: Coords): void {
+    const existing = this.get(at)
+    if (existing.has(tile)) {
+      existing.delete(tile)
+      this.set(existing, at)
+    }
+  }
+
+  replace (wanted: Tile, substitute: Tile, at: Coords | Array<Coords>): void {
+    let point!: Coords
+    if (isCoordsArray(at)) {
+      point = at.pop() as Coords
+      if (isCoordsArray(at)) {
+        this.replace(wanted, substitute, at)
+      }
+    } else if (isCoords(at)) {
+      point = at
+    }
+
+    const tile = this.get(point)
+    if (tile.has(wanted)) {
+      tile.delete(wanted)
+      this.set([
+        ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
+        substitute
+      ], point)
     }
   }
 
   get (at: Coords): Tileset {
     this.assertMapContains(at)
-    return this.tiles.get(WorldMap.index(at)) ?? WorldMap.emptyTileset
+    const tiles = this.tiles.get(WorldMap.index(at))
+    // Returns new Set to avoid `this.tiles` manipulation outside WorldMap
+    return new Set(tiles ? tiles : WorldMap.emptyTileset)
   }
 
   getAround (at: Coords): Around {
@@ -126,7 +164,7 @@ class WorldMap {
 
   each (callback: (square: Square) => void): void {
     this.tiles.forEach(
-      (tileset, index) => callback({ coords: WorldMap.coords(index), tileset }),
+      (tileset, index) => callback({ at: WorldMap.coords(index), tileset }),
     )
   }
 

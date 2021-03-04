@@ -10,5 +10,5 @@ export const random = {
   choose: (...values: any[]): any => values[random.range(0, values.length - 1)],
 
   /** Has a `percent` in 100 chance of returning `true` */
-  chance: (percent: number): boolean => Math.random() > percent / 100,
+  chance: (percent: number): boolean => Math.round(Math.random() * 100) / 100 <= percent / 100,
 } as const

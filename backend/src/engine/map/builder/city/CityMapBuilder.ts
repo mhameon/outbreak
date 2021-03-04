@@ -48,6 +48,8 @@ export class CityMapBuilder extends MapBuilder {
     }, world)
 
     this.map.add(Tile.Burning, line({ x: 0,y: 0 }, { x: 40,y: 25 }))
+    // this.map.add(Tile.Burning, { x: 0,y: 0 })
+    // this.map.set(Tile.Walkable, [{ x: 1,y: 0 },{ x: 2,y: 0 }])
 
     // Idea: Use biggest population center as outbreak start location
     // const populationDensity = matrix.create(this.map.size, 0)

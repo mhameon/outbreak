@@ -23,7 +23,6 @@ export class CommandLineInterface {
       .createInterface({
         input: process.stdin,
         output: process.stdout,
-        terminal: true,
         completer: this.autocomplete.bind(this),
         prompt: ''
       })
@@ -45,7 +44,7 @@ export class CommandLineInterface {
             }
           }
         }
-        // readline.cursorTo(process.stdout, 0)
+        // readline.cursorTo(process.stdout, 0, process.stdout.rows - 1)
         // this.cli.prompt(true)
       })
       .on('close', () => {

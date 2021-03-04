@@ -91,7 +91,7 @@ export enum RenderTile {
 export type Index = string
 export type Tileset = Set<Tile>
 export type Tiles = Tile | Tile[]
-export type Square = { coords: Coords; tileset: Tileset }
+export type Square = { at: Coords; tileset: Tileset }
 
 export type Around = Map<Values<typeof Direction>, Tileset>
 
