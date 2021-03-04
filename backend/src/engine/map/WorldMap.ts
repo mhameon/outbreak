@@ -6,6 +6,7 @@ import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
 import { Values } from '@shared/types'
 import { EventEmitter } from 'events'
+import { toTiles } from '@engine/map/helpers'
 
 /**
  * A 2D map describing the game board.
@@ -170,7 +171,7 @@ class WorldMap extends EventEmitter {
 
   has (tiles: Tiles, at: Coords): boolean {
     const tileset = this.get(at)
-    return ([] as Tile[]).concat(tiles).every(tile => tileset.has(tile))
+    return toTiles(tiles).every(tile => tileset.has(tile))
   }
 
   isWalkable (at: Coords): boolean {

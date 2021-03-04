@@ -1,5 +1,6 @@
 import { Tile, Tiles, RenderTile, Tileset } from '@engine/types'
 import { UnknownRenderTile } from '@engine/map/WorldMapErrors'
+import { toTiles, toTileset } from '@engine/map/helpers'
 
 /**
  * Tiles Rules
@@ -86,7 +87,7 @@ export const tilerules: Tilerules = {
  * When `removeOrphanSidekickTiles` is true, the function sanitize lone sideckick tiles too.
  */
 export function getSanitizedTileset (tiles: Tiles | Tileset, removeOrphanSidekickTiles = false): Tileset {
-  const tileset: Tileset = new Set(tiles instanceof Set ? tiles : ([] as Tile[]).concat(tiles))
+  const tileset = toTileset(tiles)
   tilerules.exclusions.forEach(excluded => {
     if (excluded.every(tile => tileset.has(tile))) {
       excluded.forEach(tile => tileset.delete(tile))
@@ -115,7 +116,7 @@ export function getSanitizedTileset (tiles: Tiles | Tileset, removeOrphanSidekic
  * @throws UnknownRenderTile when no `RenderTile` is found
  */
 export function getRenderTile (tiles: Tiles): RenderTile {
-  const tilesArray = ([] as Tile[]).concat(tiles)
+  const tilesArray = toTiles(tiles)
   const found = tilerules.rendering.find(({ and }) => and.every(tile => tilesArray.includes(tile)))
   if (found) {
     return found.gives
