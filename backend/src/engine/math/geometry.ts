@@ -6,10 +6,10 @@ const PI = 3.14159265
  * Clockwise, angle in degrees, O° point to north
  */
 function calculateDestination (origin: Coords, angleInDegree: number, length: number): Coords {
-  const radian = PI / 2 - ((angleInDegree * PI / 180) + 2 * PI)
+  const radian = PI / 2 - (angleInDegree * PI / 180)
   return {
-    x: Math.round(length * Math.cos(radian)) + origin.x,
-    y: Math.round(-length * Math.sin(radian)) + origin.y,
+    x: origin.x + Math.round(length * Math.cos(radian)),
+    y: origin.y - Math.round(length * Math.sin(radian)),
   }
 }
 

@@ -20,7 +20,7 @@ export class Outbreak {
     this.map = map
     this.createdAt = new Date()
 
-    this.wind = { angle: 90 }
+    this.wind = { angle: 110 }
   }
 
   get name (): string {
@@ -65,9 +65,13 @@ export class Outbreak {
   }
 
   render (): string {
+    const windRose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
+    let direction = Math.floor(this.wind.angle / 45) + (this.wind.angle % 45 >= 22.5 ? 1 : 0)
+    direction = direction >= 8 ? 0 : direction
+
     return ''
       + `Outbreak: ${this.id} (${this.createdAt.toISOString()})\n`
-      + `Wind    : ${this.wind.angle}°\n`
+      + `Wind    : ${this.wind.angle}° ${windRose[direction]}\n`
       + `Turn    : ${this.turn || 'Not started'}\n`
       + `${Outbreak.renderer.render(this.map)}`
     // + `\n${Outbreak.renderer.render(this.map.extract({ x: 2, y: 2 }, { width: 5, height: 5 }))}`
