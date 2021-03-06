@@ -6,7 +6,8 @@ import { GameManager } from '@engine/game/GameManager'
 export type Plugin<T> = ((server: GameServer) => Void<T>) | Void<T>
 
 let server: GameServer
-export function initializeGameServer (): GameServer {
+
+export function createGameServer (): GameServer {
   if (server) {
     return server
   }

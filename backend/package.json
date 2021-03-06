@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Zombies experiments",
   "author": "Matt",
-  "main": "src/index.ts",
+  "main": "build/src/index.js",
   "scripts": {
     "start": "node --enable-source-maps build/src",
     "exp": "node --enable-source-maps build/src/engine/experiment.js",
@@ -24,12 +24,12 @@
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-typescript": "^0.14.0",
     "eslint-plugin-typescript-sort-keys": "^1.5.0",
     "mocha": "^8.3.0",
     "nyc": "^15.1.0",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.3"
   },
   "dependencies": {
     "chalk": "^4.1.0",

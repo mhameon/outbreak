@@ -26,16 +26,26 @@ describe('WorldMap class', function () {
       assert.ok(map.has(Tile.Block, origin))
     })
     it('should not add tiles twice', function () {
-      map.add(Tile.Block, origin)
-      map.add(Tile.Block, origin)
-      map.add(Tile.Water, origin)
-      map.add(Tile.Water, origin)
+      assert.strictEqual(map.add(Tile.Block, origin), 0)
+      assert.strictEqual(map.add(Tile.Block, origin), 0)
+      assert.strictEqual(map.add(Tile.Water, origin), 1)
+      assert.strictEqual(map.add(Tile.Water, origin), 0)
       assert.strictEqual(map.get(origin).size, 2)
+    })
+    it('should not possible to burn water', function() {
+      const at = { x: 1, y: 1 }
+      map.set(Tile.Water, at)
+      assert.ok(map.has(Tile.Water, at))
+      assert.strictEqual(map.get(at).size, 1)
+
+      assert.strictEqual(map.add(Tile.Burning, at), 0)
+      assert.ok(map.has(Tile.Water, at))
+      assert.strictEqual(map.get(at).size, 1)
     })
   })
   describe('add(tile, at[])', function () {
     it('should add a tile at multiple coords', function () {
-      map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+      assert.strictEqual(map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }]), 3)
       assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
       assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
       assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
@@ -97,8 +107,8 @@ describe('WorldMap class', function () {
   })
 
   describe('remove(tile, at)', function () {
-    let at:Coords
-    beforeEach(function() {
+    let at: Coords
+    beforeEach(function () {
       at = { x: 4, y: 0 }
     })
     it('should remove standalone tile', function () {
@@ -112,22 +122,22 @@ describe('WorldMap class', function () {
       map.remove(Tile.Water, at)
       assert.strictEqual(map.has(Tile.Water, at), false)
     })
-    it('should remove sidekick', function() {
+    it('should remove sidekick', function () {
       map.add(Tile.Burning, at)
       console.log(map.get(at))
-      assert.ok(map.has(Tile.Burning , at))
+      assert.ok(map.has(Tile.Burning, at))
       // Fixme?
       // assert.ok(map.has([ Tile.Burning, WorldMap.defaultTile ], at))
     })
   })
 
   describe('get(at)', function () {
-    it('should returns correct tile', function() {
+    it('should returns correct tile', function () {
       const tile = map.get(origin)
       assert.ok(tile.has(Tile.Block))
       assert.strictEqual(tile.has(Tile.Walkable), false)
     })
-    it('should returns immutable default tile', function() {
+    it('should returns immutable default tile', function () {
       assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
 
       const at = { x: 1, y: 0 }

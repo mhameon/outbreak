@@ -1,14 +1,17 @@
-import { Seed, Size } from '../../types'
+import { Seed, Size } from '@engine/types'
 import WorldMap from '../WorldMap'
+import { getLogger } from '@shared/logger'
 
 export type Seeder = { builder: string; seed: Seed }
+
+const log = getLogger('MapBuilder')
 
 abstract class MapBuilder {
   protected map!: WorldMap
   protected seed: Seed = -1
-  protected size:Size
+  protected size: Size
 
-  constructor (size:Size) {
+  constructor (size: Size) {
     this.size = size
   }
 
@@ -18,10 +21,15 @@ abstract class MapBuilder {
 
   generate (seed: Seed): WorldMap {
     this.seed = seed
+    const seeder = this.getSeeder()
 
-    this.map = new WorldMap(this.size, this.getSeeder())
+    this.map = new WorldMap(this.size, seeder)
 
-    return this.build()
+    log.profile('generate')
+    const world = this.build()
+    log.profile('generate', { message: 'Generating...', level: 'debug', seed: seeder.seed, builder: seeder.builder })
+
+    return world
   }
 
   protected abstract build (): WorldMap

@@ -3,13 +3,15 @@ import { Coords } from '@engine/types'
 const PI = 3.14159265
 
 /**
- * Clockwise, angle in degrees, O° point to north
+ * @param origin Origin Coords
+ * @param angle Angle in degrees, O° point to north, clockwise
+ * @param distance Distance (in tiles) from origin
  */
-function calculateDestination (origin: Coords, angleInDegree: number, length: number): Coords {
-  const radian = PI / 2 - (angleInDegree * PI / 180)
+function calculateDestination (origin: Coords, angle: number, distance = 1): Coords {
+  const radian = PI / 2 - (angle * PI / 180)
   return {
-    x: origin.x + Math.round(length * Math.cos(radian)),
-    y: origin.y - Math.round(length * Math.sin(radian)),
+    x: origin.x + Math.round(distance * Math.cos(radian)),
+    y: origin.y - Math.round(distance * Math.sin(radian)),
   }
 }
 

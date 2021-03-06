@@ -1,10 +1,10 @@
 // Todo find lib to replace @module/xxxx by real path
 import 'module-alias/register'
 import config from 'config'
-import { initializeGameServer, serverCLI } from '@server/service'
+import { createGameServer, serverCLI } from '@server/service'
 
 const { port, cli } = config.server
 
-initializeGameServer()
+createGameServer()
   .registerPlugin(serverCLI(cli.enabled))
   .listen(port)

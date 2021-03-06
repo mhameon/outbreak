@@ -24,8 +24,8 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
 
   cli
     .registerCommand('game:list', 'List in progress games', () => {
-      const games = game.list()
       console.log('')
+      const games = game.list()
       if (games.length) {
         console.table(games.map(game => {
           const CLI = game.id === currentGameId ? '⬅️' : ''
@@ -34,16 +34,14 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
       } else {
         console.log('No game in progress ¯\\_(ツ)_/¯')
       }
-      console.log('')
     })
     .registerCommand('game:create', 'Create a new game and go inside', () => {
       console.log('')
       const gameId = game.create()
       cli.executeCommand('game:enter', gameId)
-      console.log('')
+      cli.executeCommand('game:show')
     })
     .registerCommand('game:enter', 'Enter in CLI interaction mode with gameId', (gameId: GameId) => {
-      console.log('')
       if (currentGameId === '') {
         if (game.has(gameId)) {
           currentGameId = gameId
@@ -54,17 +52,14 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
       } else {
         console.log(`Already in CLI interaction mode with "${currentGameId}"${currentGameId !== gameId ? ', please "game:quit" first' : ''}`)
       }
-      console.log('')
     })
     .registerCommand('game:quit', 'Leave CLI interaction mode', () => {
-      console.log('')
       if (currentGameId !== '') {
         console.log(`Successfully leave the CLI interaction mode with "${currentGameId}"`)
         currentGameId = ''
       } else {
         console.log('Nothing happens, you\'re not in CLI interaction mode')
       }
-      console.log('')
     })
     .registerCommand('game:show', 'Display map', () => {
       console.log('')
@@ -72,7 +67,6 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
       if (outbreak) {
         console.log(outbreak.render())
       }
-      console.log('')
     })
     .registerCommand('game:turn', 'Resolve turn', () => {
       console.log('')
@@ -81,6 +75,5 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
         outbreak.resolveTurn()
         cli.executeCommand('game:show')
       }
-      console.log('')
     })
 }

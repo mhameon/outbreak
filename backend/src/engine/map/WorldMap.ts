@@ -28,12 +28,13 @@ class WorldMap extends EventEmitter {
     this.name = 'Unnamed map'
   }
 
-  add (tiles: Tiles | Tileset, at: Coords | Array<Coords>): void {
+  add (tiles: Tiles | Tileset, at: Coords | Array<Coords>): number {
+    let added = 0
     let point!: Coords
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
       if (isCoordsArray(at)) {
-        this.add(tiles, at)
+        added += this.add(tiles, at)
       }
     } else if (isCoords(at)) {
       point = at
@@ -42,17 +43,19 @@ class WorldMap extends EventEmitter {
     if (this.contains(point)) {
       const index = WorldMap.index(point)
       const tileset = getSanitizedTileset(tiles)
-
       const existing = this.tiles.get(index)
       if (existing) {
         const toAdd = getSanitizedTileset([ ...existing, ...tileset ], true)
         if (toAdd.size) {
           this.tiles.set(index, toAdd)
+          added += toAdd.size - existing.size
         }
       } else {
+        added += tileset.size
         this.tiles.set(index, tileset)
       }
     }
+    return added
   }
 
   set (tiles: Tiles | Tileset, at: Coords | Array<Coords>): void {

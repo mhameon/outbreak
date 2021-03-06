@@ -1,7 +1,6 @@
 import config from 'config'
-import winston from 'winston'
-
-const { combine, splat, timestamp, errors, printf, ms, colorize, metadata, json } = winston.format
+import winston, { LogEntry } from 'winston'
+import { DEFAULT_LOG_FILE } from '@shared/logger/index'
 
 export type LogMethod = winston.LeveledLogMethod
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
@@ -17,6 +16,11 @@ export interface Logger {
   silly: LogMethod //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultMeta?: any
+
+  profile (id: string | number, meta?: LogEntry): Logger
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  child (options: any): Logger
 }
 
 winston.addColors({
@@ -25,7 +29,7 @@ winston.addColors({
   info: 'green',
   http: 'blue',
   verbose: 'cyan',
-  debug: 'magenta',
+  debug: 'grey',
   silly: 'grey',
 })
 
@@ -37,14 +41,17 @@ let logger: winston.Logger
  *
  * Logs levels available are: `error`, `warn`, `info`, `http`, `verbose`, `debug` and `silly`
  *
- * @param {string} [label=default] Log under this label
+ * @param label Log under this label
+ * @param metadata Optional metadata added in logs. Useful for add context once.
  * @return winston.Logger
  */
-export function getLogger (label = 'default'): Logger {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getLogger (label = 'default', metadata: Record<string, any> = {}): Logger {
   if (logger) {
-    return logger.child({ label })
+    return logger.child({ label, ...metadata })
   }
 
+  const { combine, splat, timestamp, errors, printf, ms, colorize, json } = winston.format
   logger = winston.createLogger({
     level: config.get('logger.level'),
     format: combine(
@@ -52,12 +59,11 @@ export function getLogger (label = 'default'): Logger {
       dynamicLabel({ label }),
       splat(),
       errors({ stack: true }),
-      //printf(line => `${line.timestamp} ${line.ms.padStart(7)} │ ${(line.label ?? '').padEnd(16)} │ ${line.level.padEnd(7)} │ ${line.stack ?? line.message}`),
       printf(info => info.message),
       json(),
     ),
     transports: [
-      new winston.transports.File({ filename: 'logs/default.log' }),
+      new winston.transports.File({ filename: `logs/${DEFAULT_LOG_FILE}` })
     ],
   })
 
@@ -66,13 +72,13 @@ export function getLogger (label = 'default'): Logger {
       stderrLevels: [],
       format: combine(
         colorize({ all: true }),
-        metadata(),
+        winston.format.metadata(),
         timestamp({ format: 'HH:mm:ss.SSS' }),
         ms(),
         splat(),
         errors({ stack: true }),
         printf(info => {
-          // line.level.padEnd(17) instead 7: level is colored in terminal, the extra length (10) may be due to that ?
+          // line.level.padEnd(17) instead of 7: level is colored in terminal, the extra length (10) is probably caused by that
           let message = `${info.timestamp} ${info.ms.padStart(7)} │ ${(info?.metadata.label ?? '').padEnd(16)} │ ${info.level.padEnd(17)} │ ${info.stack ?? info.message}`
 
           let maxWith = 0
@@ -108,6 +114,5 @@ const dynamicLabel = winston.format((info, opts) => {
   if (!info.label) {
     info.label = opts.label
   }
-  //info.via='dynamicLabel'
   return info
 })

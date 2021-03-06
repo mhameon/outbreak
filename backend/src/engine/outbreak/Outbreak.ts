@@ -1,14 +1,17 @@
 import WorldMap from '../map/WorldMap'
 import { Renderers } from '../renderer'
-import { GameId, Tile, Coords } from '../types'
-import { calculateDestination } from '@engine/math/geometry'
+import { GameId } from '../types'
+import { getLogger, Logger } from '@shared/logger'
+import { FireResolver, Resolvable } from './resolver'
 
 export class Outbreak {
   private static renderer = new Renderers.Ascii()
 
+  readonly log: Logger
   readonly id: GameId
   readonly createdAt: Date
   readonly map: WorldMap
+  readonly resolvers: Array<Resolvable>
   private turn = 0 // 0 means not started
 
   wind: { angle: number }
@@ -21,6 +24,12 @@ export class Outbreak {
     this.createdAt = new Date()
 
     this.wind = { angle: 110 }
+
+    this.log = getLogger('Outbreak', { gameId: this.id })
+
+    this.resolvers = [
+      new FireResolver(this)
+    ]
   }
 
   get name (): string {
@@ -32,35 +41,18 @@ export class Outbreak {
   }
 
   resolveTurn (): number {
+    this.log.profile('resolveTurn')
+    this.log.debug(`Resolving turn ${this.turn}...`)
 
-    let burningTiles = 0
-    const ignitions = new Set<Coords>()
-    const ashes = new Set<Coords>()
-    this.map.each(({ tileset, at }) => {
-      if (tileset.has(Tile.Burning)) {
-        burningTiles++
+    this.resolvers.forEach(resolver => resolver.resolve())
 
-        //if (random.chance(75)) {
-        const destination = calculateDestination(at, this.wind.angle, 1)
-        ignitions.add(destination)
-        //}
+    // this.log.profile('sound')
+    // this.log.profile('sound', { message: '🔊 Resolve: Sound propagation', level: 'debug' })
+    //
+    // this.log.profile('zombie')
+    // this.log.profile('zombie', { message: '🧟 Resolve: Zombies move', level: 'debug' })
 
-        //if ( random.chance(50) ) {
-        ashes.add(at)
-        //}
-      }
-    })
-
-    if (ignitions.size > 0) {
-      ignitions.forEach(flamingCoords => ashes.delete(flamingCoords))
-      this.map.add(Tile.Burning, [ ...ignitions ])
-    }
-    if (ashes.size > 0) {
-      this.map.replace(Tile.Burning, Tile.Burned, [ ...ashes ])
-    }
-
-    console.log(`${burningTiles} burning tiles generate ${ignitions.size} new ignitions`)
-
+    this.log.profile('resolveTurn', { message: `Turn ${this.turn} resolved`, level: 'info' })
     return ++this.turn
   }
 

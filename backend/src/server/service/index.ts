@@ -1,2 +1,2 @@
 export { serverCLI } from './cli'
-export { initializeGameServer } from './server'
+export { createGameServer } from './server'

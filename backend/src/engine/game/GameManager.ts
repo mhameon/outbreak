@@ -32,11 +32,12 @@ export class GameManager extends EventEmitter{
   }
 
   create (): GameId {
+    log.verbose('Creating outbreak...')
+
     const gameId = GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
     this.games.set(gameId, outbreak)
-    log.info('Created `%s`', gameId, { gameId })
-    console.log(outbreak.render()) // Todo debug only
+
     return gameId
   }
 
