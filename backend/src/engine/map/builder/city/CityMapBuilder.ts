@@ -1,7 +1,7 @@
 import { matrix, NoiseFactory } from '@engine/math'
 import MapBuilder from '@engine/map/builder/MapBuilder'
 import WorldMap from '@engine/map/WorldMap'
-import { Tile, TileLevel } from '@engine/types'
+import { Tile, BuildingLevel } from '@engine/types'
 import { line } from '@engine/math/geometry'
 
 const { normalize, cap } = matrix
@@ -39,8 +39,7 @@ export class CityMapBuilder extends MapBuilder {
     matrix.each(({ coords, value }) => {
       if (value > thresholds.buildLevels[0]) {
         const floor = thresholds.buildLevels.findIndex(v => value <= v)
-        this.map.add(Tile.Building, coords)
-        this.map.add(Tile[`Level${floor}` as TileLevel], coords)
+        this.map.add([ Tile.Building, Tile[`Level${floor}` as BuildingLevel] ], coords)
       }
       if (value <= thresholds.water) {
         this.map.set(Tile.Water, coords)

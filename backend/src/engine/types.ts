@@ -33,7 +33,7 @@ export type Size = {
   height: number
 }
 
-export type TileLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
+export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
 export enum Tile {
   /*** Properties (Sidekick tiles) ***/

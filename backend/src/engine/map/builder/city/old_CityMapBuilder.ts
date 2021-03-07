@@ -2,7 +2,7 @@ import { matrix } from '@engine/math'
 import AsciiMapRenderer from '../../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
 import WorldMap from '../../WorldMap'
-import { Tile, TileLevel, Coords, Seed } from '@engine/types'
+import { Tile, BuildingLevel, Coords, Seed } from '@engine/types'
 import { InvalidArgumentError } from '@shared/Errors'
 import { line, calculateDestination } from '../../../math/geometry'
 import chalk from 'chalk'
@@ -40,9 +40,8 @@ class Old_CityMapBuilder extends MapBuilder {
 
         output += chalk.bgRgb(Math.round(200 * item), 0, 0).red(`${buildingFloor}`)
 
-        this.map.add(Tile.Building, { x, y })
         level = `Level${buildingFloor}`
-        this.map.add(Tile[level as TileLevel], { x, y })
+        this.map.add([ Tile.Building, Tile[level as BuildingLevel] ], { x, y })
         // outbreak.map.add(Tile.Road, { x, y })
       }
       else {
