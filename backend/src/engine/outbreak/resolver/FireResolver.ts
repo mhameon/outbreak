@@ -20,7 +20,6 @@ export class FireResolver extends Resolver {
   resolve (): void {
     this.log.profile('fire')
 
-    let ignitedTiles = 0
     const ignitions = new Set<Coords>()
     const ashes = new Set<Coords>()
     this.flames.forEach((at) => {
@@ -34,16 +33,17 @@ export class FireResolver extends Resolver {
       //}
     })
 
+    let ignitionsCounter = 0
     if (ignitions.size > 0) {
       ignitions.forEach(flamingCoords => ashes.delete(flamingCoords))
-      ignitedTiles = this.outbreak.map.add(Tile.Burning, [ ...ignitions ])
+      ignitionsCounter = this.outbreak.map.add(Tile.Burning, ignitions)
     }
     if (ashes.size > 0) {
       this.outbreak.map.replace(Tile.Burning, Tile.Burned, [ ...ashes ])
       ashes.forEach(at => this.flames.delete(at))
     }
 
-    this.log.debug(`${this.flames.size} burning tiles generates ${ignitedTiles} new ignitions`)
+    this.log.debug(`${this.flames.size} burning tiles generates ${ignitionsCounter} new ignitions`)
     this.log.profile('fire', { message: '🔥 Fire propagation resolved', level: 'debug' })
   }
 }

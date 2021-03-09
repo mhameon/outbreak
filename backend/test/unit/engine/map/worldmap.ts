@@ -161,6 +161,17 @@ describe('WorldMap class', function () {
     })
   })
 
+  describe('replace', function() {
+    it('should replace wanted tile', function() {
+      map.replace(Tile.Block, Tile.Forest, origin)
+      assert.ok(map.has(Tile.Forest, origin))
+    })
+    it('should do nothing when there is no wanted tile',function() {
+      map.replace(Tile.Water, Tile.Forest, origin)
+      assert.ok(map.has(Tile.Block, origin))
+    })
+  })
+
   describe('get(at)', function () {
     it('should returns correct tile', function () {
       const tile = map.get(origin)

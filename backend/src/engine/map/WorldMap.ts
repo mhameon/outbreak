@@ -32,20 +32,21 @@ class WorldMap extends EventEmitter {
     this.name = 'Unnamed map'
   }
 
-  add (tiles: OneOrMany<Tile>, at: Coords | Array<Coords>): number {
+  add (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): number {
+    const coords = toArray(at)
     let added = 0
-    let point!: Coords
-    if (isCoordsArray(at)) {
-      point = at.pop() as Coords
-      if (isCoordsArray(at)) {
-        added += this.add(tiles, at)
+    let here!: Coords
+    if (isCoordsArray(coords)) {
+      here = coords.pop() as Coords
+      if (isCoordsArray(coords)) {
+        added += this.add(tiles, coords)
       }
-    } else if (isCoords(at)) {
-      point = at
+    } else if (isCoords(coords)) {
+      here = coords
     }
 
-    if (this.contains(point)) {
-      const index = WorldMap.index(point)
+    if (this.contains(here)) {
+      const index = WorldMap.index(here)
       const existing = this.tiles.get(index)
       const tileset = getSanitizedTileset(tiles)
       if (existing) {
@@ -53,11 +54,11 @@ class WorldMap extends EventEmitter {
         if (merge.size) {
           this.tiles.set(index, merge)
           const newTiles = diffSet<Tileset>(merge, existing)
-          added += this.emitTileAdded(newTiles, point)
+          added += this.emitTileAdded(newTiles, here)
         }
       } else {
         this.tiles.set(index, tileset)
-        added += this.emitTileAdded(tileset, point)
+        added += this.emitTileAdded(tileset, here)
       }
     }
     return added
@@ -71,19 +72,20 @@ class WorldMap extends EventEmitter {
     return tileset.size
   }
 
-  set (tiles: OneOrMany<Tile>, at: Coords | Array<Coords>): void {
-    let point!: Coords
-    if (isCoordsArray(at)) {
-      point = at.pop() as Coords
-      if (isCoordsArray(at)) {
-        this.set(tiles, at)
+  set (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): void {
+    const coords = toArray<Coords>(at)
+    let here!: Coords
+    if (isCoordsArray(coords)) {
+      here = coords.pop() as Coords
+      if (isCoordsArray(coords)) {
+        this.set(tiles, coords)
       }
-    } else if (isCoords(at)) {
-      point = at
+    } else if (isCoords(coords)) {
+      here = coords
     }
 
     const tileset = getSanitizedTileset(tiles, true)
-    const index = WorldMap.index(point)
+    const index = WorldMap.index(here)
     this.tiles.delete(index)
     if (
       tileset.size >= 1
@@ -103,24 +105,25 @@ class WorldMap extends EventEmitter {
     return removed
   }
 
-  replace (wanted: Tile, substitute: Tile, at: Coords | Array<Coords>): void {
-    let point!: Coords
-    if (isCoordsArray(at)) {
-      point = at.pop() as Coords
-      if (isCoordsArray(at)) {
-        this.replace(wanted, substitute, at)
+  replace (wanted: Tile, substitute: Tile, at: OneOrMany<Coords>): void {
+    const coords = toArray<Coords>(at)
+    let here!: Coords
+    if (isCoordsArray(coords)) {
+      here = coords.pop() as Coords
+      if (isCoordsArray(coords)) {
+        this.replace(wanted, substitute, coords)
       }
-    } else if (isCoords(at)) {
-      point = at
+    } else if (isCoords(coords)) {
+      here = coords
     }
 
-    const tile = this.get(point)
+    const tile = this.get(here)
     if (tile.has(wanted)) {
       tile.delete(wanted)
       this.set([
         ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
         substitute
-      ], point)
+      ], here)
     }
   }
 
