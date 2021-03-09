@@ -6,7 +6,7 @@ export abstract class Resolver implements Resolvable {
   readonly log: Logger
   readonly outbreak: Outbreak
 
-  constructor (outbreak: Outbreak) {
+  protected constructor (outbreak: Outbreak) {
     this.log = outbreak.log.child({ label: this.constructor.name })
     this.outbreak = outbreak
   }

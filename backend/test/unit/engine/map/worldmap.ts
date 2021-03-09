@@ -1,14 +1,13 @@
 import WorldMap from '@engine/map/WorldMap'
-import { Tile, Direction, Tileset, Coords } from '@engine/types'
+import { Tile, Direction, Tileset, Coords, InMapTile } from '@engine/types'
 
 import * as assert from 'assert'
 import { InvalidArgumentError } from '@shared/Errors'
-import { stringifyTileset } from '@engine/map/WorldMapErrors'
+import { stringifyTiles } from '@engine/map/WorldMapErrors'
 
 describe('WorldMap class', function () {
   let map: WorldMap
   const origin = { x: 0, y: 0 }
-
   beforeEach(function () {
     map = new WorldMap({ width: 5, height: 5 })
     map.set([ Tile.Block ], origin)
@@ -21,43 +20,80 @@ describe('WorldMap class', function () {
     })
   })
 
-  describe('add(tile, at)', function () {
-    it('should find (has) the right tile', function () {
-      assert.ok(map.has(Tile.Block, origin))
+  context('add()', function () {
+    let tileAddedEvents: Array<InMapTile>
+    beforeEach(function () {
+      tileAddedEvents = []
+      map.on('tile:added', (args: InMapTile) => {
+        tileAddedEvents.push(args)
+      })
     })
-    it('should not add tiles twice', function () {
-      assert.strictEqual(map.add(Tile.Block, origin), 0)
-      assert.strictEqual(map.add(Tile.Block, origin), 0)
-      assert.strictEqual(map.add(Tile.Water, origin), 1)
-      assert.strictEqual(map.add(Tile.Water, origin), 0)
-      assert.strictEqual(map.get(origin).size, 2)
+    afterEach(function () {
+      return map.removeAllListeners('tile:added')
     })
-    it('should not possible to burn water', function() {
-      const at = { x: 1, y: 1 }
-      map.set(Tile.Water, at)
-      assert.ok(map.has(Tile.Water, at))
-      assert.strictEqual(map.get(at).size, 1)
+    describe('add(tile, at)', function () {
+      it('should find (has) the right tile', function () {
+        assert.ok(map.has(Tile.Block, origin))
+      })
+      it('should not add tiles twice', function () {
+        map.on(`tile:${Tile.Water}:added`, (at: Coords) => {
+          assert.strictEqual(at, origin)
+        })
+        assert.strictEqual(map.add(Tile.Block, origin), 0)
+        assert.strictEqual(map.add(Tile.Block, origin), 0)
+        assert.strictEqual(map.add(Tile.Water, origin), 1)
+        assert.strictEqual(map.add(Tile.Water, origin), 0)
+        assert.strictEqual(map.get(origin).size, 2)
 
-      assert.strictEqual(map.add(Tile.Burning, at), 0)
-      assert.ok(map.has(Tile.Water, at))
-      assert.strictEqual(map.get(at).size, 1)
-    })
-  })
-  describe('add(tile, at[])', function () {
-    it('should add a tile at multiple coords', function () {
-      assert.strictEqual(map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }]), 3)
-      assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
-      assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
-      assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
-    })
-  })
-  describe('add(tile[], at)', function () {
-    it('should add multiple tile at coords')
-  })
-  describe('add(tile[], at[])', function () {
-    it('should add multiple tile at multiple coords')
-  })
+        assert.deepStrictEqual(tileAddedEvents, [{ tile: Tile.Water, at: origin }])
+      })
+      it('should not possible to burn water', function () {
+        const at = { x: 1, y: 1 }
+        map.set(Tile.Water, at)
+        assert.ok(map.has(Tile.Water, at))
+        assert.strictEqual(map.get(at).size, 1)
 
+        assert.strictEqual(map.add(Tile.Burning, at), 0)
+        assert.ok(map.has(Tile.Water, at))
+        assert.strictEqual(map.get(at).size, 1)
+        assert.deepStrictEqual(tileAddedEvents, [])
+      })
+    })
+    describe('add(tile, at[])', function () {
+      it('should add a tile at multiple coords', function () {
+        assert.strictEqual(map.add(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }]), 3)
+        assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
+        assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
+        assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
+        assert.deepStrictEqual(tileAddedEvents, [
+          { tile: Tile.Road, at: origin },
+          { tile: Tile.Road, at: { x: 1, y: 0 } },
+          { tile: Tile.Road, at: { x: 2, y: 0 } }
+        ])
+      })
+    })
+    describe('add(tile[], at)', function () {
+      const at = { x: 1, y: 0 }
+      it('should add multiple tile (array<Tile>) at coords', function () {
+        assert.strictEqual(map.add([ Tile.Water, Tile.Burning, Tile.Forest ], at), 1)
+        assert.strictEqual(map.get(at).size, 1)
+        assert.ok(map.has([ Tile.Forest ], at))
+
+        assert.strictEqual(map.add([ Tile.Water, Tile.Burning, Tile.Forest ], origin), 1)
+        assert.strictEqual(map.get(origin).size, 2)
+        assert.ok(map.has([ Tile.Forest, Tile.Block ], origin))
+      })
+      it('should add multiple tile (Tileset) at coords', function () {
+        assert.strictEqual(map.add(new Set([ Tile.Water, Tile.Burning, Tile.Forest ]), at), 1)
+        assert.strictEqual(map.get(at).size, 1)
+        assert.ok(map.has([ Tile.Forest ], at))
+
+        assert.strictEqual(map.add(new Set([ Tile.Water, Tile.Burning, Tile.Forest ]), origin), 1)
+        assert.strictEqual(map.get(origin).size, 2)
+        assert.ok(map.has([ Tile.Forest, Tile.Block ], origin))
+      })
+    })
+  })
   describe('set(tile, at)', function () {
     it('should overwrite existing tile', function () {
       map.set(Tile.Road, origin)
@@ -107,27 +143,21 @@ describe('WorldMap class', function () {
   })
 
   describe('remove(tile, at)', function () {
-    let at: Coords
-    beforeEach(function () {
-      at = { x: 4, y: 0 }
-    })
+    const at = { x: 4, y: 0 }
     it('should remove standalone tile', function () {
       map.set(Tile.Water, at)
       assert.ok(map.has(Tile.Water, at))
 
       assert.strictEqual(map.has(Tile.Forest, at), false)
-      map.remove(Tile.Forest, at)
+      assert.strictEqual(map.remove(Tile.Forest, at), 0)
       assert.strictEqual(map.has(Tile.Forest, at), false)
 
-      map.remove(Tile.Water, at)
+      assert.strictEqual(map.remove(Tile.Water, at), 1)
       assert.strictEqual(map.has(Tile.Water, at), false)
     })
     it('should remove sidekick', function () {
       map.add(Tile.Burning, at)
-      console.log(map.get(at))
       assert.ok(map.has(Tile.Burning, at))
-      // Fixme?
-      // assert.ok(map.has([ Tile.Burning, WorldMap.defaultTile ], at))
     })
   })
 
@@ -156,7 +186,7 @@ describe('WorldMap class', function () {
     assert.strictEqual(around.get(Direction.NorthEast), undefined)
 
     assert.ok((around.get(Direction.West) as Tileset).has(Tile.Block))
-    assert.ok((around.get(Direction.East) as Tileset).has(Tile.Grass), stringifyTileset(around.get(Direction.East) as Tileset))
+    assert.ok((around.get(Direction.East) as Tileset).has(Tile.Grass), stringifyTiles(around.get(Direction.East) as Tileset))
 
     assert.ok((around.get(Direction.SouthWest) as Tileset).has(Tile.Grass))
     assert.ok((around.get(Direction.South) as Tileset).has(Tile.Grass))
@@ -280,6 +310,13 @@ describe('WorldMap class', function () {
         assert.ok(world.has([], { x: 3, y: 4 }))
         assert.ok(world.has(Tile.Road, { x: 4, y: 4 }))
       })
+    })
+  })
+  describe('helpers', function () {
+    it('should stringify tiles', function () {
+      assert.strictEqual(stringifyTiles(Tile.Forest), '[10/Forest]')
+      assert.strictEqual(stringifyTiles([ Tile.Building, Tile.Level5 ]), '[13/Building, 8/Level5]')
+      assert.strictEqual(stringifyTiles(new Set([ Tile.Building, Tile.Level5 ])), '[13/Building, 8/Level5]')
     })
   })
 })

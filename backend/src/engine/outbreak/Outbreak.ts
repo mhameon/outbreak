@@ -48,7 +48,6 @@ export class Outbreak {
 
     // this.log.profile('sound')
     // this.log.profile('sound', { message: '🔊 Resolve: Sound propagation', level: 'debug' })
-    //
     // this.log.profile('zombie')
     // this.log.profile('zombie', { message: '🧟 Resolve: Zombies move', level: 'debug' })
 

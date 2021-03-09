@@ -1,6 +1,6 @@
 import { tilerules, getSanitizedTileset, getRenderTile } from '@engine/map/tilerules'
 import assert from 'assert'
-import { stringifyTileset, UnknownRenderTile } from '@engine/map/WorldMapErrors'
+import { stringifyTiles, UnknownRenderTile } from '@engine/map/WorldMapErrors'
 import { Tile, RenderTile } from '@engine/types'
 
 describe('tilerules', function () {
@@ -11,7 +11,7 @@ describe('tilerules', function () {
     describe('Exclusions', function () {
       it('declarations are sorted in descending order', function () {
         let size = 999
-        tilerules.exclusions.forEach( exclusion => {
+        tilerules.exclusions.forEach(exclusion => {
           assert.ok(exclusion.length <= size)
           size = exclusion.length
         })
@@ -30,7 +30,7 @@ describe('tilerules', function () {
           const tileset = new Set(and)
           tilerules.exclusions.forEach(excluded => {
             if (excluded.every(tile => tileset.has(tile))) {
-              assert.fail(`Additives tiles can't be composed by mutually exclusives tiles ${stringifyTileset(tileset)}`)
+              assert.fail(`Additives tiles can't be composed by mutually exclusives tiles ${stringifyTiles(tileset)}`)
             }
           })
         })
@@ -51,9 +51,17 @@ describe('tilerules', function () {
       })
     })
     describe('getRenderTile', function () {
-      it('should find a rendering tile (Bridge)', function () {
+      it('should find a "double" render tile (Bridge) in any order', function () {
         assert.strictEqual(getRenderTile([ Tile.Road, Tile.Water ]), RenderTile.Bridge)
         assert.strictEqual(getRenderTile([ Tile.Water, Tile.Road ]), RenderTile.Bridge)
+      })
+      it('should find a "triple" render tile (BurningBuildingL1) in any order', function () {
+        assert.strictEqual(getRenderTile([ Tile.Burning, Tile.Building, Tile.Level1 ]), RenderTile.BurningBuildingL1)
+        assert.strictEqual(getRenderTile([ Tile.Burning, Tile.Level1, Tile.Building ]), RenderTile.BurningBuildingL1)
+        assert.strictEqual(getRenderTile([ Tile.Level1, Tile.Burning, Tile.Building, ]), RenderTile.BurningBuildingL1)
+        assert.strictEqual(getRenderTile([ Tile.Level1, Tile.Building, Tile.Burning ]), RenderTile.BurningBuildingL1)
+        assert.strictEqual(getRenderTile([ Tile.Building, Tile.Level1, Tile.Burning ]), RenderTile.BurningBuildingL1)
+        assert.strictEqual(getRenderTile([ Tile.Building, Tile.Burning, Tile.Level1 ]), RenderTile.BurningBuildingL1)
       })
       it('should find a standalone tile (Water)', function () {
         assert.strictEqual(getRenderTile([ Tile.Water ]), RenderTile.Water)

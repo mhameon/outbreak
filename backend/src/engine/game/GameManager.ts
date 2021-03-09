@@ -19,8 +19,8 @@ type Game = {
 /**
  * Handle & Manage games (Outbreak)
  *
- * emit events
- * - `game:deletion`, (gameId: GameId)
+ * Emit events:
+ * - `game:deleted`, (gameId: GameId)
  */
 export class GameManager extends EventEmitter{
   static GAME_ID_PREFIX = 'game:'
@@ -55,7 +55,7 @@ export class GameManager extends EventEmitter{
   delete (gameId: GameId): void {
     this.get(gameId)
     this.games.delete(gameId)
-    this.emit('game:deletion', gameId)
+    this.emit('game:deleted', gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 

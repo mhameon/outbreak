@@ -68,5 +68,4 @@ export class CityMapBuilder extends MapBuilder {
 
     return this.map
   }
-
 }

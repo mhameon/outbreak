@@ -1,18 +1,22 @@
-import { Size, Coords, Tile, Tiles, Index, Tileset, Around, Square, Direction } from '../types'
+import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoordsArray, isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
-import { Values } from '@shared/types'
+import { Values, OneOrMany } from '@shared/types'
 import { EventEmitter } from 'events'
-import { toTiles } from '@engine/map/helpers'
+import { diffSet, toArray } from '@shared/helpers'
 
 /**
  * A 2D map describing the game board.
+ *
+ * Emit events:
+ * - `tile:added`, ({ tile: Tile, at: Coords })
+ * - `tile:${Tile}:added`, (at: Coords)
  */
 class WorldMap extends EventEmitter {
-  static readonly defaultTile: Tile = Tile.Grass
+  static readonly defaultTile = Tile.Grass
   static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
   readonly size: Size
   readonly seeder?: Seeder
@@ -28,7 +32,7 @@ class WorldMap extends EventEmitter {
     this.name = 'Unnamed map'
   }
 
-  add (tiles: Tiles | Tileset, at: Coords | Array<Coords>): number {
+  add (tiles: OneOrMany<Tile>, at: Coords | Array<Coords>): number {
     let added = 0
     let point!: Coords
     if (isCoordsArray(at)) {
@@ -42,23 +46,32 @@ class WorldMap extends EventEmitter {
 
     if (this.contains(point)) {
       const index = WorldMap.index(point)
-      const tileset = getSanitizedTileset(tiles)
       const existing = this.tiles.get(index)
+      const tileset = getSanitizedTileset(tiles)
       if (existing) {
-        const toAdd = getSanitizedTileset([ ...existing, ...tileset ], true)
-        if (toAdd.size) {
-          this.tiles.set(index, toAdd)
-          added += toAdd.size - existing.size
+        const merge = getSanitizedTileset([ ...existing, ...tileset ], true)
+        if (merge.size) {
+          this.tiles.set(index, merge)
+          const newTiles = diffSet<Tileset>(merge, existing)
+          added += this.emitTileAdded(newTiles, point)
         }
       } else {
-        added += tileset.size
         this.tiles.set(index, tileset)
+        added += this.emitTileAdded(tileset, point)
       }
     }
     return added
   }
 
-  set (tiles: Tiles | Tileset, at: Coords | Array<Coords>): void {
+  private emitTileAdded (tileset: Tileset, at: Coords): number {
+    tileset.forEach(tile => {
+      this.emit(`tile:${tile}:added`, at)
+      this.emit('tile:added', { tile, at })
+    })
+    return tileset.size
+  }
+
+  set (tiles: OneOrMany<Tile>, at: Coords | Array<Coords>): void {
     let point!: Coords
     if (isCoordsArray(at)) {
       point = at.pop() as Coords
@@ -80,12 +93,14 @@ class WorldMap extends EventEmitter {
     }
   }
 
-  remove (tile: Tile, at: Coords): void {
+  remove (tile: Tile, at: Coords): number {
+    let removed = 0
     const existing = this.get(at)
     if (existing.has(tile)) {
-      existing.delete(tile)
+      removed = Number(existing.delete(tile))
       this.set(existing, at)
     }
+    return removed
   }
 
   replace (wanted: Tile, substitute: Tile, at: Coords | Array<Coords>): void {
@@ -158,7 +173,7 @@ class WorldMap extends EventEmitter {
     for (let y = topLeft.y; y <= bottomRight.y; y++) {
       destination.x = 0
       for (let x = topLeft.x; x <= bottomRight.x; x++) {
-        region.set([ ...this.get({ x, y }) ], destination)
+        region.set(this.get({ x, y }), destination)
         ++destination.x
       }
       ++destination.y
@@ -166,15 +181,15 @@ class WorldMap extends EventEmitter {
     return region
   }
 
-  each (callback: (square: Square) => void): void {
+  each (callback: (square: InMapTileset) => void): void {
     this.tiles.forEach(
-      (tileset, index) => callback({ at: WorldMap.coords(index), tileset }),
+      (tileset, index) => callback({ tileset, at: WorldMap.coords(index) }),
     )
   }
 
-  has (tiles: Tiles, at: Coords): boolean {
+  has (tiles: OneOrMany<Tile>, at: Coords): boolean {
     const tileset = this.get(at)
-    return toTiles(tiles).every(tile => tileset.has(tile))
+    return toArray<Tile>(tiles).every(tile => tileset.has(tile))
   }
 
   isWalkable (at: Coords): boolean {

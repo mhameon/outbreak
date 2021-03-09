@@ -7,7 +7,7 @@ import { Outbreak } from '@engine/outbreak'
 let currentGameId: GameId = ''
 
 export function registerGameCommands (cli: CommandLineInterface, game: GameManager): void {
-  game.on('game:deletion', (gameId: GameId) => {
+  game.on('game:deleted', (gameId: GameId) => {
     if (currentGameId === gameId) {
       console.log(`${gameId} deleted, automatically leave CLI interaction mode`)
       currentGameId = ''

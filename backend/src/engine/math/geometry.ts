@@ -3,8 +3,8 @@ import { Coords } from '@engine/types'
 const PI = 3.14159265
 
 /**
- * @param origin Origin Coords
- * @param angle Angle in degrees, O° point to north, clockwise
+ * @param origin Coords
+ * @param angle in degrees, 0° point to north, clockwise
  * @param distance Distance (in tiles) from origin
  */
 function calculateDestination (origin: Coords, angle: number, distance = 1): Coords {

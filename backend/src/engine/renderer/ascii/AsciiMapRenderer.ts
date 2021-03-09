@@ -40,12 +40,10 @@ class AsciiMapRenderer extends MapRenderer {
     const height = { length: this.map.size.height }
 
     const seeder = this.map.seeder ? ` ${this.map.seeder.builder}(${this.map.seeder.seed})` : ''
-    let tiles,
-      ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + seeder + '\n'
+    let ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + seeder + '\n'
     Array.from(height, (_, y) => {
       Array.from(width, (_, x) => {
-        tiles = this.map.get({ x, y })
-        ascii += AsciiMapRenderer.draw(tiles)
+        ascii += AsciiMapRenderer.draw(this.map.get({ x, y }))
       })
       ascii += '\n'
     })
@@ -54,7 +52,7 @@ class AsciiMapRenderer extends MapRenderer {
 
   private static draw (tileset: Tileset): string {
     try {
-      return TileAtlas[getRenderTile([ ...tileset ])]
+      return TileAtlas[getRenderTile(tileset)]
     } catch (e) {
       try {
         return TileAtlas[getRenderTile([ ...tileset, ...WorldMap.emptyTileset ])]

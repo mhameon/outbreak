@@ -1,11 +1,10 @@
 import { CustomError } from '@shared/Errors'
-import { Coords, Size, Tile, Tileset } from '../types'
+import { Coords, Size, Tile } from '../types'
+import { OneOrMany } from '@shared/types'
+import { toArray } from '@shared/helpers'
 
-export function stringifyTileset (tileset: Tileset | Array<Tile>): string {
-  const stringifyTileset: Array<string> = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tileset.forEach((id: any) => stringifyTileset.push(`${id}/${Tile[id]}`))
-  return `[${stringifyTileset.join(', ')}]`
+export function stringifyTiles (tiles: OneOrMany<Tile>): string {
+  return `[${toArray<Tile>(tiles).map(id => (`${id}/${Tile[id]}`)).join(', ')}]`
 }
 
 export class OutOfMapError extends CustomError {
@@ -16,6 +15,6 @@ export class OutOfMapError extends CustomError {
 
 export class UnknownRenderTile extends CustomError {
   constructor (tiles: Array<Tile>) {
-    super(`No RenderTile found for tiles ${stringifyTileset(tiles)}`)
+    super(`No RenderTile found for tiles ${stringifyTiles(tiles)}`)
   }
 }

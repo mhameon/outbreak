@@ -90,8 +90,8 @@ export enum RenderTile {
 
 export type Index = string
 export type Tileset = Set<Tile>
-export type Tiles = Tile | Tile[]
-export type Square = { at: Coords; tileset: Tileset }
+export type InMapTileset = { at: Coords; tileset: Tileset }
+export type InMapTile = { tile: Tile; at: Coords }
 
 export type Around = Map<Values<typeof Direction>, Tileset>
 

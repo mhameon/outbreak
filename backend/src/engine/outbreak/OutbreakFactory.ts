@@ -13,7 +13,9 @@ const defaultOptions: Options = {
 
 export class OutbreakFactory {
   static create (id: GameId, options: Options = defaultOptions): Outbreak {
-    const map = (new CityMapBuilder(options.size)).generate(id)
-    return new Outbreak(id, map)
+    const mapBuilder = new CityMapBuilder(id, options.size)
+    const outbreak = new Outbreak(id, mapBuilder.getMapRef())
+    mapBuilder.generate()
+    return outbreak
   }
 }
