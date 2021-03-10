@@ -161,14 +161,20 @@ describe('WorldMap class', function () {
     })
   })
 
-  describe('replace', function() {
-    it('should replace wanted tile', function() {
+  describe('replace', function () {
+    it('should replace wanted tile', function () {
       map.replace(Tile.Block, Tile.Forest, origin)
       assert.ok(map.has(Tile.Forest, origin))
     })
-    it('should do nothing when there is no wanted tile',function() {
+    it('should do nothing when there is no wanted tile', function () {
       map.replace(Tile.Water, Tile.Forest, origin)
       assert.ok(map.has(Tile.Block, origin))
+    })
+    it('should replace tiles on multiple coords', function () {
+      const at = { x: 1, y: 0 }
+      map.replace(Tile.Block, Tile.Forest, [ origin, at ])
+      assert.ok(map.has(Tile.Forest, origin))
+      assert.strictEqual(map.has(Tile.Forest, at), false)
     })
   })
 

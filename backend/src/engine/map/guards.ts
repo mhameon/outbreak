@@ -7,17 +7,21 @@ export function isNumber (arg: any): arg is number {
 }
 
 export function isCoords (arg: any): arg is Coords {
-  return isNumber(arg.x) && isNumber(arg.y)
+  const coords: Coords = arg
+  return isNumber(coords.x) && isNumber(coords.y)
 }
 
+// TODO: Keep?
 export function isCoordsArray (arg: any): arg is Array<Coords> {
-  return arg.length > 0 && isCoords(arg[0])
+  const coordsArray: Array<Coords> = arg
+  return coordsArray.length > 0 && isCoords(coordsArray[0])
 }
 
 export function isMatrix2d (arg: any): arg is Matrix2d {
-  return arg.length > 0 && arg[0].length > 0 && isNumber(arg[0][0])
+  const matrix: Matrix2d = arg
+  return matrix.length > 0 && matrix[0].length > 0 && isNumber(matrix[0][0])
 }
 
-export function isWorldMap(arg:any): arg is WorldMap{
+export function isWorldMap (arg: any): arg is WorldMap {
   return arg instanceof WorldMap
 }

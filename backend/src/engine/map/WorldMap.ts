@@ -1,6 +1,6 @@
 import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
-import { isCoordsArray, isCoords } from './guards'
+import { isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
@@ -33,19 +33,14 @@ class WorldMap extends EventEmitter {
   }
 
   add (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): number {
-    const coords = toArray(at)
     let added = 0
-    let here!: Coords
-    if (isCoordsArray(coords)) {
-      here = coords.pop() as Coords
-      if (isCoordsArray(coords)) {
-        added += this.add(tiles, coords)
-      }
-    } else if (isCoords(coords)) {
-      here = coords
+    const coords = toArray(at)
+    const here = coords.pop()
+    if (coords.length) {
+      added += this.add(tiles, coords)
     }
 
-    if (this.contains(here)) {
+    if (isCoords(here) && this.contains(here)) {
       const index = WorldMap.index(here)
       const existing = this.tiles.get(index)
       const tileset = getSanitizedTileset(tiles)
@@ -74,24 +69,21 @@ class WorldMap extends EventEmitter {
 
   set (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): void {
     const coords = toArray<Coords>(at)
-    let here!: Coords
-    if (isCoordsArray(coords)) {
-      here = coords.pop() as Coords
-      if (isCoordsArray(coords)) {
-        this.set(tiles, coords)
-      }
-    } else if (isCoords(coords)) {
-      here = coords
+    const here = coords.pop()
+    if (coords.length) {
+      this.set(tiles, coords)
     }
 
-    const tileset = getSanitizedTileset(tiles, true)
-    const index = WorldMap.index(here)
-    this.tiles.delete(index)
-    if (
-      tileset.size >= 1
-      && !(tileset.size === 1 && (tileset.has(Tile.Walkable) /*|| tileset.has(WorldMap.defaultTile)*/))
-    ) {
-      this.tiles.set(index, tileset)
+    if (isCoords(here)) {
+      const tileset = getSanitizedTileset(tiles, true)
+      const index = WorldMap.index(here)
+      this.tiles.delete(index)
+      if (
+        tileset.size >= 1
+        && !(tileset.size === 1 && (tileset.has(Tile.Walkable) /*|| tileset.has(WorldMap.defaultTile)*/))
+      ) {
+        this.tiles.set(index, tileset)
+      }
     }
   }
 
@@ -107,23 +99,20 @@ class WorldMap extends EventEmitter {
 
   replace (wanted: Tile, substitute: Tile, at: OneOrMany<Coords>): void {
     const coords = toArray<Coords>(at)
-    let here!: Coords
-    if (isCoordsArray(coords)) {
-      here = coords.pop() as Coords
-      if (isCoordsArray(coords)) {
-        this.replace(wanted, substitute, coords)
-      }
-    } else if (isCoords(coords)) {
-      here = coords
+    const here = coords.pop()
+    if (coords.length) {
+      this.replace(wanted, substitute, coords)
     }
 
-    const tile = this.get(here)
-    if (tile.has(wanted)) {
-      tile.delete(wanted)
-      this.set([
-        ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
-        substitute
-      ], here)
+    if (isCoords(here)) {
+      const tile = this.get(here)
+      if (tile.has(wanted)) {
+        tile.delete(wanted)
+        this.set([
+          ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
+          substitute
+        ], here)
+      }
     }
   }
 

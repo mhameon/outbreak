@@ -102,5 +102,4 @@ export type Seed = number | string
 /** A matrix is an array of numbers of N dimensions */
 export type Matrix = Array<Matrix | number> // Recursive type
 
-export type Matrix1d = number[]
 export type Matrix2d = number[][]
