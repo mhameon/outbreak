@@ -255,8 +255,8 @@ export class GameServer {
   }
 
   private registerErrorHandler (socket: io.Socket): void {
-    socket.on('error', (err) => {
-      log.error(err, { socketId: socket.id })
+    socket.on('error', (error) => {
+      log.error(error)
     })
   }
 
