@@ -326,6 +326,7 @@ export class GameServer {
   private uncaughtException (error: Error): void {
     log.error('⚠️ uncaughtException %s', error.stack ? error.stack : `${error.name}: ${error.message}`)
     this.close('uncaughtException')
+    process.exit(1)
   }
 
   private gracefulShutdown (signal: NodeJS.Signals): void {

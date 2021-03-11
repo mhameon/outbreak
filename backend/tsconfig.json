@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "es6",
     "lib": [
-      "es2018"
+      "es2019"
     ],
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",

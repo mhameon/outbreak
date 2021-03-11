@@ -20,7 +20,7 @@ describe('WorldMap class', function () {
     })
   })
 
-  context('add()', function () {
+  describe('add()', function () {
     let tileAddedEvents: Array<InMapTile>
     beforeEach(function () {
       tileAddedEvents = []
@@ -32,7 +32,7 @@ describe('WorldMap class', function () {
       return map.removeAllListeners('tile:added')
     })
     describe('add(tile, at)', function () {
-      it('should find (has) the right tile', function () {
+      it('should add a tile at coords', function () {
         assert.ok(map.has(Tile.Block, origin))
       })
       it('should not add tiles twice', function () {
@@ -94,51 +94,54 @@ describe('WorldMap class', function () {
       })
     })
   })
-  describe('set(tile, at)', function () {
-    it('should overwrite existing tile', function () {
-      map.set(Tile.Road, origin)
-      assert.ok(map.has([ Tile.Road ], origin))
-      assert.strictEqual(map.has(Tile.Block, origin), false)
-    })
-  })
-  describe('set(tile, at[])', function () {
-    it('should overwrite existing tiles at multiple coords', function () {
-      map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
-      assert.ok(map.has([ Tile.Road ], origin))
-      assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
-      assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
-    })
-  })
-  describe('set(tile[], at)', function () {
-    it('should set multiple tiles', function () {
-      map.set([ Tile.Water, Tile.Block ], origin)
-      assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
-    })
-    it('should get default tile when set with nothing', function () {
-      map.set([], origin)
-      assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
-      assert.ok(map.has(Tile.Grass, origin))
-      assert.strictEqual(map.get(origin).size, 1)
-    })
-    it('should ignore incompatible tiles', function () {
-      map.set([ Tile.Walkable, Tile.Block, Tile.Road ], origin)
-      assert.ok(map.has(Tile.Road, origin))
-      assert.strictEqual(map.get(origin).size, 1)
 
-      map.set([ Tile.Burning, Tile.Water, Tile.Road ], origin)
-      assert.ok(map.has(Tile.Road, origin))
-      assert.strictEqual(map.get(origin).size, 1)
-
-      map.set([ Tile.Burned, Tile.Water ], origin)
-      assert.ok(map.has(Tile.Grass, origin))
-      assert.strictEqual(map.get(origin).size, 1)
+  describe('set', function() {
+    describe('set(tile, at)', function () {
+      it('should overwrite existing tile', function () {
+        map.set(Tile.Road, origin)
+        assert.ok(map.has([ Tile.Road ], origin))
+        assert.strictEqual(map.has(Tile.Block, origin), false)
+      })
     })
-  })
-  describe('set(tile[], at[])', function () {
-    it('should set multiple tiles & overwrite multiple tiles', function () {
-      map.set([ Tile.Water, Tile.Block ], [ origin, { x: 1, y: 0 }])
-      assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
-      assert.ok(map.has([ Tile.Water ], { x: 1, y: 0 }))
+    describe('set(tile, at[])', function () {
+      it('should overwrite existing tiles at multiple coords', function () {
+        map.set(Tile.Road, [ origin, { x: 1, y: 0 }, { x: 2, y: 0 }])
+        assert.ok(map.has([ Tile.Road ], origin))
+        assert.ok(map.has([ Tile.Road ], { x: 1, y: 0 }))
+        assert.ok(map.has([ Tile.Road ], { x: 2, y: 0 }))
+      })
+    })
+    describe('set(tile[], at)', function () {
+      it('should set multiple tiles', function () {
+        map.set([ Tile.Water, Tile.Block ], origin)
+        assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
+      })
+      it('should get default tile when set with nothing', function () {
+        map.set([], origin)
+        assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
+        assert.ok(map.has(Tile.Grass, origin))
+        assert.strictEqual(map.get(origin).size, 1)
+      })
+      it('should ignore incompatible tiles', function () {
+        map.set([ Tile.Walkable, Tile.Block, Tile.Road ], origin)
+        assert.ok(map.has(Tile.Road, origin))
+        assert.strictEqual(map.get(origin).size, 1)
+
+        map.set([ Tile.Burning, Tile.Water, Tile.Road ], origin)
+        assert.ok(map.has(Tile.Road, origin))
+        assert.strictEqual(map.get(origin).size, 1)
+
+        map.set([ Tile.Burned, Tile.Water ], origin)
+        assert.ok(map.has(Tile.Grass, origin))
+        assert.strictEqual(map.get(origin).size, 1)
+      })
+    })
+    describe('set(tile[], at[])', function () {
+      it('should set multiple tiles & overwrite multiple tiles', function () {
+        map.set([ Tile.Water, Tile.Block ], [ origin, { x: 1, y: 0 }])
+        assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
+        assert.ok(map.has([ Tile.Water ], { x: 1, y: 0 }))
+      })
     })
   })
 
@@ -158,6 +161,9 @@ describe('WorldMap class', function () {
     it('should remove sidekick', function () {
       map.add(Tile.Burning, at)
       assert.ok(map.has(Tile.Burning, at))
+    })
+    it('should remove nothing when it\'s outside the map', function () {
+      assert.strictEqual(map.remove(Tile.Forest, { x: -1, y: -1 }), 0)
     })
   })
 
@@ -210,17 +216,19 @@ describe('WorldMap class', function () {
     assert.ok((around.get(Direction.SouthEast) as Tileset).has(Tile.Grass))
   })
 
-  it('has(tile, at)', function () {
-    assert.ok(map.has(Tile.Block, origin))
-    assert.strictEqual(map.has([ Tile.Water, Tile.Block ], origin), false)
-  })
+  describe('has', function () {
+    it('has(tile, at)', function () {
+      assert.ok(map.has(Tile.Block, origin))
+      assert.strictEqual(map.has([ Tile.Water, Tile.Block ], origin), false)
+    })
 
-  it('has(tile[], at)', function () {
-    map.add(Tile.Water, origin)
-    assert.ok(map.has(Tile.Block, origin))
-    assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
-    assert.ok(map.has([ Tile.Block, Tile.Water ], origin))
-    assert.strictEqual(map.has([ Tile.Block, Tile.Road ], origin), false)
+    it('has(tile[], at)', function () {
+      map.add(Tile.Water, origin)
+      assert.ok(map.has(Tile.Block, origin))
+      assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
+      assert.ok(map.has([ Tile.Block, Tile.Water ], origin))
+      assert.strictEqual(map.has([ Tile.Block, Tile.Road ], origin), false)
+    })
   })
 
   it('isWalkable(at)', function () {
@@ -235,12 +243,12 @@ describe('WorldMap class', function () {
   })
 
   it('fails when working outside the map', function () {
-    assert.strictEqual(map.contains({ x: 10, y: 10 }), false)
-
     const outside = { x: 10, y: 10 }
+    assert.strictEqual(map.contains(outside), false)
+    assert.strictEqual(map.has(Tile.Block, outside), false)
+
     const error = /Coords 10,10 is outside map \(5x5\)/
     assert.throws(() => map.isWalkable(outside), error)
-    assert.throws(() => map.has(Tile.Block, outside), error)
     assert.throws(() => map.get(outside), error)
   })
 
@@ -329,6 +337,7 @@ describe('WorldMap class', function () {
       })
     })
   })
+
   describe('helpers', function () {
     it('should stringify tiles', function () {
       assert.strictEqual(stringifyTiles(Tile.Forest), '[10/Forest]')

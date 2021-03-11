@@ -36,10 +36,11 @@ export type Size = {
 export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
 export enum Tile {
-  /*** Properties (Sidekick tiles) ***/
+  /*** Properties ***/
   Walkable,
   Block,
 
+  /*** Sidekick tiles ***/
   Burned,
   Burning,
 
@@ -49,7 +50,7 @@ export enum Tile {
   Level4,
   Level5,
 
-  /*** Cosmetic ***/
+  /*** Materials ***/
   Grass,
   Forest,
   Road,

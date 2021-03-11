@@ -42,14 +42,14 @@ class WorldMap extends EventEmitter {
 
     if (isCoords(here) && this.contains(here)) {
       const index = WorldMap.index(here)
-      const existing = this.tiles.get(index)
+      const existingTiles = this.tiles.get(index)
       const tileset = getSanitizedTileset(tiles)
-      if (existing) {
-        const merge = getSanitizedTileset([ ...existing, ...tileset ], true)
+      if (existingTiles) {
+        const merge = getSanitizedTileset([ ...existingTiles, ...tileset ], true)
         if (merge.size) {
           this.tiles.set(index, merge)
-          const newTiles = diffSet<Tileset>(merge, existing)
-          added += this.emitTileAdded(newTiles, here)
+          const newTiles = diffSet<Tileset>(merge, existingTiles)
+          added += this.emitTileAdded(newTiles, here, existingTiles)
         }
       } else {
         this.tiles.set(index, tileset)
@@ -59,10 +59,10 @@ class WorldMap extends EventEmitter {
     return added
   }
 
-  private emitTileAdded (tileset: Tileset, at: Coords): number {
+  private emitTileAdded (tileset: Tileset, at: Coords, existing?:Tileset): number {
     tileset.forEach(tile => {
-      this.emit(`tile:${tile}:added`, at)
-      this.emit('tile:added', { tile, at })
+      this.emit(`tile:${tile}:added`, at, existing)
+      this.emit('tile:added', { tile, at }, existing)
     })
     return tileset.size
   }
@@ -89,10 +89,14 @@ class WorldMap extends EventEmitter {
 
   remove (tile: Tile, at: Coords): number {
     let removed = 0
-    const existing = this.get(at)
-    if (existing.has(tile)) {
-      removed = Number(existing.delete(tile))
-      this.set(existing, at)
+    try {
+      const existing = this.get(at)
+      if (existing.has(tile)) {
+        removed = Number(existing.delete(tile))
+        this.set(existing, at)
+      }
+    } catch (e) {
+      // Do nothing
     }
     return removed
   }
@@ -116,6 +120,9 @@ class WorldMap extends EventEmitter {
     }
   }
 
+  /**
+   * @throws OutOfMapError
+   */
   get (at: Coords): Tileset {
     this.assertMapContains(at)
     const tiles = this.tiles.get(WorldMap.index(at))
@@ -143,6 +150,9 @@ class WorldMap extends EventEmitter {
     return around
   }
 
+  /**
+   * @throws OutOfMapError
+   */
   extract (center: Coords, surface: Size): WorldMap {
     this.assertMapContains(center)
     if ((surface.width - 1) % 2 !== 0 || (surface.height - 1) % 2 !== 0) {
@@ -180,10 +190,18 @@ class WorldMap extends EventEmitter {
   }
 
   has (tiles: OneOrMany<Tile>, at: Coords): boolean {
-    const tileset = this.get(at)
-    return toArray<Tile>(tiles).every(tile => tileset.has(tile))
+    try {
+      const tileset = this.get(at)
+      return toArray<Tile>(tiles).every(tile => tileset.has(tile))
+    } catch (e) {
+      // Do nothing
+    }
+    return false
   }
 
+  /**
+   * @throws OutOfMapError
+   */
   isWalkable (at: Coords): boolean {
     this.assertMapContains(at)
     return !this.has(Tile.Block, at)
@@ -193,6 +211,9 @@ class WorldMap extends EventEmitter {
     return point.x >= 0 && point.x < this.size.width && point.y >= 0 && point.y < this.size.height
   }
 
+  /**
+   * @throws OutOfMapError
+   */
   private assertMapContains (at: Coords): void {
     if (!this.contains(at)) {
       throw new OutOfMapError(at, this.size)

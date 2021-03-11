@@ -9,7 +9,7 @@
     "exp": "node --enable-source-maps build/src/engine/experiment.js",
     "dev": "tsc-watch --onSuccess 'npm run start'",
     "build": "echo 'Compiling TypeScript' && tsc --version && tsc",
-    "lint": "eslint 'src/**'",
+    "lint": "eslint --cache 'src/**'",
     "test": "mocha",
     "test:coverage": "nyc --reporter=text --reporter=html mocha",
     "postinstall": "npm run clean && npm run build",
