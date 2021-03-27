@@ -12,8 +12,8 @@ import { diffSet, toArray } from '@shared/helpers'
  * A 2D map describing the game board.
  *
  * Emit events:
- * - `tile:added`, ({ tile: Tile, at: Coords })
- * - `tile:${Tile}:added`, (at: Coords)
+ * - `tile:added`, ({ tile: Tile, at: Coords }, existingTiles: Tileset)
+ * - `tile:${Tile}:added`, (at: Coords, existingTiles: Tileset)
  */
 class WorldMap extends EventEmitter {
   static readonly defaultTile = Tile.Grass
@@ -60,9 +60,10 @@ class WorldMap extends EventEmitter {
   }
 
   private emitTileAdded (tileset: Tileset, at: Coords, existing?:Tileset): number {
+    const existingTiles = existing ?? WorldMap.emptyTileset
     tileset.forEach(tile => {
-      this.emit(`tile:${tile}:added`, at, existing)
-      this.emit('tile:added', { tile, at }, existing)
+      this.emit(`tile:${tile}:added`, at, existingTiles)
+      this.emit('tile:added', { tile, at }, existingTiles)
     })
     return tileset.size
   }

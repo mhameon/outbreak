@@ -29,7 +29,7 @@ winston.addColors({
   info: 'green',
   http: 'blue',
   verbose: 'cyan',
-  debug: 'grey',
+  debug: 'white',
   silly: 'grey',
 })
 
