@@ -8,7 +8,7 @@ export function isNumber (arg: any): arg is number {
 
 export function isCoords (arg: any): arg is Coords {
   const coords: Coords = arg
-  return isNumber(coords.x) && isNumber(coords.y)
+  return isNumber(coords?.x) && isNumber(coords?.y)
 }
 
 // TODO: Keep?

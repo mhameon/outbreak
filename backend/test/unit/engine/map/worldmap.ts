@@ -32,6 +32,7 @@ describe('WorldMap class', function () {
       return map.removeAllListeners('tile:added')
     })
     describe('add(tile, at)', function () {
+      const at = { x: 1, y: 1 }
       it('should add a tile at coords', function () {
         assert.ok(map.has(Tile.Block, origin))
       })
@@ -48,7 +49,6 @@ describe('WorldMap class', function () {
         assert.deepStrictEqual(tileAddedEvents, [{ tile: Tile.Water, at: origin }])
       })
       it('should not possible to burn water', function () {
-        const at = { x: 1, y: 1 }
         map.set(Tile.Water, at)
         assert.ok(map.has(Tile.Water, at))
         assert.strictEqual(map.get(at).size, 1)
@@ -57,6 +57,16 @@ describe('WorldMap class', function () {
         assert.ok(map.has(Tile.Water, at))
         assert.strictEqual(map.get(at).size, 1)
         assert.deepStrictEqual(tileAddedEvents, [])
+      })
+      it('should not possible to burn already burned ground', function () {
+        map.set([ Tile.Burned, Tile.Grass ], at)
+        assert.ok(map.has([ Tile.Burned, Tile.Grass ], at))
+
+        // FIXME: an added sidekick tile that "cancel" an ALREADY existing sidekick tile must be striped !
+        // Allow to remove `if (ground.has(Tile.Burned)) return false`in FireResolver:L82
+        // map.add(Tile.Burning, at)
+        // console.log(map.get(at))
+        // assert.ok(map.has([ Tile.Burned, Tile.Grass ], at))
       })
     })
     describe('add(tile, at[])', function () {
@@ -70,6 +80,10 @@ describe('WorldMap class', function () {
           { tile: Tile.Road, at: { x: 1, y: 0 } },
           { tile: Tile.Road, at: { x: 2, y: 0 } }
         ])
+      })
+      it('should add nothing with an empty at coords', function (){
+        assert.strictEqual(map.add(Tile.Road, new Set<Coords>()), 0)
+        assert.strictEqual(map.add(Tile.Road, []), 0)
       })
     })
     describe('add(tile[], at)', function () {

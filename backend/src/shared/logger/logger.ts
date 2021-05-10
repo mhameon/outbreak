@@ -39,7 +39,7 @@ let logger: winston.Logger
  * Returns a ready to use logger based on Winston.
  * @see https://github.com/winstonjs/winston
  *
- * Logs levels available are: `error`, `warn`, `info`, `http`, `verbose`, `debug` and `silly`
+ * Available logs levels are: `error`, `warn`, `info`, `http`, `verbose`, `debug` and `silly`
  *
  * @param label Log under this label
  * @param metadata Optional metadata added in logs. Useful for add context once.

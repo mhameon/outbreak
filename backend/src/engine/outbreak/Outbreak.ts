@@ -1,8 +1,9 @@
 import WorldMap from '../map/WorldMap'
 import { Renderers } from '../renderer'
-import { GameId } from '../types'
+import { GameId, Wind } from '../types'
 import { getLogger, Logger } from '@shared/logger'
 import { FireResolver, Resolvable } from './resolver'
+import { Options } from './'
 
 export class Outbreak {
   private static renderer = new Renderers.Ascii()
@@ -14,16 +15,16 @@ export class Outbreak {
   readonly resolvers: Array<Resolvable>
   private turn = 0 // 0 means not started
 
-  wind: { angle: number }
+  wind: Wind
 
   private players = new Map()
 
-  constructor (id: GameId, map: WorldMap) {
+  constructor (id: GameId, map: WorldMap, option?: Options) {
     this.id = id
     this.map = map
     this.createdAt = new Date()
 
-    this.wind = { angle: 45 }
+    this.wind = option?.wind ?? { angle: 0, force: 0 }
 
     this.log = getLogger('Outbreak', { gameId: this.id })
 

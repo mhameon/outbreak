@@ -104,3 +104,13 @@ export type Seed = number | string
 export type Matrix = Array<Matrix | number> // Recursive type
 
 export type Matrix2d = number[][]
+
+export type Wind = {
+  /** Wind angle in degrees, 0° is North */
+  angle: number
+  /**
+   * Wind force (0-12), inspired by Beaufort scale
+   * @see https://en.wikipedia.org/wiki/Beaufort_scale
+   */
+  force: number
+}

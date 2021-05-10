@@ -15,6 +15,7 @@ describe('map guards', function () {
     assert.ok(isCoords({ x: 0, y: 0 }))
     assert.strictEqual(isCoords({ x: null, y: undefined }), false)
     assert.strictEqual(isCoords('notCoords'), false)
+    assert.strictEqual(isCoords(undefined), false)
   })
 
   it('isCoordsArray', function () {

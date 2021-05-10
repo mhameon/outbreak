@@ -1,7 +1,6 @@
 import { getLogger } from '@shared/logger/logger'
 import readline, { CompleterResult } from 'readline'
 import { InvalidArgumentError } from '@shared/Errors'
-import { Writable } from 'stream'
 
 const log = getLogger('CLI')
 
@@ -24,14 +23,6 @@ export class CommandLineInterface {
       .createInterface({
         input: process.stdin,
         output: process.stdout,
-        // output: new Writable({
-        //   write: (chunk, encoding, callback) => {
-        //     if (!this.executeNextCommandSilently) {
-        //       process.stdout.write(chunk, encoding)
-        //     }
-        //     callback()
-        //   }
-        // }),
         completer: this.autocomplete.bind(this),
         prompt: ''
       })
@@ -46,7 +37,6 @@ export class CommandLineInterface {
                 readline.moveCursor(process.stdout, 0, -1)
                 readline.cursorTo(process.stdout, 0)
                 process.stdout.clearLine(0)
-                // readline.moveCursor(process.stdout, 0, -1)
               } else {
                 log.verbose('💻 "%s"', input)
                 this.executeNextCommandSilently = false
@@ -58,8 +48,6 @@ export class CommandLineInterface {
             }
           }
         }
-        // readline.cursorTo(process.stdout, 0, process.stdout.rows - 1)
-        // this.cli.prompt(true)
       })
       .on('close', () => {
         process.kill(process.pid, 'SIGINT')

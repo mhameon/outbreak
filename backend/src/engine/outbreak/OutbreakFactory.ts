@@ -1,20 +1,19 @@
 import { Outbreak } from './Outbreak'
 import { CityMapBuilder } from '../map/builder/city/CityMapBuilder'
-import { GameId, Size } from '../types'
+import { GameId, Seed } from '../types'
+import { Options } from '@engine/outbreak'
 
-type Options = {
-  size: Size
-}
 
 // Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
 const defaultOptions: Options = {
-  size: { width: 60, height: 25 }
+  size: { width: 160, height: 30 },
+  wind: { angle: 90, force: 4 }
 }
 
 export class OutbreakFactory {
   static create (id: GameId, options: Options = defaultOptions): Outbreak {
-    const mapBuilder = new CityMapBuilder(id, options.size)
-    const outbreak = new Outbreak(id, mapBuilder.getMapRef())
+    const mapBuilder = new CityMapBuilder(id as Seed, options.size)
+    const outbreak = new Outbreak(id, mapBuilder.getMapRef(), defaultOptions)
     mapBuilder.generate()
     return outbreak
   }

@@ -12,10 +12,10 @@ export class FireResolver extends Resolver {
   static readonly flame = {
     spreadAngle: 45,
     lifetime: [
-      { for: Tile.Grass, lifetime: 5 }, //burn longer
-      { for: Tile.Forest, lifetime: 6 },
-      { for: Tile.Road, lifetime: 2 },
-      { for: Tile.Building, lifetime: 3 }, //could randomly explode?
+      { is: 5, for: Tile.Grass }, //burn longer
+      { is: 6, for: Tile.Forest },
+      { is: 2, for: Tile.Road },
+      { is: 3, for: Tile.Building }, //could randomly explode?
     ]
   }
 
@@ -36,28 +36,24 @@ export class FireResolver extends Resolver {
   }
 
   static getFlameLifetime (tiles: Tileset): number {
-    // return toArray<Tile>(tiles).every(tile => tileset.has(tile))
-    const flame = FireResolver.flame.lifetime.find(spread => (tiles.has(spread.for)))
-    return flame?.lifetime ?? 1
+    const flameLifetime = FireResolver.flame.lifetime.find(tile => (tiles.has(tile.for)))
+    return flameLifetime?.is ?? 1
   }
 
   resolve (): void {
     this.log.profile('fire')
 
-    const windAngle = this.outbreak.wind.angle
-    //const spreadFactor = Math.floor(100 / FireResolver.flame.lifetime.max)
-
     const ignitions = new Set<Coords>()
     const ashes = new Set<Coords>()
-    this.flames.forEach((flame, at) => {
+    const windAngle = this.outbreak.wind.angle
 
+    this.flames.forEach((flame, at) => {
       const here = calculateDestination(at,
         random.range(
           windAngle - FireResolver.flame.spreadAngle,
           windAngle + FireResolver.flame.spreadAngle
         )
       )
-
       if (this.flameIsSpreading(here)) {
         ignitions.add(here)
       }
@@ -68,12 +64,7 @@ export class FireResolver extends Resolver {
       }
     })
 
-    //Apply
-    let ignitionsCounter = 0
-    if (ignitions.size > 0) {
-      ignitions.forEach(flamingCoords => ashes.delete(flamingCoords))
-      ignitionsCounter = this.outbreak.map.add(Tile.Burning, ignitions)
-    }
+    const ignitionsCounter = this.outbreak.map.add(Tile.Burning, ignitions)
     if (ashes.size > 0) {
       this.outbreak.map.replace(Tile.Burning, Tile.Burned, [ ...ashes ])
       ashes.forEach(at => this.flames.delete(at))
@@ -86,7 +77,13 @@ export class FireResolver extends Resolver {
   private flameIsSpreading (at: Coords): boolean {
     try {
       const ground = this.outbreak.map.get(at)
+
+      // Flame can't propagate on already burned ground
       if (ground.has(Tile.Burned)) return false
+
+      if (this.outbreak.wind.force < 2) {
+        return false
+      }
 
       return true
     } catch (e) {
