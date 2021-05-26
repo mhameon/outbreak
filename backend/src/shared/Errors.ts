@@ -2,9 +2,9 @@ import config from 'config'
 import { LeveledLogMethod } from 'winston'
 import { getLogger, LogMethod } from './logger'
 
-let logErrorWithDefault: LogMethod
+let logErrorWithDefaultLevel: LogMethod
 if (config.get('logger.exception')) {
-  logErrorWithDefault = getLogger('Exception').error
+  logErrorWithDefaultLevel = getLogger('Exception').error
 }
 
 export abstract class CustomError extends Error {
@@ -13,7 +13,7 @@ export abstract class CustomError extends Error {
     this.name = this.constructor.name
     if (logErrorWith) {
       logErrorWith === true
-        ? logErrorWithDefault(message)
+        ? logErrorWithDefaultLevel(message)
         : logErrorWith(message)
     }
   }

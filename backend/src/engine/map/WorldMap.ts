@@ -3,17 +3,19 @@ import { OutOfMapError } from './WorldMapErrors'
 import { isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
-import { getSanitizedTileset } from '@engine/map/tilerules'
+import { getSanitizedTileset, addSanitizedTileset } from '@engine/map/tilerules'
 import { Values, OneOrMany } from '@shared/types'
-import { EventEmitter } from 'events'
 import { diffSet, toArray } from '@shared/helpers'
+import { EventEmitter } from 'events'
 
 /**
- * A 2D map describing the game board.
+ * A 2D map structure describing the game board
  *
- * Emit events:
- * - `tile:added`, ({ tile: Tile, at: Coords }, existingTiles: Tileset)
- * - `tile:${Tile}:added`, (at: Coords, existingTiles: Tileset)
+ * Emit events
+ * | Event                | Signature                                              |
+ * |----------------------|--------------------------------------------------------|
+ * | `tile:added`         | `({ tile: Tile, at: Coords }, existingTiles: Tileset)` |
+ * | `tile:${Tile}:added` | `(at: Coords, existingTiles: Tileset)`                 |
  */
 class WorldMap extends EventEmitter {
   static readonly defaultTile = Tile.Grass
@@ -32,6 +34,10 @@ class WorldMap extends EventEmitter {
     this.name = 'Unnamed map'
   }
 
+  /**
+   * @return Number of added tiles (can differs from `tiles` size due to tiles rules)
+   * @see tilerules.ts
+   */
   add (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): number {
     let added = 0
     const coords = toArray(at)
@@ -45,6 +51,7 @@ class WorldMap extends EventEmitter {
       const existingTiles = this.tiles.get(index)
       const tileset = getSanitizedTileset(tiles)
       if (existingTiles) {
+        //const merge = addSanitizedTileset(existingTiles, tileset)
         const merge = getSanitizedTileset([ ...existingTiles, ...tileset ], true)
         if (merge.size) {
           this.tiles.set(index, merge)

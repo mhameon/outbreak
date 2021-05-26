@@ -64,10 +64,10 @@ export const matrix = {
   },
 
   sharpen2: (array: Matrix): Matrix => {
-    const absolutize = (entry: MatrixEntry): MatrixEntry => (
-      isNumber(entry) ? entry * entry : entry.map(absolutize)
+    const pow = (entry: MatrixEntry): MatrixEntry => (
+      isNumber(entry) ? entry * entry : entry.map(pow)
     )
-    return array.map(absolutize)
+    return array.map(pow)
   },
 
   /** Normalize a Matrix (converts all entries to values between 0 to 1 with magnitude scale conservation) */

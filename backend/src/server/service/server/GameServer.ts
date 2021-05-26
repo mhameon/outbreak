@@ -12,7 +12,6 @@ import { ConnectionRefusedError } from './ServerErrors'
 
 // Fixme: must be typed (and lives in another file?)
 type Player = any
-
 interface ServerStatus {
   started: boolean
   uptime: number
@@ -22,6 +21,9 @@ interface ServerStatus {
 
 const LOBBY = 'lobby'
 
+/**
+ * Multiplayer socket server
+ */
 export class GameServer {
   static maxShutdownDelayInSeconds = 5
 

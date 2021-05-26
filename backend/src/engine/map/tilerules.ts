@@ -1,6 +1,6 @@
 import { Tile, RenderTile, Tileset } from '@engine/types'
 import { UnknownRenderTile } from '@engine/map/WorldMapErrors'
-import { toSet, toArray } from '@shared/helpers'
+import { toSet, toArray, diffSet } from '@shared/helpers'
 import { OneOrMany } from '@shared/types'
 
 /**
@@ -23,7 +23,7 @@ import { OneOrMany } from '@shared/types'
  * Note: Sidekick tiles are not necessary compatible with all tiles (Ex: Burning + Water)
  *       and should be declared as exclusive
  *
- * "Classical" Tiles and Sideckicks can be "merged" to produce a `RenderTile`.
+ * "Classical" Tiles and Sidekicks can be "merged" to produce a `RenderTile`.
  * Examples:
  * - Water + Road = Bridge (same as Road + Water)
  * - Building + Level5 = a high building
@@ -144,7 +144,7 @@ export function getSanitizedTileset (tiles: OneOrMany<Tile>, removeOrphanSidekic
     }
   })
   if (removeOrphanSidekickTiles) {
-    const tilesetCopy: Tileset = new Set(tileset)
+    const tilesetCopy = new Set(tileset)
     tilerules.rendering.forEach(({ and }) => {
       if (and.every(tile => tileset.has(tile))) {
         // `gives` key contains the found RenderTile
@@ -159,6 +159,36 @@ export function getSanitizedTileset (tiles: OneOrMany<Tile>, removeOrphanSidekic
   }
 
   return tileset
+}
+
+export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMany<Tile>): Tileset {
+  const tileset = toSet<Tile>(tiles)
+  const existing = toSet<Tile>(toExisting)
+  tilerules.exclusions.forEach(excluded => {
+    if (excluded.every(tile => tileset.has(tile))) {
+      excluded.forEach(tile => tileset.delete(tile))
+    }
+  })
+  existing.forEach(exists => {
+    if ( tileset.has(exists) ){
+      tileset.delete(exists)
+    }
+  })
+
+  const unusedTiles = new Set(tileset)
+  tilerules.rendering.forEach(({ and }) => {
+    if (and.every(tile => tileset.has(tile))) {
+      and.forEach(tile => unusedTiles.delete(tile))
+    }
+  })
+
+  tilerules.sidekicks.forEach(sidekick => {
+    if (!unusedTiles.has(sidekick)) {
+      unusedTiles.delete(sidekick)
+    }
+  })
+
+  return diffSet<Tileset>(tileset, unusedTiles)
 }
 
 /**

@@ -109,8 +109,7 @@ export type Wind = {
   /** Wind angle in degrees, 0° is North */
   angle: number
   /**
-   * Wind force (0-12), inspired by Beaufort scale
-   * @see https://en.wikipedia.org/wiki/Beaufort_scale
+   * Wind force (0-10): 0 - no spread, 10 - 100% flame spread
    */
   force: number
 }

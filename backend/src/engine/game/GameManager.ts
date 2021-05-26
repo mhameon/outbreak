@@ -19,8 +19,10 @@ type Game = {
 /**
  * Handle & Manage games (Outbreak)
  *
- * Emit events:
- * - `game:deleted`, (gameId: GameId)
+ * Emit events
+ * | Event          | Signature        |
+ * |----------------|------------------|
+ * | `game:deleted` | (gameId: GameId) |
  */
 export class GameManager extends EventEmitter{
   static GAME_ID_PREFIX = 'game:'
