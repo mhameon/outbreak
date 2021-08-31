@@ -9,5 +9,6 @@
   "ui": "bdd",
   "watch-files": ["build/src/**/*.js", "build/test/**/*.js"],
   "watch-ignore": [],
-  "bail": true
+  "bail": true,
+  "enable-source-maps": true
 }
