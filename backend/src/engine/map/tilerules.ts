@@ -36,6 +36,7 @@ import { OneOrMany } from '@shared/types'
 
 type Tilerules = {
   exclusions: Array<Array<Tile>>
+  properties: Array<Tile>
   sidekicks: Array<Tile>
   rendering: Array<{ and: Array<Tile>; gives: RenderTile }>
 }
@@ -49,11 +50,14 @@ export const tilerules: Tilerules = {
     [ Tile.Burned, Tile.Water ],
     [ Tile.Burned, Tile.Burning ]
   ],
+  properties: [
+    Tile.Block,
+    Tile.Walkable
+  ],
   sidekicks: [
     Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5,
     Tile.Burning,
     Tile.Burned,
-    //Tile.Block, Tile.Walkable
   ],
   rendering: [
     // Must be declared descending
@@ -75,7 +79,7 @@ export const tilerules: Tilerules = {
     { and: [ Tile.Building, Tile.Level4 ], gives: RenderTile.BuildingL4 },
     { and: [ Tile.Building, Tile.Level5 ], gives: RenderTile.BuildingL5 },
     { and: [ Tile.Burning, Tile.Grass ], gives: RenderTile.BurningGrass },
-    { and: [ Tile.Burning, Tile.Walkable ], gives: RenderTile.BurningGrass }, // default
+    //{ and: [ Tile.Burning, Tile.Walkable ], gives: RenderTile.BurningGrass }, // default
     { and: [ Tile.Burning, Tile.Forest ], gives: RenderTile.BurningForest },
     { and: [ Tile.Burning, Tile.Road ], gives: RenderTile.BurningRoad },
     { and: [ Tile.Burned, Tile.Grass ], gives: RenderTile.BurnedGrass },
@@ -194,7 +198,14 @@ export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMa
  * @throws UnknownRenderTile when no `RenderTile` is found
  */
 export function getRenderTile (tiles: OneOrMany<Tile>): RenderTile {
-  const tilesArray = toArray<Tile>(tiles)
+  const tileset = toSet<Tile>(tiles)
+  tilerules.properties.forEach(propTile => {
+    if (tileset.has(propTile)) {
+      tileset.delete(propTile)
+    }
+  })
+
+  const tilesArray = toArray<Tile>(tileset)
 
   // There is a standalone Tile corresponding to a RenderTile ?
   if (tilesArray.length === 1) {
@@ -202,8 +213,7 @@ export function getRenderTile (tiles: OneOrMany<Tile>): RenderTile {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tileName: any = Tile[tilesArray[0]]
     if (RenderTile[tileName] !== undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return RenderTile[tileName] as any
+      return RenderTile[tileName] as unknown as RenderTile
     }
   }
 

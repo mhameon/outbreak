@@ -90,6 +90,7 @@ export enum RenderTile {
   BurnedBuildingL3,
   BurnedBuildingL4,
   BurnedBuildingL5,
+  Zombie,
 }
 
 export type Index = string

@@ -54,6 +54,8 @@ describe('tilerules', function () {
       it('should find a "double" render tile (Bridge) in any order', function () {
         assert.strictEqual(getRenderTile([ Tile.Road, Tile.Water ]), RenderTile.Bridge)
         assert.strictEqual(getRenderTile([ Tile.Water, Tile.Road ]), RenderTile.Bridge)
+        assert.strictEqual(getRenderTile([ Tile.Water ]), RenderTile.Water)
+        assert.strictEqual(getRenderTile([ Tile.Water, Tile.Block ]), RenderTile.Water)
       })
       it('should find a "triple" render tile (BurningBuildingL1) in any order', function () {
         assert.strictEqual(getRenderTile([ Tile.Burning, Tile.Building, Tile.Level1 ]), RenderTile.BurningBuildingL1)

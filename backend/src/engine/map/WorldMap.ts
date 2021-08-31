@@ -85,14 +85,7 @@ export class WorldMap extends EventEmitter {
 
     if (isCoords(here)) {
       const tileset = getSanitizedTileset(tiles, true)
-      const index = WorldMap.index(here)
-      this.tiles.delete(index)
-      if (
-        tileset.size >= 1
-        && !(tileset.size === 1 && (tileset.has(Tile.Walkable) /*|| tileset.has(WorldMap.defaultTile)*/))
-      ) {
-        this.tiles.set(index, tileset)
-      }
+      this.tiles.set(WorldMap.index(here), tileset)
     }
   }
 

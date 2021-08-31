@@ -42,7 +42,7 @@ export class CityMapBuilder extends MapBuilder {
         this.map.add([ Tile.Building, Tile[`Level${floor}` as BuildingLevel] ], coords)
       }
       if (value <= thresholds.water) {
-        this.map.set(Tile.Water, coords)
+        this.map.set([ Tile.Water, Tile.Block ], coords)
       }
     }, world)
 

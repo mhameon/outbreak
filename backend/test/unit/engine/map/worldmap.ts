@@ -31,6 +31,13 @@ describe('WorldMap class', function () {
     afterEach(function () {
       return map.removeAllListeners('tile:added')
     })
+
+    it('should not duplicate tiles', function () {
+      map.add(Tile.Block, origin)
+      const tiles = map.get(origin)
+      assert.strictEqual(tiles.size, 1)
+    })
+
     describe('add(tile, at)', function () {
       const at = { x: 1, y: 1 }
       it('should add a tile at coords', function () {
@@ -81,7 +88,7 @@ describe('WorldMap class', function () {
           { tile: Tile.Road, at: { x: 2, y: 0 } }
         ])
       })
-      it('should add nothing with an empty at coords', function (){
+      it('should add nothing with an empty at coords', function () {
         assert.strictEqual(map.add(Tile.Road, new Set<Coords>()), 0)
         assert.strictEqual(map.add(Tile.Road, []), 0)
       })
@@ -109,7 +116,7 @@ describe('WorldMap class', function () {
     })
   })
 
-  describe('set', function() {
+  describe('set', function () {
     describe('set(tile, at)', function () {
       it('should overwrite existing tile', function () {
         map.set(Tile.Road, origin)
@@ -130,12 +137,6 @@ describe('WorldMap class', function () {
         map.set([ Tile.Water, Tile.Block ], origin)
         assert.ok(map.has([ Tile.Water, Tile.Block ], origin))
       })
-      it('should get default tile when set with nothing', function () {
-        map.set([], origin)
-        assert.strictEqual(WorldMap.defaultTile, Tile.Grass)
-        assert.ok(map.has(Tile.Grass, origin))
-        assert.strictEqual(map.get(origin).size, 1)
-      })
       it('should ignore incompatible tiles', function () {
         map.set([ Tile.Walkable, Tile.Block, Tile.Road ], origin)
         assert.ok(map.has(Tile.Road, origin))
@@ -146,8 +147,8 @@ describe('WorldMap class', function () {
         assert.strictEqual(map.get(origin).size, 1)
 
         map.set([ Tile.Burned, Tile.Water ], origin)
-        assert.ok(map.has(Tile.Grass, origin))
-        assert.strictEqual(map.get(origin).size, 1)
+        assert.ok(map.get(origin), undefined)
+        assert.strictEqual(map.get(origin).size, 0)
       })
     })
     describe('set(tile[], at[])', function () {
@@ -221,7 +222,6 @@ describe('WorldMap class', function () {
     assert.strictEqual(around.get(Direction.NorthWest), undefined)
     assert.strictEqual(around.get(Direction.North), undefined)
     assert.strictEqual(around.get(Direction.NorthEast), undefined)
-
     assert.ok((around.get(Direction.West) as Tileset).has(Tile.Block))
     assert.ok((around.get(Direction.East) as Tileset).has(Tile.Grass), stringifyTiles(around.get(Direction.East) as Tileset))
 
@@ -248,12 +248,6 @@ describe('WorldMap class', function () {
   it('isWalkable(at)', function () {
     assert.strictEqual(map.isWalkable(origin), false)
     assert.ok(map.isWalkable({ x: 1, y: 0 }))
-  })
-
-  it('No tile duplication', function () {
-    map.add(Tile.Block, origin)
-    const tiles = map.get(origin)
-    assert.strictEqual(tiles.size, 1)
   })
 
   it('fails when working outside the map', function () {

@@ -32,6 +32,7 @@ TileAtlas[RenderTile.BurnedBuildingL2] = chalk.hex('#000000').bgHex('#999999')('
 TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('▒')
 TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
+TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('☹︎')
 
 class AsciiMapRenderer extends MapRenderer {
   protected renderer (): string {
@@ -59,7 +60,7 @@ class AsciiMapRenderer extends MapRenderer {
         // Do Nothing
       }
     }
-    return chalk.red('?')
+    return chalk.hex('#ea6a6a').bgHex('#6c0101')('?')
   }
 }
 

@@ -10,8 +10,8 @@ import { GameManager } from '@engine/game/GameManager'
 import { GameId } from '@engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 
-// Fixme: must be typed (and lives in another file?)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Todo: continue typing
+// Fixme: must lives in another file?
 export interface Player {
   id: string
   name?: string
