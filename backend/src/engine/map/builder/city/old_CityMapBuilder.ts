@@ -1,7 +1,7 @@
 import { matrix } from '@engine/math'
 import AsciiMapRenderer from '../../../renderer/ascii/AsciiMapRenderer'
 import MapBuilder from '../MapBuilder'
-import WorldMap from '../../WorldMap'
+import { WorldMap } from '../../WorldMap'
 import { Tile, BuildingLevel, Coords, Seed } from '@engine/types'
 import { InvalidArgumentError } from '@shared/Errors'
 import { line, calculateDestination } from '../../../math/geometry'

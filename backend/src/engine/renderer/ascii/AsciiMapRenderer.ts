@@ -2,7 +2,7 @@ import MapRenderer from '../MapRenderer'
 import { Tileset, RenderTile } from '@engine/types'
 import chalk from 'chalk'
 import { getRenderTile } from '@engine/map/tilerules'
-import WorldMap from '@engine/map/WorldMap'
+import { WorldMap } from '@engine/map/WorldMap'
 
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')

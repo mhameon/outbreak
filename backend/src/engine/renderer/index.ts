@@ -1,6 +1,6 @@
 import MapRenderer from './MapRenderer'
 import AsciiMapRenderer from './ascii/AsciiMapRenderer'
-import WorldMap from '@engine/map/WorldMap'
+import { WorldMap } from '@engine/map/WorldMap'
 
 export type Renderer = 'Ascii' // | 'ThreeJS' | 'HTML'
 

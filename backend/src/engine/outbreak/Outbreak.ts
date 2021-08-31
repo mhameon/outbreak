@@ -1,4 +1,4 @@
-import WorldMap from '../map/WorldMap'
+import { WorldMap } from '../map/WorldMap'
 import { Renderers } from '../renderer'
 import { GameId } from '../types'
 import { getLogger, Logger } from '@shared/logger'

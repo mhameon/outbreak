@@ -1,6 +1,6 @@
 import { isWorldMap } from '@engine/map/guards'
 import { validate } from '@shared/validator'
-import WorldMap from '../map/WorldMap'
+import { WorldMap } from '../map/WorldMap'
 
 abstract class MapRenderer {
   protected map!: WorldMap

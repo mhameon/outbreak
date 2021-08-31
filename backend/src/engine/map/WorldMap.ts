@@ -17,14 +17,15 @@ import { EventEmitter } from 'events'
  * | `tile:added`         | `({ tile: Tile, at: Coords }, existingTiles: Tileset)` |
  * | `tile:${Tile}:added` | `(at: Coords, existingTiles: Tileset)`                 |
  */
-class WorldMap extends EventEmitter {
+export class WorldMap extends EventEmitter {
   static readonly defaultTile = Tile.Grass
   static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
+
   readonly size: Size
   readonly seeder?: Seeder
   readonly name: string
 
-  private tiles: Map<Index, Tileset>
+  private readonly tiles: Map<Index, Tileset>
 
   constructor (size: Size, seeder?: Seeder) {
     super()
@@ -238,5 +239,3 @@ class WorldMap extends EventEmitter {
     return { x: Number(x), y: Number(y) }
   }
 }
-
-export default WorldMap

@@ -1,6 +1,6 @@
 import { matrix, NoiseFactory } from '@engine/math'
 import MapBuilder from '@engine/map/builder/MapBuilder'
-import WorldMap from '@engine/map/WorldMap'
+import { WorldMap } from '@engine/map/WorldMap'
 import { Tile, BuildingLevel } from '@engine/types'
 import { line } from '@engine/math/geometry'
 

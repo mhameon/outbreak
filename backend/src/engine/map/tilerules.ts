@@ -87,48 +87,46 @@ export const tilerules: Tilerules = {
 // Experiment. tilerules.renderings alternative (but write the parser is pain in the ass right now)
 // type Renderable = { with: Tile; gives: RenderTile; and?: Array<Renderable> }
 // type RenderingV2 = Array<[ Tile, Array<Renderable> ]>
-// const renderingV2: RenderingV2 = [
-//   [ Tile.Water, [
-//     { with: Tile.Road, gives: RenderTile.Bridge },
-//   ]],
-//   [ Tile.Burning, [
-//     { with: Tile.Walkable, gives: RenderTile.BurningGrass },
-//     { with: Tile.Forest, gives: RenderTile.BurningForest },
-//     { with: Tile.Road, gives: RenderTile.BurningRoad },
-//     { with: Tile.Grass, gives: RenderTile.BurnedGrass },
-//   ]],
-//   [ Tile.Building, [
-//     {
+// export const renderingV2: RenderingV2 = [
+//   [
+//     Tile.Water, [
+//       { with: Tile.Road, gives: RenderTile.Bridge }]
+//   ],
+//   [
+//     Tile.Burning, [
+//       { with: Tile.Walkable, gives: RenderTile.BurningGrass },
+//       { with: Tile.Grass, gives: RenderTile.BurnedGrass },
+//       { with: Tile.Forest, gives: RenderTile.BurningForest },
+//       { with: Tile.Road, gives: RenderTile.BurningRoad }]
+//   ],
+//   [
+//     Tile.Building, [{
 //       with: Tile.Level1, gives: RenderTile.BuildingL1, and: [
 //         { with: Tile.Burning, gives: RenderTile.BurningBuildingL1 },
 //         { with: Tile.Burned, gives: RenderTile.BurnedBuildingL1 }
 //       ],
-//     },
-//     {
+//     }, {
 //       with: Tile.Level2, gives: RenderTile.BuildingL2, and: [
 //         { with: Tile.Burning, gives: RenderTile.BurningBuildingL2 },
 //         { with: Tile.Burned, gives: RenderTile.BurnedBuildingL2 }
 //       ],
-//     },
-//     {
+//     }, {
 //       with: Tile.Level3, gives: RenderTile.BuildingL3, and: [
 //         { with: Tile.Burning, gives: RenderTile.BurningBuildingL3 },
 //         { with: Tile.Burned, gives: RenderTile.BurnedBuildingL3 }
 //       ],
-//     },
-//     {
+//     }, {
 //       with: Tile.Level4, gives: RenderTile.BuildingL4, and: [
 //         { with: Tile.Burning, gives: RenderTile.BurningBuildingL4 },
 //         { with: Tile.Burned, gives: RenderTile.BurnedBuildingL4 }
 //       ],
-//     },
-//     {
+//     }, {
 //       with: Tile.Level5, gives: RenderTile.BuildingL5, and: [
 //         { with: Tile.Burning, gives: RenderTile.BurningBuildingL5 },
 //         { with: Tile.Burned, gives: RenderTile.BurnedBuildingL5 }
 //       ],
-//     }
-//   ]],
+//     }]
+//   ],
 // ]
 
 
@@ -170,7 +168,7 @@ export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMa
     }
   })
   existing.forEach(exists => {
-    if ( tileset.has(exists) ){
+    if (tileset.has(exists)) {
       tileset.delete(exists)
     }
   })

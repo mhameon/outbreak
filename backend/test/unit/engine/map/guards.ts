@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap } from '@engine/map/guards'
 import * as assert from 'assert'
-import WorldMap from '@engine/map/WorldMap'
+import { WorldMap } from '@engine/map/WorldMap'
 
 describe('map guards', function () {
   it('isNumber', function () {

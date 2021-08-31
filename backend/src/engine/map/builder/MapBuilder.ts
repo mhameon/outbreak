@@ -1,5 +1,5 @@
 import { Seed, Size } from '@engine/types'
-import WorldMap from '../WorldMap'
+import { WorldMap } from '../WorldMap'
 import { getLogger } from '@shared/logger'
 
 export type Seeder = { builder: string; seed: Seed }

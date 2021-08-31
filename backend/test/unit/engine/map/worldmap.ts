@@ -1,4 +1,4 @@
-import WorldMap from '@engine/map/WorldMap'
+import { WorldMap } from '@engine/map/WorldMap'
 import { Tile, Direction, Tileset, Coords, InMapTile } from '@engine/types'
 
 import * as assert from 'assert'
