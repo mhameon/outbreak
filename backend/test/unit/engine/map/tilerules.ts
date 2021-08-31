@@ -72,7 +72,7 @@ describe('tilerules', function () {
           assert.fail('should have been throw UnknownRenderTile')
         } catch (e) {
           assert.ok(e instanceof UnknownRenderTile)
-          assert.strictEqual(e.message, 'No RenderTile found for tiles [10/Forest, 11/Road]')
+          assert.strictEqual(e.message, 'No RenderTile found for tiles [101/Forest, 102/Road]')
         }
       })
     })

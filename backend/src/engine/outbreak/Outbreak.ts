@@ -1,9 +1,11 @@
 import WorldMap from '../map/WorldMap'
 import { Renderers } from '../renderer'
-import { GameId, Wind } from '../types'
+import { GameId } from '../types'
 import { getLogger, Logger } from '@shared/logger'
 import { FireResolver, Resolvable } from './resolver'
 import { Options } from './'
+import { Wind } from '@engine/outbreak/environment/Wind'
+import { Player } from '@server/service/server/GameServer'
 
 export class Outbreak {
   private static renderer = new Renderers.Ascii()
@@ -12,11 +14,11 @@ export class Outbreak {
   readonly id: GameId
   readonly createdAt: Date
   readonly map: WorldMap
+
+  readonly wind: Wind
   readonly resolvers: Array<Resolvable>
+
   private turn = 0 // 0 means not started
-
-  wind: Wind
-
   private players = new Map()
 
   constructor (id: GameId, map: WorldMap, option?: Options) {
@@ -24,9 +26,9 @@ export class Outbreak {
     this.map = map
     this.createdAt = new Date()
 
-    this.wind = option?.wind ?? { angle: 0, force: 0 }
-
     this.log = getLogger('Outbreak', { gameId: this.id })
+
+    this.wind = new Wind(option?.wind)
 
     this.resolvers = [
       new FireResolver(this)
@@ -57,6 +59,7 @@ export class Outbreak {
   }
 
   render (): string {
+    const windForce = (''.padEnd(this.wind.force, '◼')) + (''.padEnd(Wind.maxForce - this.wind.force, '◻'))
     const windRose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
     const negativeAngle = this.wind.angle < 0
     let direction = Math.floor(Math.abs(this.wind.angle) / 45) + (Math.abs(this.wind.angle) % 45 >= 22.5 ? 1 : 0)
@@ -64,13 +67,13 @@ export class Outbreak {
 
     return ''
       + `Outbreak: ${this.id} (${this.createdAt.toISOString()})\n`
-      + `Wind    : ${this.wind.angle}° ${windRose[negativeAngle ? 8 - direction : direction]}\n`
+      + `Wind    : ${windRose[negativeAngle ? 8 - direction : direction]} ${this.wind.angle}° ${windForce} Force ${this.wind.force}\n`
       + `Turn    : ${this.turn || 'Not started'}\n`
       + `${Outbreak.renderer.render(this.map)}`
     // + `\n${Outbreak.renderer.render(this.map.extract({ x: 2, y: 2 }, { width: 5, height: 5 }))}`
   }
 
-  joinPlayer (player: any): void {
+  joinPlayer (player: Player): void {
     if (this.turn === 0) {
       this.players.set(player.id, player)
     } else {

@@ -18,6 +18,10 @@ describe('random', function () {
       const range = random.range(1, 2)
       assert.ok(range === 1 || range === 2, `Unexpected random number: ${range}`)
     })
+    it('should find integer between -1 and -2', function () {
+      const range = random.range(-2, -1)
+      assert.ok(range === -1 || range === -2, `Unexpected random number: ${range}`)
+    })
     it('should find float between 1.0 and 1.2', function () {
       const range = random.range(1, 1.2, 1)
       assert.ok(range === 1 || range === 1.1 || range === 1.2, `Unexpected random number: ${range}`)

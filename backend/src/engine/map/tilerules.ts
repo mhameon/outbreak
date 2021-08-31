@@ -21,14 +21,14 @@ import { OneOrMany } from '@shared/types'
  * ==> We call them "Sidekick"
  *
  * Note: Sidekick tiles are not necessary compatible with all tiles (Ex: Burning + Water)
- *       and should be declared as exclusive
+ *       and should be declared in Exclusions
  *
  * "Classical" Tiles and Sidekicks can be "merged" to produce a `RenderTile`.
  * Examples:
- * - Water + Road = Bridge (same as Road + Water)
+ * - Water + Road = Bridge
  * - Building + Level5 = a high building
- * - Forest + Fire = a burning forest
- * - Forest + Burned = a burned forest
+ * - Forest + Fire = a burning forest (flaming)
+ * - Forest + Burned = a burned forest (ashes)
  * - Burned + Iced + Building = a burned building under the snow
  * Order doesn't matter and produce the same result. Generally composed by 2 tiles, but can be more.
  * ==> We call them "Rendering"

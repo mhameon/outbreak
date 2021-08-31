@@ -11,8 +11,13 @@ import { GameId } from '@engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 
 // Fixme: must be typed (and lives in another file?)
-type Player = any
-interface ServerStatus {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Player {
+  id: string
+  name?: string
+}
+
+export interface ServerStatus {
   started: boolean
   uptime: number
   rooms: Array<string>
@@ -33,7 +38,7 @@ export class GameServer {
 
   readonly game: GameManager
   private readonly rooms = new Set<string>()
-  private readonly clients = new WeakMap<io.Socket, Player>()
+  private readonly clients = new WeakMap<io.Socket, { player: Player; socket: any }>()
 
   private isShuttingDown = false
   private startListeningAt?: Date
@@ -93,8 +98,7 @@ export class GameServer {
 
         if (!args.gameId) {
           gameId = this.game.create()
-        }
-        else {
+        } else {
           gameId = args.gameId
           if (!this.game.has(gameId)) {
             return ack({ gameId: null })
@@ -214,8 +218,8 @@ export class GameServer {
 
       // Fixme Keep? Or move clients in each Outbreak via GameManager?
       this.clients.set(socket, {
-        user: {
-          id: +new Date(),
+        player: {
+          id: +new Date() + '',
           name: 'Harcoded name ' + Math.random(),
         },
         socket: {
@@ -243,8 +247,7 @@ export class GameServer {
               this.game.delete(gameId)
             }
           })
-        }
-        else {
+        } else {
           assert(gameRooms.length === 0, 'A player can\'t only be in one game at the time')
         }
       })
@@ -285,8 +288,7 @@ export class GameServer {
         wasLast = true
       }
       log.info('💔 Leave room `%s`', room, { socketId: socket.id, room, wasLast })
-    }
-    else {
+    } else {
       log.warn('Can\'t leave a room you\'re not in', room, { socketId: socket.id, room })
     }
     if (callback) {

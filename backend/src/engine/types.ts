@@ -41,7 +41,7 @@ export enum Tile {
   Block,
 
   /*** Sidekick tiles ***/
-  Burned,
+  Burned = 10,
   Burning,
 
   Level1,
@@ -50,8 +50,11 @@ export enum Tile {
   Level4,
   Level5,
 
+  /*** Entities ***/
+  Zombie = 50,
+
   /*** Materials ***/
-  Grass,
+  Grass = 100,
   Forest,
   Road,
   Water,
@@ -86,7 +89,7 @@ export enum RenderTile {
   BurnedBuildingL2,
   BurnedBuildingL3,
   BurnedBuildingL4,
-  BurnedBuildingL5
+  BurnedBuildingL5,
 }
 
 export type Index = string
@@ -105,8 +108,8 @@ export type Matrix = Array<Matrix | number> // Recursive type
 
 export type Matrix2d = number[][]
 
-export type Wind = {
-  /** Wind angle in degrees, 0° is North */
+export type WindSettings = {
+  /** Wind angle in degrees, 0° is North, clockwise */
   angle: number
   /**
    * Wind force (0-10): 0 - no spread, 10 - 100% flame spread

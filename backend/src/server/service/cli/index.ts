@@ -12,16 +12,19 @@ let cli: CommandLineInterface
 // Usage: `serverCLI(true, server)` or `serverCLI(true)(server)`
 // {@link https://medium.com/@FabriceTavilla/le-currying-en-javascript-cdcf98fae54e|Currying}
 export function serverCLI (enabled: boolean, server?: GameServer): Plugin<CommandLineInterface> {
-  if (enabled) {
-    return server
-      ? initializeCommandLineInterface(server)
-      : (server: GameServer) => initializeCommandLineInterface(server)
+  if (!enabled) {
+    log.info('🟥 The 💻 CLI is disabled')
+    return
   }
-  log.info('🟥 The 💻 CLI is disabled')
+
+  return server
+    ? initializeCommandLineInterface(server)
+    : (server: GameServer) => initializeCommandLineInterface(server)
 }
 
 function initializeCommandLineInterface (server: GameServer): CommandLineInterface {
   log.info('🟩 The 💻 CLI is enabled - type "help" for available commands')
+
   if (!cli) {
     cli = new CommandLineInterface()
     registerServerCommands(cli, server)

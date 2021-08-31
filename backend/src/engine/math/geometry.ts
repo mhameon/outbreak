@@ -1,6 +1,6 @@
 import { Coords } from '@engine/types'
 
-const PI = 3.14159265
+const PI = 3.14159265 as const
 
 /**
  * @param origin Coords

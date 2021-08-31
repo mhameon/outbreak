@@ -3,7 +3,7 @@ import { OutOfMapError } from './WorldMapErrors'
 import { isCoords } from './guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
-import { getSanitizedTileset, addSanitizedTileset } from '@engine/map/tilerules'
+import { getSanitizedTileset } from '@engine/map/tilerules'
 import { Values, OneOrMany } from '@shared/types'
 import { diffSet, toArray } from '@shared/helpers'
 import { EventEmitter } from 'events'
@@ -160,6 +160,7 @@ class WorldMap extends EventEmitter {
 
   /**
    * @throws OutOfMapError
+   * @throws InvalidArgumentError
    */
   extract (center: Coords, surface: Size): WorldMap {
     this.assertMapContains(center)

@@ -11,6 +11,6 @@ export const random = {
     return values.flatMap(x => x)[random.range(0, values.length - 1)]
   },
 
-  /** Has a `percent` in 100 chance of returning `true` */
+  /** Return `true` with the probability of `percent`/100 chance */
   chance: (percent: number): boolean => Math.round(Math.random() * 100) / 100 <= percent / 100,
 } as const

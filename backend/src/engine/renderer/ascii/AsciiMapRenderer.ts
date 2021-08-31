@@ -22,7 +22,6 @@ TileAtlas[RenderTile.BuildingL2] = chalk.bgHex('#999999')(' ')
 TileAtlas[RenderTile.BuildingL3] = chalk.bgHex('#AAAAAA')(' ')
 TileAtlas[RenderTile.BuildingL4] = chalk.bgHex('#BBBBBB')(' ')
 TileAtlas[RenderTile.BuildingL5] = chalk.bgHex('#CCCCCC')(' ')
-//TileAtlas[RenderTile.BurnedBuilding,
 TileAtlas[RenderTile.BurningBuildingL1] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
 TileAtlas[RenderTile.BurningBuildingL2] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')
 TileAtlas[RenderTile.BurningBuildingL3] = chalk.bgHex('#ef390b').hex('#f8ea00')('░')

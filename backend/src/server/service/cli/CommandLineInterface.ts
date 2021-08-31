@@ -1,6 +1,7 @@
 import { getLogger } from '@shared/logger/logger'
 import readline, { CompleterResult } from 'readline'
 import { InvalidArgumentError } from '@shared/Errors'
+import chalk from 'chalk'
 
 const log = getLogger('CLI')
 
@@ -99,10 +100,11 @@ export class CommandLineInterface {
             if (args.filter(i => i).length) {
               displayArgs = `${args.map(arg => {
                 const [ parameter, optional ] = arg.split('=')
-                return optional ? `[${parameter}]` : `${parameter}`
+                return optional ? `[${chalk.underline(parameter)}]` : `${chalk.underline(parameter)}`
               }).join(' ')} `
             }
-            console.log(`   ${(name + ' ' + displayArgs).padEnd(55, '·')} ${command.description}`)
+            const space = (displayArgs.match(/ /g) || []).length
+            console.log(`   ${(name + ' ' + displayArgs).padEnd(55 + space * 9, '·')} ${command.description}`)
           }
         }
         console.log('')
@@ -116,5 +118,13 @@ export class CommandLineInterface {
 
     // Show all availableCommands if none found
     return [ hits.length ? hits : registeredCommandNames, input ]
+  }
+
+  print (errorOrMessage: string | Error): void {
+    console.log(
+      errorOrMessage instanceof Error
+        ? chalk.red(`❌ ${errorOrMessage.message}`)
+        : errorOrMessage
+    )
   }
 }

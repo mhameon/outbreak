@@ -354,9 +354,9 @@ describe('WorldMap class', function () {
 
   describe('helpers', function () {
     it('should stringify tiles', function () {
-      assert.strictEqual(stringifyTiles(Tile.Forest), '[10/Forest]')
-      assert.strictEqual(stringifyTiles([ Tile.Building, Tile.Level5 ]), '[13/Building, 8/Level5]')
-      assert.strictEqual(stringifyTiles(new Set([ Tile.Building, Tile.Level5 ])), '[13/Building, 8/Level5]')
+      assert.strictEqual(stringifyTiles(Tile.Forest), '[101/Forest]')
+      assert.strictEqual(stringifyTiles([ Tile.Building, Tile.Level5 ]), '[104/Building, 16/Level5]')
+      assert.strictEqual(stringifyTiles(new Set([ Tile.Building, Tile.Level5 ])), '[104/Building, 16/Level5]')
     })
   })
 })
