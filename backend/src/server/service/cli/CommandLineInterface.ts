@@ -120,7 +120,7 @@ export class CommandLineInterface {
     return [ hits.length ? hits : registeredCommandNames, input ]
   }
 
-  print (errorOrMessage: string | Error): void {
+  print (errorOrMessage: string | Error | unknown): void {
     console.log(
       errorOrMessage instanceof Error
         ? chalk.red(`❌ ${errorOrMessage.message}`)
