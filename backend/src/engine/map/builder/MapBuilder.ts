@@ -1,6 +1,7 @@
 import { Seed, Size } from '@engine/types'
 import { WorldMap } from '../WorldMap'
 import { getLogger } from '@shared/logger'
+import { CreatureManager } from '@engine/outbreak/entities/CreatureManager'
 
 export type Seeder = { builder: string; seed: Seed }
 
@@ -35,6 +36,8 @@ abstract class MapBuilder {
   }
 
   protected abstract build (): WorldMap
+
+  abstract populate (world: CreatureManager): void
 }
 
 export default MapBuilder

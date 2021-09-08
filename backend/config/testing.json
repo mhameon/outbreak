@@ -1,5 +1,6 @@
 {
   "logger": {
+    "level": "warn",
     "exception": false
   }
 }

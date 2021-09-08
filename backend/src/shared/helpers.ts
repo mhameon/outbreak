@@ -20,7 +20,7 @@ export function toSet<T> (item: OneOrMany<T>): Set<T> {
  * Returns a new Set based on `set` where all items existing in `without` have been removed
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function diffSet<T extends Set<any>> (set: T, without: T): T {
+export function deleteInSet<T extends Set<any>> (set: T, without: T): T {
   const result = new Set(set) as T
   without.forEach(it => result.delete(it))
   return result

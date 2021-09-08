@@ -1,7 +1,7 @@
 import { InvalidArgumentError } from '@shared/Errors'
 import { WindSettings } from '@engine/types'
 import { validate } from '@shared/validator'
-import { isNumber } from '@engine/map/guards'
+import { isNumber } from '@engine/guards'
 
 export class Wind {
   static minForce = 0 as const

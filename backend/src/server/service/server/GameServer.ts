@@ -9,6 +9,7 @@ import { log, registerEventLogger } from './serverLogger'
 import { GameManager } from '@engine/game/GameManager'
 import { GameId } from '@engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
+import event from '@engine/events'
 
 // Todo: continue typing
 // Fixme: must lives in another file?
@@ -76,7 +77,7 @@ export class GameServer {
       this.registerErrorHandler(socket)
       registerEventLogger(socket)
 
-      socket.on('game:join', (args: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
+      socket.on(event.game.join, (args: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
         //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAME_ID_PREFIX))
@@ -116,7 +117,7 @@ export class GameServer {
         return ack({ gameId })
       })
 
-      socket.on('game:leave', (args: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
+      socket.on(event.game.leave, (args: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
         this.leaveRoom(socket, args.gameId, (wasLast) => {
           if (wasLast) {
             this.game.delete(args.gameId)
@@ -171,7 +172,7 @@ export class GameServer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   registerPlugin (plugin: Plugin<any>): GameServer {
     if (plugin instanceof Function) {
-      // Keep trace of registered plugins?
+      // Todo Keep trace of registered plugins?
       plugin(this)
     }
     return this

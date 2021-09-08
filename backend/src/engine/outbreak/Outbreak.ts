@@ -6,16 +6,18 @@ import { FireResolver, Resolvable } from './resolver'
 import { Options } from './'
 import { Wind } from '@engine/outbreak/environment/Wind'
 import { Player } from '@server/service/server/GameServer'
+import { CreatureManager } from '@engine/outbreak/entities/CreatureManager'
 
 export class Outbreak {
   private static renderer = new Renderers.Ascii()
 
-  readonly log: Logger
   readonly id: GameId
-  readonly createdAt: Date
+  readonly log: Logger
   readonly map: WorldMap
+  readonly createdAt: Date
 
   readonly wind: Wind
+  readonly creature: CreatureManager
   readonly resolvers: Array<Resolvable>
 
   private turn = 0 // 0 means not started
@@ -23,12 +25,12 @@ export class Outbreak {
 
   constructor (id: GameId, map: WorldMap, option?: Options) {
     this.id = id
+    this.log = getLogger('Outbreak', { gameId: this.id })
     this.map = map
     this.createdAt = new Date()
 
-    this.log = getLogger('Outbreak', { gameId: this.id })
-
     this.wind = new Wind(option?.wind)
+    this.creature = new CreatureManager(this)
 
     this.resolvers = [
       new FireResolver(this)
@@ -65,8 +67,12 @@ export class Outbreak {
     let direction = Math.floor(Math.abs(this.wind.angle) / 45) + (Math.abs(this.wind.angle) % 45 >= 22.5 ? 1 : 0)
     direction = direction >= 8 ? 0 : direction
 
+
+    const seeder = this.map.seeder ? `build with ${this.map.seeder.builder}(${this.map.seeder.seed})` : ''
+
     return ''
       + `Outbreak: ${this.id} (${this.createdAt.toISOString()})\n`
+      + `Map     : "${this.map.name}" (${this.map.size.width}x${this.map.size.height}) ${seeder}\n`
       + `Wind    : ${windRose[negativeAngle ? 8 - direction : direction]} ${this.wind.angle}° ${windForce} Force ${this.wind.force}\n`
       + `Turn    : ${this.turn || 'Not started'}\n`
       + `${Outbreak.renderer.render(this.map)}`

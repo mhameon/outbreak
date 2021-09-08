@@ -1,6 +1,6 @@
 import { WorldMap } from '@engine/map/WorldMap'
 import { Tile, Direction, Tileset, Coords, InMapTile } from '@engine/types'
-
+import event from '@engine/events'
 import * as assert from 'assert'
 import { InvalidArgumentError } from '@shared/Errors'
 import { stringifyTiles } from '@engine/map/WorldMapErrors'
@@ -24,8 +24,8 @@ describe('WorldMap class', function () {
     let tileAddedEvents: Array<InMapTile>
     beforeEach(function () {
       tileAddedEvents = []
-      map.on('tile:added', (args: InMapTile) => {
-        tileAddedEvents.push(args)
+      map.on(event.tile.added, (added: InMapTile, originalTileset?: Tileset) => {
+        tileAddedEvents.push(added)
       })
     })
     afterEach(function () {
@@ -64,6 +64,14 @@ describe('WorldMap class', function () {
         assert.ok(map.has(Tile.Water, at))
         assert.strictEqual(map.get(at).size, 1)
         assert.deepStrictEqual(tileAddedEvents, [])
+
+        map.set([ Tile.Water, Tile.Block ], at)
+        assert.ok(map.has([ Tile.Water, Tile.Block ], at))
+        assert.strictEqual(map.get(at).size, 2)
+
+        assert.strictEqual(map.add([ Tile.Burning, Tile.Zombie ], at), 1)
+        assert.ok(map.has([ Tile.Water, Tile.Block, Tile.Zombie ], at))
+        assert.strictEqual(map.get(at).size, 3)
       })
       it('should not possible to burn already burned ground', function () {
         map.set([ Tile.Burned, Tile.Grass ], at)
@@ -71,9 +79,8 @@ describe('WorldMap class', function () {
 
         // FIXME: an added sidekick tile that "cancel" an ALREADY existing sidekick tile must be striped !
         // Allow to remove `if (ground.has(Tile.Burned)) return false`in FireResolver:L82
-        // map.add(Tile.Burning, at)
-        // console.log(map.get(at))
-        // assert.ok(map.has([ Tile.Burned, Tile.Grass ], at))
+        map.add(Tile.Burning, at)
+        assert.ok(map.has([ Tile.Burned, Tile.Grass ], at))
       })
     })
     describe('add(tile, at[])', function () {
@@ -260,7 +267,7 @@ describe('WorldMap class', function () {
     assert.throws(() => map.get(outside), error)
   })
 
-  it('Add `Tile.Walkable` removes `Tile.Block`', function () {
+  it.skip('should remove `Tile.Block` when adding `Tile.Walkable`', function () {
     assert.strictEqual(map.isWalkable(origin), false)
 
     // map.add(Tile.Walkable, origin) // WorldMap.add() now ignores when sidekick erase source tile

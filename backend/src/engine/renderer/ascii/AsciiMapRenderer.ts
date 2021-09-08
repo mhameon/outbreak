@@ -32,15 +32,14 @@ TileAtlas[RenderTile.BurnedBuildingL2] = chalk.hex('#000000').bgHex('#999999')('
 TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('▒')
 TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
-TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('☹︎')
+TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('Z︎')
 
 class AsciiMapRenderer extends MapRenderer {
   protected renderer (): string {
     const width = { length: this.map.size.width }
     const height = { length: this.map.size.height }
 
-    const seeder = this.map.seeder ? ` ${this.map.seeder.builder}(${this.map.seeder.seed})` : ''
-    let ascii = chalk.underline(`${this.map.name} (${this.map.size.width}x${this.map.size.height})`) + seeder + '\n'
+    let ascii = ''
     Array.from(height, (_, y) => {
       Array.from(width, (_, x) => {
         ascii += AsciiMapRenderer.draw(this.map.get({ x, y }))

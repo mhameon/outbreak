@@ -1,8 +1,9 @@
 import { NotFoundError } from '@shared/Errors'
 import { GameId } from '../types'
 // Fixme IoD: use interfaces & inject them in constructor
-import { Outbreak , OutbreakFactory } from '../outbreak/'
+import { Outbreak, OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
+import event from '@engine/events'
 
 import { getLogger } from '@shared/logger'
 import { EventEmitter } from 'events'
@@ -13,18 +14,18 @@ type Game = {
   id: GameId
   name: string
   // players: any[]
-  turn:number
+  turn: number
 }
 
 /**
  * Handle & Manage games (Outbreak)
  *
- * Emit events
- * | Event          | Signature        |
- * |----------------|------------------|
- * | `game:deleted` | (gameId: GameId) |
+ * Emitted event:
+ * | Name           | Handler signature |
+ * |----------------|-------------------|
+ * | `game:deleted` | (gameId: GameId)  |
  */
-export class GameManager extends EventEmitter{
+export class GameManager extends EventEmitter {
   static GAME_ID_PREFIX = 'game:'
 
   private readonly games: Map<GameId, Outbreak> = new Map()
@@ -47,6 +48,9 @@ export class GameManager extends EventEmitter{
     return this.games.has(gameId)
   }
 
+  /**
+   * @throws {NotFoundError}
+   */
   get (gameId: GameId): Outbreak {
     if (!this.has(gameId)) {
       throw new NotFoundError(gameId, 'GameId', log.error)
@@ -54,10 +58,13 @@ export class GameManager extends EventEmitter{
     return this.games.get(gameId) as Outbreak
   }
 
+  /**
+   * @throws {NotFoundError}
+   */
   delete (gameId: GameId): void {
     this.get(gameId)
     this.games.delete(gameId)
-    this.emit('game:deleted', gameId)
+    this.emit(event.game.deleted, gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 

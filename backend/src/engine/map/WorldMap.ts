@@ -1,21 +1,22 @@
 import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
-import { isCoords } from './guards'
+import { isCoords } from '../guards'
 import { Seeder } from '@engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getSanitizedTileset } from '@engine/map/tilerules'
 import { Values, OneOrMany } from '@shared/types'
-import { diffSet, toArray } from '@shared/helpers'
+import { deleteInSet, toArray } from '@shared/helpers'
 import { EventEmitter } from 'events'
+import event from '@engine/events'
 
 /**
  * A 2D map structure describing the game board
  *
- * Emit events
- * | Event                | Signature                                              |
+ * Emitted event:
+ * | Name                 | Handler signature                                      |
  * |----------------------|--------------------------------------------------------|
- * | `tile:added`         | `({ tile: Tile, at: Coords }, existingTiles: Tileset)` |
- * | `tile:${Tile}:added` | `(at: Coords, existingTiles: Tileset)`                 |
+ * | `tile:added`         | ({ tile: Tile, at: Coords }, originalTileset: Tileset) |
+ * | `tile:${Tile}:added` | (at: Coords, originalTileset: Tileset)                 |
  */
 export class WorldMap extends EventEmitter {
   static readonly defaultTile = Tile.Grass
@@ -55,8 +56,8 @@ export class WorldMap extends EventEmitter {
         //const merge = addSanitizedTileset(existingTiles, tileset)
         const merge = getSanitizedTileset([ ...existingTiles, ...tileset ], true)
         if (merge.size) {
-          this.tiles.set(index, merge)
-          const newTiles = diffSet<Tileset>(merge, existingTiles)
+          const newTiles = deleteInSet<Tileset>(merge, existingTiles)
+          this.tiles.set(index, getSanitizedTileset([ ...existingTiles, ...newTiles ], true))
           added += this.emitTileAdded(newTiles, here, existingTiles)
         }
       } else {
@@ -67,11 +68,11 @@ export class WorldMap extends EventEmitter {
     return added
   }
 
-  private emitTileAdded (tileset: Tileset, at: Coords, existing?:Tileset): number {
-    const existingTiles = existing ?? WorldMap.emptyTileset
+  private emitTileAdded (tileset: Tileset, at: Coords, original?: Tileset): number {
+    const originalTileset = original ?? WorldMap.emptyTileset
     tileset.forEach(tile => {
-      this.emit(`tile:${tile}:added`, at, existingTiles)
-      this.emit('tile:added', { tile, at }, existingTiles)
+      this.emit(`tile:${tile}:added`, at, originalTileset)
+      this.emit(event.tile.added, { tile, at }, originalTileset)
     })
     return tileset.size
   }
@@ -172,7 +173,6 @@ export class WorldMap extends EventEmitter {
       x: center.x + offsetX > this.size.width - 1 ? this.size.width - 1 : center.x + offsetX,
       y: center.y + offsetY > this.size.height - 1 ? this.size.height - 1 : center.y + offsetY
     }
-
     const region = new WorldMap({ width: 1 + bottomRight.x - topLeft.x, height: 1 + bottomRight.y - topLeft.y })
     const destination: Coords = { x: 0, y: 0 }
     for (let y = topLeft.y; y <= bottomRight.y; y++) {
@@ -217,13 +217,13 @@ export class WorldMap extends EventEmitter {
   /**
    * @throws OutOfMapError
    */
-  private assertMapContains (at: Coords): void {
+  assertMapContains (at: Coords): void {
     if (!this.contains(at)) {
       throw new OutOfMapError(at, this.size)
     }
   }
 
-  private static index (at: Coords): Index {
+  static index (at: Coords): Index {
     return `${at.x},${at.y}`
   }
 

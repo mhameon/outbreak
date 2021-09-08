@@ -3,6 +3,7 @@ import MapBuilder from '@engine/map/builder/MapBuilder'
 import { WorldMap } from '@engine/map/WorldMap'
 import { Tile, BuildingLevel } from '@engine/types'
 import { line } from '@engine/math/geometry'
+import { CreatureManager, CreatureType } from '@engine/outbreak/entities/CreatureManager'
 
 const { normalize, cap } = matrix
 
@@ -40,14 +41,15 @@ export class CityMapBuilder extends MapBuilder {
       if (value > thresholds.buildLevels[0]) {
         const floor = thresholds.buildLevels.findIndex(v => value <= v)
         this.map.add([ Tile.Building, Tile[`Level${floor}` as BuildingLevel] ], coords)
-      }
-      if (value <= thresholds.water) {
+      } else if (value <= thresholds.water) {
         this.map.set([ Tile.Water, Tile.Block ], coords)
+      } else {
+        this.map.set(Tile.Grass, coords)
       }
     }, world)
 
     //this.map.add(Tile.Burning, line({ x: 0,y: 0 }, { x: 40,y: 25 }))
-    this.map.add(Tile.Burning, line({ x: 3,y: 3 }, { x: 10,y: 13 }))
+    this.map.add(Tile.Burning, line({ x: 3, y: 3 }, { x: 10, y: 13 }))
     // this.map.add(Tile.Burning, { x: 0,y: 0 })
     // this.map.set(Tile.Walkable, [{ x: 1,y: 0 },{ x: 2,y: 0 }])
 
@@ -68,5 +70,9 @@ export class CityMapBuilder extends MapBuilder {
     // console.log(matrix.debug(matrix.normalize(populationDensity), { colorize: { gte: .85 } }))
 
     return this.map
+  }
+
+  populate (world: CreatureManager): void {
+    world.spawn(CreatureType.Zombie, { x: 3, y: 3 })
   }
 }

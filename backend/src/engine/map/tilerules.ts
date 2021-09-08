@@ -1,6 +1,6 @@
 import { Tile, RenderTile, Tileset } from '@engine/types'
 import { UnknownRenderTile } from '@engine/map/WorldMapErrors'
-import { toSet, toArray, diffSet } from '@shared/helpers'
+import { toSet, toArray, deleteInSet } from '@shared/helpers'
 import { OneOrMany } from '@shared/types'
 
 /**
@@ -190,7 +190,7 @@ export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMa
     }
   })
 
-  return diffSet<Tileset>(tileset, unusedTiles)
+  return deleteInSet<Tileset>(tileset, unusedTiles)
 }
 
 /**

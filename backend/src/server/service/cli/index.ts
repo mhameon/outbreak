@@ -29,6 +29,11 @@ function initializeCommandLineInterface (server: GameServer): CommandLineInterfa
     cli = new CommandLineInterface()
     registerServerCommands(cli, server)
     registerGameCommands(cli, server.game)
+
+    //-- Startup execution (debug purpose)
+    cli.executeCommand('game:create')
+    //cli.executeCommand('game:debug:at 3,3')
+    cli.executeCommand('server:status')
   }
   return cli
 }

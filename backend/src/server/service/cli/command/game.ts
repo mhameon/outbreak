@@ -4,11 +4,12 @@ import { GameId } from '@engine/types'
 import { Nullable } from '@shared/types'
 import { Outbreak } from '@engine/outbreak'
 import { registerGameControlCommands } from '@server/service/cli/command/game-control'
+import event from '@engine/events'
 
 let currentGameId: GameId = ''
 
 export function registerGameCommands (cli: CommandLineInterface, game: GameManager): void {
-  game.on('game:deleted', (gameId: GameId) => {
+  game.on(event.game.deleted, (gameId: GameId) => {
     if (currentGameId === gameId) {
       console.log(`${gameId} deleted, automatically leave CLI interaction mode`)
       currentGameId = ''

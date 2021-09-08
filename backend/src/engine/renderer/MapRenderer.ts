@@ -1,4 +1,4 @@
-import { isWorldMap } from '@engine/map/guards'
+import { isWorldMap } from '@engine/guards'
 import { validate } from '@shared/validator'
 import { WorldMap } from '../map/WorldMap'
 

@@ -14,6 +14,7 @@ export class OutbreakFactory {
     const mapBuilder = new CityMapBuilder(id as Seed, options.size)
     const outbreak = new Outbreak(id, mapBuilder.getMapRef(), defaultOptions)
     mapBuilder.generate()
+    mapBuilder.populate(outbreak.creature)
     return outbreak
   }
 }
