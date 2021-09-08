@@ -13,7 +13,7 @@ export type Coords = {
  *  W ← 3 · 4 → E
  *      5 6 7
  *    ↙   ↓   ↘
- *  SW    S   SE
+ *  SW    S    SE
  * ```
  */
 // https://fettblog.eu/tidy-typescript-avoid-enums/
@@ -96,7 +96,7 @@ export enum RenderTile {
 export type Index = string
 export type Tileset = Set<Tile>
 export type InMapTileset = { at: Coords; tileset: Tileset }
-export type InMapTile = { tile: Tile; at: Coords }
+export type InMapTile = { at: Coords; tile: Tile }
 
 export type Around = Map<Values<typeof Direction>, Tileset>
 

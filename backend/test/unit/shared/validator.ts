@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { validate } from '@shared/validator'
-import { isNumber } from '@engine/map/guards'
+import { isNumber } from '@engine/guards'
 import { InvalidArgumentError } from '@shared/Errors'
 
 describe('validator', function () {

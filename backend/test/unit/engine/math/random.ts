@@ -36,4 +36,10 @@ describe('random', function () {
       assert.ok(almostChosen === 'a' || almostChosen === 'b', almostChosen)
     })
   })
+
+  describe('hex', function () {
+    it('generate hex string', function () {
+      assert.ok(random.hex(8).search(/^[a-f0-9]{16}$/i) !== -1)
+    })
+  })
 })

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { InvalidArgumentError } from '@shared/Errors'
-
+    
 type TypeGuard = (args: any) => boolean
 type TypeGuards = TypeGuard | Array<TypeGuard>
 

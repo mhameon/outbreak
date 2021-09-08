@@ -5,14 +5,13 @@ import { DEFAULT_LOG_FILE } from '@shared/logger/index'
 export type LogMethod = winston.LeveledLogMethod
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
 
-// todo use Logger interface to hide winston in getLogger(): Logger
 export interface Logger {
   error: LogMethod // Something goes wrong, not supposed to happen
   warn: LogMethod // Something fails but “it's expected/under control”
   info: LogMethod // Normal flow
   http: LogMethod // Network operations
   verbose: LogMethod //
-  debug: LogMethod //
+  debug: LogMethod // debug message
   silly: LogMethod //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultMeta?: any

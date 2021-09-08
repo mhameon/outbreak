@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export const random = {
   /** Randomly pick a number between `min` and `max` (included) */
   range: (min: number, max: number, decimals = 0): number => {
@@ -12,5 +14,8 @@ export const random = {
   },
 
   /** Return `true` with the probability of `percent`/100 chance */
-  chance: (percent: number): boolean => Math.round(Math.random() * 100) / 100 <= percent / 100,
+  chance: (percent: number): boolean => percent === 100 ? true : Math.round(Math.random() * 100) < percent,
+
+  /** Generate a random hexadecimal string (string size = bytes*2) */
+  hex: (bytes = 8): string => crypto.randomBytes(bytes).toString('hex')
 } as const
