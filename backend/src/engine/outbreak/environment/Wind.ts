@@ -6,6 +6,7 @@ import { isNumber } from '@engine/guards'
 export class Wind {
   static minForce = 0 as const
   static maxForce = 10 as const
+  static rose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ] as const
 
   private _angle = 45
   private _force = 5
@@ -38,5 +39,13 @@ export class Wind {
       throw new InvalidArgumentError(`Wind force must be between ${Wind.minForce} and ${Wind.maxForce}.`)
     }
     this._force = value
+  }
+
+  get arrow (): string {
+    const negativeAngle = this._angle < 0
+    let direction = Math.floor(Math.abs(this._angle) / 45) + (Math.abs(this._angle) % 45 >= 22.5 ? 1 : 0)
+    direction = direction >= 8 ? 0 : direction
+
+    return Wind.rose[negativeAngle ? 8 - direction : direction]
   }
 }
