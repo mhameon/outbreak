@@ -3,7 +3,7 @@ import { Outbreak } from '@engine/outbreak'
 import { Nullable } from '@shared/types'
 import { Coords, RenderTile } from '@engine/types'
 import { stringifyTiles } from '@engine/map/WorldMapErrors'
-import AsciiMapRenderer from '@engine/renderer/ascii/AsciiMapRenderer'
+import { AsciiMapRenderer } from '@engine/renderer/ascii/AsciiMapRenderer'
 import assert from 'assert'
 import { InvalidArgumentError } from '@shared/Errors'
 import { getRenderTile } from '@engine/map/tilerules'
@@ -16,13 +16,9 @@ export function registerGameControlCommands (cli: CommandLineInterface, getOutbr
   function setWind (angle: string, force?: string): void {
     const outbreak = getOutbreak()
     if (outbreak) {
-      try {
-        outbreak.wind.angle = parseInt(angle, 10)
-        if (force) {
-          outbreak.wind.force = parseInt(force, 10)
-        }
-      } catch (error) {
-        cli.print(error)
+      outbreak.wind.angle = parseInt(angle, 10)
+      if (force) {
+        outbreak.wind.force = parseInt(force, 10)
       }
       cli.executeCommand('game:show')
     }
@@ -31,35 +27,30 @@ export function registerGameControlCommands (cli: CommandLineInterface, getOutbr
   function getDebugInfoAtCoords (x: string, y?: string): void {
     const outbreak = getOutbreak()
     if (outbreak) {
-      try {
-        let at: Coords
-        if (!y) {
-          const coords = x.split(',')
-          at = { x: parseInt(coords[0], 10), y: parseInt(coords[1], 10) }
-        } else {
-          at = { x: parseInt(x, 10), y: parseInt(y, 10) }
-        }
-        assert(at.x >= 0 && at.y >= 0, new InvalidArgumentError(`${at.x},${at.y} are not valid map coords`))
-
-        const tileset = outbreak.map.get(at)
-        const renderedTile = getRenderTile(tileset)
-        const minimap = outbreak.map.extract(at, { width: 3, height: 3 })
-
-        const render = new AsciiMapRenderer(minimap)
-        const map = render.render().split('\n')
-        const creatures = outbreak.creature.get(at)
-
-        console.log(
-          '   ▼\n' +
-          `  ${map[0]}  At ${at.x},${at.y} - tiles ${stringifyTiles(tileset)}\n` +
-          `︎︎▶${map[1]}  renders ${renderedTile}/${RenderTile[renderedTile]}\n` +
-          `  ${map[2]}\n` +
-          '       ' + creatures.map(c => JSON.stringify(c)).join('\n       ')
-        )
-
-      } catch (error) {
-        cli.print(error)
+      let at: Coords
+      if (!y) {
+        const coords = x.split(',')
+        at = { x: parseInt(coords[0], 10), y: parseInt(coords[1], 10) }
+      } else {
+        at = { x: parseInt(x, 10), y: parseInt(y, 10) }
       }
+      assert(at.x >= 0 && at.y >= 0, new InvalidArgumentError(`${at.x},${at.y} are not valid map coords`))
+
+      const tileset = outbreak.map.get(at)
+      const renderedTile = getRenderTile(tileset)
+      const minimap = outbreak.map.extract(at, { width: 3, height: 3 })
+
+      const render = new AsciiMapRenderer()
+      const map = render.render(minimap).split('\n')
+      const creatures = outbreak.creature.get(at)
+
+      console.log(
+        '   ▼\n' +
+        `  ${map[0]}  At ${at.x},${at.y} - tiles ${stringifyTiles(tileset)}\n` +
+        `︎︎▶${map[1]}  renders ${renderedTile}/${RenderTile[renderedTile]}\n` +
+        `  ${map[2]}\n` +
+        '       ' + creatures.map(c => JSON.stringify(c)).join('\n       ')
+      )
     }
   }
 }

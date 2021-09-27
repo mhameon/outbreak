@@ -14,12 +14,12 @@ function printServerStatus (status: ServerStatus): void {
     memoryUsage: (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
     uptime: Math.round(+process.uptime())
   }
-  console.log('\n')
-  console.log(`Server     Mem: ${program.memoryUsage} M     Uptime: ${program.uptime} s`)
+  console.log(`
+Server     📶 Mem: ${program.memoryUsage} M    ⏱  Uptime: ${program.uptime} s`)
   if (status.started) {
-    console.log(`Listening  Yes (since ${status.uptime}s)`)
+    console.log(`Listening  🟢 Yes (since ${status.uptime}s)`)
   } else {
-    console.log('Listening  No')
+    console.log('Listening  🔴 No')
   }
   console.log(`${status.rooms.length} room(s)   ${status.rooms.join(', ')}`)
   console.log(`${status.clients.length} Connected client(s)`)

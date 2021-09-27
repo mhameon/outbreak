@@ -42,8 +42,13 @@ export class CommandLineInterface {
                 log.verbose('💻 "%s"', input)
                 this.executeNextCommandSilently = false
               }
-              const command = this.registeredCommands.get(instruction) as CommandDescriptor
-              await command.execute(...args)
+              try {
+                const command = this.registeredCommands.get(instruction) as CommandDescriptor
+                await command.execute(...args)
+              } catch (error) {
+                this.print(error)
+                this.executeCommand('help', instruction)
+              }
             } else {
               log.warn('💻 "%s" command not found', instruction)
             }
