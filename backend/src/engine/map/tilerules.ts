@@ -136,7 +136,7 @@ export const tilerules: Tilerules = {
 
 /**
  * Returns a sanitized Tileset by removing mutually exclusives tiles.
- * When `removeOrphanSidekickTiles` is true, the function sanitize lone sideckick tiles too.
+ * When `removeOrphanSidekickTiles` is true, the function sanitize lone sidekick tiles too.
  */
 export function getSanitizedTileset (tiles: OneOrMany<Tile>, removeOrphanSidekickTiles = false): Tileset {
   const tileset = toSet<Tile>(tiles)
@@ -198,20 +198,11 @@ export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMa
  * @throws UnknownRenderTile when no `RenderTile` is found
  */
 export function getRenderTile (tiles: OneOrMany<Tile>): RenderTile {
-  const tileset = toSet<Tile>(tiles)
-  tilerules.properties.forEach(propTile => {
-    if (tileset.has(propTile)) {
-      tileset.delete(propTile)
-    }
-  })
-
-  const tilesArray = toArray<Tile>(tileset)
+  const tilesArray = toArray<Tile>(tiles).filter(tile => !tilerules.properties.includes(tile))
 
   // There is a standalone Tile corresponding to a RenderTile ?
   if (tilesArray.length === 1) {
-    // Don't know how to type "enum keys", `any` does the trick...
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tileName: any = Tile[tilesArray[0]]
+    const tileName = Tile[tilesArray[0]] as unknown as number
     if (RenderTile[tileName] !== undefined) {
       return RenderTile[tileName] as unknown as RenderTile
     }
