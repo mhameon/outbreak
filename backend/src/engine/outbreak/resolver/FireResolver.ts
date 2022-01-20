@@ -21,6 +21,7 @@ export class FireResolver extends Resolver {
       { is: 6, for: Tile.Forest },
       { is: 2, for: Tile.Road },
       { is: 3, for: Tile.Building }, //could randomly explode?
+      //todo `for` could be an array: allow to handle different flame lifetime depending Level of building
     ]
   }
 

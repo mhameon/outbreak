@@ -1,8 +1,10 @@
-import MapRenderer from '../MapRenderer'
-import { Tileset, RenderTile } from '@engine/types'
+import { RenderTile, Coords } from '@engine/types'
 import chalk from 'chalk'
 import { getRenderTile } from '@engine/map/tilerules'
 import { WorldMap } from '@engine/map/WorldMap'
+import { Outbreak } from '@engine/outbreak'
+import { MapRenderer } from '@engine/renderer/MapRenderer'
+import { Wind } from '@engine/outbreak/environment/Wind'
 
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')
@@ -34,22 +36,38 @@ TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
 TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('Z︎')
 
-class AsciiMapRenderer extends MapRenderer {
-  protected renderer (): string {
-    const width = { length: this.map.size.width }
-    const height = { length: this.map.size.height }
+export class AsciiMapRenderer extends MapRenderer {
+  protected renderer (outbreak: Outbreak): string {
+    const width = { length: outbreak.map.size.width }
+    const height = { length: outbreak.map.size.height }
 
-    let ascii = ''
+    let asciiMap = ''
     Array.from(height, (_, y) => {
       Array.from(width, (_, x) => {
-        ascii += AsciiMapRenderer.draw(this.map.get({ x, y }))
+        asciiMap += AsciiMapRenderer.draw(outbreak, { x, y })
       })
-      ascii += '\n'
+      asciiMap += '\n'
     })
-    return ascii
+
+    if (outbreak.id === 'StandAloneRendering') {
+      return asciiMap
+    }
+    const seeder = outbreak.map.seeder ? `build with ${outbreak.map.seeder.builder}(${outbreak.map.seeder.seed})` : ''
+    const windForce = (''.padEnd(outbreak.wind.force, '◼')) + (''.padEnd(Wind.maxForce - outbreak.wind.force, '◻'))
+    return ''
+      + `Outbreak: ${outbreak.id} (${outbreak.createdAt.toISOString()})\n`
+      + `Map     : "${outbreak.map.name}" (${outbreak.map.size.width}x${outbreak.map.size.height}) ${seeder}\n`
+      + `Wind    : ${outbreak.wind.arrow} ${outbreak.wind.angle}° ${windForce} Force ${outbreak.wind.force}\n`
+      + `Turn    : ${outbreak.currentTurn || 'Not started'}\n`
+      + asciiMap
   }
 
-  private static draw (tileset: Tileset): string {
+  private static draw (outbreak: Outbreak, at: Coords): string {
+    const tileset = outbreak.map.get(at)
+    const creatures = outbreak.creature.get(at)
+    if (creatures.length) {
+      console.log(creatures)
+    }
     try {
       return TileAtlas[getRenderTile(tileset)]
     } catch (e) {
@@ -62,5 +80,3 @@ class AsciiMapRenderer extends MapRenderer {
     return chalk.hex('#ea6a6a').bgHex('#6c0101')('?')
   }
 }
-
-export default AsciiMapRenderer

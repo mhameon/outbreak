@@ -4,9 +4,9 @@ import { validate } from '@shared/validator'
 import { isNumber } from '@engine/guards'
 
 export class Wind {
-  static minForce = 0 as const
-  static maxForce = 10 as const
-  static rose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ] as const
+  static readonly minForce = 0
+  static readonly maxForce = 10
+  static readonly rose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
 
   private _angle = 45
   private _force = 5

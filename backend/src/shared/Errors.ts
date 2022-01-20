@@ -1,10 +1,21 @@
 import config from 'config'
 import { LeveledLogMethod } from 'winston'
 import { getLogger, LogMethod } from './logger'
+import { OneOrMany } from '@shared/types'
+import assert from 'assert'
+import { toArray } from '@shared/helpers'
 
 let logErrorWithDefaultLevel: LogMethod
 if (config.get('logger.exception')) {
   logErrorWithDefaultLevel = getLogger('Exception').error
+}
+
+export function expect (error: unknown, toBeOneOfThem: OneOrMany<Error|unknown>): void {
+  assert(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    toArray<any>(toBeOneOfThem).some(err => error instanceof err),
+    new UnexpectedError(error)
+  )
 }
 
 export abstract class CustomError extends Error {
@@ -19,10 +30,17 @@ export abstract class CustomError extends Error {
   }
 }
 
-export class InvalidArgumentError extends CustomError {}
+export class InvalidArgumentError extends CustomError {
+}
 
 export class NotFoundError extends CustomError {
   constructor (id: string | number, type?: string, logErrorWith?: LogMethod) {
     super(`"${id}" ${type ? `is an unknown ${type}` : 'not found'}`, logErrorWith)
+  }
+}
+
+export class UnexpectedError extends CustomError {
+  constructor (error: unknown) {
+    super((error as any)?.message ?? 'UnexpectedError: WTF, isn\'t that supposed to happen ?!')
   }
 }

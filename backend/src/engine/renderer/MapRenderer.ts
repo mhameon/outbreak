@@ -1,28 +1,19 @@
 import { isWorldMap } from '@engine/guards'
-import { validate } from '@shared/validator'
 import { WorldMap } from '../map/WorldMap'
+import { Outbreak } from '@engine/outbreak'
 
-abstract class MapRenderer {
-  protected map!: WorldMap
-
-  constructor (map?: WorldMap) {
-    this.setMap(map)
-  }
-
-  render (map?: WorldMap): string {
-    this.setMap(map)
-    validate(this.map, isWorldMap, 'A `WorldMap` is required to be rendered')
-
-    return this.renderer()
-  }
-
-  protected abstract renderer (): string
-
-  private setMap (map?: WorldMap): void {
-    if (map) {
-      this.map = map
-    }
-  }
+export interface Renderable{
+  render (world: WorldMap | Outbreak): string
 }
 
-export default MapRenderer
+export abstract class MapRenderer implements Renderable{
+  render (world: WorldMap | Outbreak): string {
+    if (isWorldMap(world)) {
+      return this.renderer(new Outbreak('StandAloneRendering', world))
+    }
+
+    return this.renderer(world)
+  }
+
+  protected abstract renderer (outbreak: Outbreak): string
+}

@@ -12,7 +12,8 @@ export const tile = {
 } as const
 
 export const creature = {
-  spawned: 'creature:spawned'
+  spawned: 'creature:spawned',
+  moved: 'creature:moved'
 } as const
 
 export default {

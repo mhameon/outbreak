@@ -38,7 +38,7 @@ const map = new WorldMap(size)
 
 //console.log(matrix.debug(mat))
 
-const ascii = new Renderers.Ascii()
+const ascii = Renderers.Ascii()
 
 let blast
 blast = explosion({ x: 15, y: 7 }, 3)

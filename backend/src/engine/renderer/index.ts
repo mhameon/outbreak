@@ -1,15 +1,10 @@
-import MapRenderer from './MapRenderer'
-import AsciiMapRenderer from './ascii/AsciiMapRenderer'
-import { WorldMap } from '@engine/map/WorldMap'
+import { AsciiMapRenderer } from './ascii/AsciiMapRenderer'
+import { Renderable } from '@engine/renderer/MapRenderer'
 
 export type Renderer = 'Ascii' // | 'ThreeJS' | 'HTML'
 
-type ConcreteMapRenderer = new (map?: WorldMap) => MapRenderer
-type AvailableRenderers = Record<Renderer, ConcreteMapRenderer>
-
-export { MapRenderer }
-export const Renderers: AvailableRenderers = {
-  'Ascii': AsciiMapRenderer,
+export const Renderers: Record<Renderer, () => Renderable> = {
+  'Ascii': () => new AsciiMapRenderer(),
   // 'ThreeJS': ThreeJSMapRenderer,
 }
 

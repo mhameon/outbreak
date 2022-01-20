@@ -16,17 +16,19 @@ export type Coords = {
  *  SW    S    SE
  * ```
  */
-// https://fettblog.eu/tidy-typescript-avoid-enums/
-export const Direction = {
-  NorthWest: 0,
-  North: 1,
-  NorthEast: 2,
-  West: 3,
-  East: 4,
-  SouthWest: 5,
-  South: 6,
-  SouthEast: 7
-} as const
+export enum Direction {
+  NorthWest,
+  North,
+  NorthEast,
+  West,
+  East,
+  SouthWest,
+  South,
+  SouthEast
+}
+
+/** DirectionInDegree[Direction.NorthEast] will give you 45° */
+export const DirectionInDegree = [ 315, 0, 45, 270, 90, 225, 180, 135 ] as const
 
 export type Size = {
   width: number
