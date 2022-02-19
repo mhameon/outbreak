@@ -1,6 +1,6 @@
-import { isWorldMap } from '@engine/guards'
+import { isWorldMap } from '#engine/guards'
 import { WorldMap } from '../map/WorldMap'
-import { Outbreak } from '@engine/outbreak'
+import { Outbreak } from '#engine/outbreak/index'
 
 export interface Renderable{
   render (world: WorldMap | Outbreak): string

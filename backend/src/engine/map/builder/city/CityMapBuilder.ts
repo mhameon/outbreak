@@ -1,9 +1,9 @@
-import { matrix, NoiseFactory } from '@engine/math'
-import MapBuilder from '@engine/map/builder/MapBuilder'
-import { WorldMap } from '@engine/map/WorldMap'
-import { Tile, BuildingLevel } from '@engine/types'
-import { line } from '@engine/math/geometry'
-import { CreatureManager, CreatureType } from '@engine/outbreak/entities/CreatureManager'
+import { matrix, NoiseFactory } from '#engine/math/index'
+import MapBuilder from '#engine/map/builder/MapBuilder'
+import { WorldMap } from '#engine/map/WorldMap'
+import { Tile, BuildingLevel } from '#engine/types'
+import { line } from '#engine/math/geometry'
+import { CreatureManager, CreatureType } from '#engine/outbreak/entities/CreatureManager'
 
 const { normalize, cap } = matrix
 

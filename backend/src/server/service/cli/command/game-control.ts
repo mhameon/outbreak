@@ -1,12 +1,12 @@
-import { CommandLineInterface } from '@server/service/cli/CommandLineInterface'
-import { Outbreak } from '@engine/outbreak'
-import { Nullable } from '@shared/types'
-import { Coords, RenderTile } from '@engine/types'
-import { stringifyTiles } from '@engine/map/WorldMapErrors'
-import { AsciiMapRenderer } from '@engine/renderer/ascii/AsciiMapRenderer'
+import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
+import { Outbreak } from '#engine/outbreak/index'
+import { Nullable } from '#shared/types'
+import { Coords, RenderTile } from '#engine/types'
+import { stringifyTiles } from '#engine/map/WorldMapErrors'
+import { AsciiMapRenderer } from '#engine/renderer/ascii/AsciiMapRenderer'
 import assert from 'assert'
-import { InvalidArgumentError } from '@shared/Errors'
-import { getRenderTile } from '@engine/map/tilerules'
+import { InvalidArgumentError } from '#shared/Errors'
+import { getRenderTile } from '#engine/map/tilerules'
 
 export function registerGameControlCommands (cli: CommandLineInterface, getOutbreak: () => Nullable<Outbreak>): void {
   cli

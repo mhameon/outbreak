@@ -1,6 +1,6 @@
-import { getLogger } from '@shared/logger/logger'
+import { getLogger } from '#shared/logger/logger'
 import readline, { CompleterResult } from 'readline'
-import { InvalidArgumentError } from '@shared/Errors'
+import { InvalidArgumentError } from '#shared/Errors'
 import chalk from 'chalk'
 
 const log = getLogger('CLI')

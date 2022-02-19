@@ -1,7 +1,7 @@
 import assert from 'assert'
-import { validate } from '@shared/validator'
-import { isNumber } from '@engine/guards'
-import { InvalidArgumentError } from '@shared/Errors'
+import { validate } from '#shared/validator'
+import { isNumber } from '#engine/guards'
+import { InvalidArgumentError } from '#shared/Errors'
 
 describe('validator', function () {
   it('reject with default message', function () {

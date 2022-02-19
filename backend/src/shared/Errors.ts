@@ -1,9 +1,9 @@
 import config from 'config'
 import { LeveledLogMethod } from 'winston'
 import { getLogger, LogMethod } from './logger'
-import { OneOrMany } from '@shared/types'
+import { OneOrMany } from '#shared/types'
 import assert from 'assert'
-import { toArray } from '@shared/helpers'
+import { toArray } from '#shared/helpers'
 
 let logErrorWithDefaultLevel: LogMethod
 if (config.get('logger.exception')) {

@@ -1,4 +1,4 @@
-import { LogLevel } from '@shared/logger'
+import { LogLevel } from '#shared/logger/index'
 import 'config'
 
 declare module 'config' {

@@ -1,12 +1,12 @@
-import { Outbreak } from '@engine/outbreak'
-import { WorldMap } from '@engine/map/WorldMap'
-import type { Creature } from '@engine/outbreak/entities/CreatureManager'
-import { CreatureType } from '@engine/outbreak/entities/CreatureManager'
+import { Outbreak } from '#engine/outbreak/index'
+import { WorldMap } from '#engine/map/WorldMap'
+import type { Creature } from '#engine/outbreak/entities/CreatureManager'
+import { CreatureType } from '#engine/outbreak/entities/CreatureManager'
 import * as assert from 'assert'
-import event from '@engine/events'
-import { OutOfMapError } from '@engine/map/WorldMapErrors'
-import { NotFoundError } from '@shared/Errors'
-import { Direction, Coords, Tile } from '@engine/types'
+import event from '#engine/events'
+import { OutOfMapError } from '#engine/map/WorldMapErrors'
+import { NotFoundError } from '#shared/Errors'
+import { Direction, Coords, Tile } from '#engine/types'
 
 function assertCreatureEqual (actual: Creature | null, expected: Creature): void {
   assert.ok(actual)

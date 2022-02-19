@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { WorldMap } from '@engine/map/WorldMap'
+import { WorldMap } from '#engine/map/WorldMap'
 import { Coords, Matrix2d } from './types'
-import { CreatureType } from '@engine/outbreak/entities/CreatureManager'
+import { CreatureType } from '#engine/outbreak/entities/CreatureManager'
 
 export function isNumber (arg: any): arg is number {
   return !isNaN(+arg)

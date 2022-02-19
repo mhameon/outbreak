@@ -1,4 +1,4 @@
-import { calculateDestination } from '@engine/math/geometry'
+import { calculateDestination } from '#engine/math/geometry'
 import assert from 'assert'
 
 describe('geometry', function () {

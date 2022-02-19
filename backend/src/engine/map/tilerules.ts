@@ -1,7 +1,7 @@
-import { Tile, RenderTile, Tileset } from '@engine/types'
-import { UnknownRenderTile } from '@engine/map/WorldMapErrors'
-import { toSet, toArray, deleteInSet } from '@shared/helpers'
-import { OneOrMany } from '@shared/types'
+import { Tile, RenderTile, Tileset } from '#engine/types'
+import { UnknownRenderTile } from '#engine/map/WorldMapErrors'
+import { toSet, toArray, deleteInSet } from '#shared/helpers'
+import { OneOrMany } from '#shared/types'
 
 /**
  * Tiles Rules

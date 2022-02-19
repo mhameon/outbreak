@@ -1,7 +1,7 @@
-import { tilerules, getSanitizedTileset, getRenderTile } from '@engine/map/tilerules'
+import { tilerules, getSanitizedTileset, getRenderTile } from '#engine/map/tilerules'
 import assert from 'assert'
-import { stringifyTiles, UnknownRenderTile } from '@engine/map/WorldMapErrors'
-import { Tile, RenderTile } from '@engine/types'
+import { stringifyTiles, UnknownRenderTile } from '#engine/map/WorldMapErrors'
+import { Tile, RenderTile } from '#engine/types'
 
 describe('tilerules', function () {
   describe('Data validation', function () {

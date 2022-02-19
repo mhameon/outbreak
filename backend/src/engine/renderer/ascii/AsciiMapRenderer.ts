@@ -1,10 +1,10 @@
-import { RenderTile, Coords } from '@engine/types'
+import { RenderTile, Coords } from '#engine/types'
 import chalk from 'chalk'
-import { getRenderTile } from '@engine/map/tilerules'
-import { WorldMap } from '@engine/map/WorldMap'
-import { Outbreak } from '@engine/outbreak'
-import { MapRenderer } from '@engine/renderer/MapRenderer'
-import { Wind } from '@engine/outbreak/environment/Wind'
+import { getRenderTile } from '#engine/map/tilerules'
+import { WorldMap } from '#engine/map/WorldMap'
+import { Outbreak } from '#engine/outbreak/index'
+import { MapRenderer } from '#engine/renderer/MapRenderer'
+import { Wind } from '#engine/outbreak/environment/Wind'
 
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')

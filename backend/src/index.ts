@@ -1,7 +1,5 @@
-// Todo find lib to replace @module/xxxx by real path
-import 'module-alias/register'
 import config from 'config'
-import { createGameServer, serverCLI } from '@server/service'
+import { createGameServer, serverCLI } from '#server/service/index'
 
 const { port, cli } = config.server
 

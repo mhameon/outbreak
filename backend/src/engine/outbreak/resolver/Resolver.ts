@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Logger } from '@shared/logger'
-import { Outbreak } from '@engine/outbreak'
+import { Logger } from '#shared/logger/index'
+import { Outbreak } from '#engine/outbreak/index'
 import { Resolvable } from './index'
-import { Bootable } from '@shared/types'
+import { Bootable } from '#shared/types'
 
 export abstract class Resolver implements Bootable, Resolvable {
   readonly log: Logger

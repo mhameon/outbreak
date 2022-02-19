@@ -1,9 +1,9 @@
-import { WorldMap } from '@engine/map/WorldMap'
-import { Tile, Direction, Tileset, Coords, InMapTile } from '@engine/types'
-import event from '@engine/events'
+import { WorldMap } from '#engine/map/WorldMap'
+import { Tile, Direction, Tileset, Coords, InMapTile } from '#engine/types'
+import event from '#engine/events'
 import * as assert from 'assert'
-import { InvalidArgumentError } from '@shared/Errors'
-import { stringifyTiles } from '@engine/map/WorldMapErrors'
+import { InvalidArgumentError } from '#shared/Errors'
+import { stringifyTiles } from '#engine/map/WorldMapErrors'
 
 describe('WorldMap class', function () {
   let map: WorldMap

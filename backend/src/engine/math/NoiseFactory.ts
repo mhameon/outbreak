@@ -1,7 +1,7 @@
-import { matrix, MatrixTransformer } from '@engine/math/matrix'
-import { isNumber } from '@engine/guards'
-import { Seed, Matrix2d, Size, Coords } from '@engine/types'
-import { pipe } from '@shared/helpers'
+import { matrix, MatrixTransformer } from '#engine/math/matrix'
+import { isNumber } from '#engine/guards'
+import { Seed, Matrix2d, Size, Coords } from '#engine/types'
+import { pipe } from '#shared/helpers'
 import assert from 'assert'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

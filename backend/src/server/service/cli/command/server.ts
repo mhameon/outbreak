@@ -1,6 +1,6 @@
-import { CommandLineInterface } from '@server/service/cli/CommandLineInterface'
+import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
 import config from 'config'
-import { GameServer, ServerStatus } from '@server/service/server/GameServer'
+import { GameServer, ServerStatus } from '#server/service/server/GameServer'
 
 export function registerServerCommands (cli: CommandLineInterface, server: GameServer): void {
   cli

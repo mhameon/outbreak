@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OneOrMany } from '@shared/types'
+import { OneOrMany } from '#shared/types'
 
 type Functions = Array<(...args: any[]) => any>
 

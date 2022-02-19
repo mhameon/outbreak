@@ -1,7 +1,7 @@
-import { Plugin } from '@server/service/server'
-import { GameServer } from '@server/service/server/GameServer'
+import { Plugin } from '#server/service/server'
+import { GameServer } from '#server/service/server/GameServer'
 import { CommandLineInterface } from './CommandLineInterface'
-import { getLogger } from '@shared/logger/logger'
+import { getLogger } from '#shared/logger/logger'
 import { registerServerCommands } from './command/server'
 import { registerGameCommands } from './command/game'
 

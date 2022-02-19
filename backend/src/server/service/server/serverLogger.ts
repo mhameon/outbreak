@@ -1,4 +1,4 @@
-import { getLogger } from '@shared/logger'
+import { getLogger } from '#shared/logger/index'
 import util from 'util'
 import { Socket } from 'socket.io'
 

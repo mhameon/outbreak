@@ -1,6 +1,6 @@
-import { isMatrix2d, isNumber } from '@engine/guards'
-import { Coords, Matrix, Matrix2d, Size } from '@engine/types'
-import { validate } from '@shared/validator'
+import { isMatrix2d, isNumber } from '#engine/guards'
+import { Coords, Matrix, Matrix2d, Size } from '#engine/types'
+import { validate } from '#shared/validator'
 import chalk from 'chalk'
 
 export type MatrixTransformer = (matrix: Matrix) => Matrix

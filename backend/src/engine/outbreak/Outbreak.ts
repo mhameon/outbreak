@@ -1,14 +1,14 @@
 import { WorldMap } from '../map/WorldMap'
 import { Renderers } from '../renderer'
 import { GameId } from '../types'
-import { getLogger, Logger } from '@shared/logger'
+import { getLogger, Logger } from '#shared/logger/index'
 import { FireResolver } from './resolver'
 import type { Resolvable } from './resolver'
 import { Options } from './'
-import { Wind } from '@engine/outbreak/environment/Wind'
-import { Player } from '@server/service/server/GameServer'
-import { CreatureManager } from '@engine/outbreak/entities/CreatureManager'
-import type { Renderable } from '@engine/renderer/MapRenderer'
+import { Wind } from '#engine/outbreak/environment/Wind'
+import { Player } from '#server/service/server/GameServer'
+import { CreatureManager } from '#engine/outbreak/entities/CreatureManager'
+import type { Renderable } from '#engine/renderer/MapRenderer'
 
 export class Outbreak {
   //private static renderer = Renderers.Ascii()

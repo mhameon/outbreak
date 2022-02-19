@@ -1,4 +1,4 @@
-import { random } from '@engine/math'
+import { random } from '#engine/math/index'
 import assert from 'assert'
 
 // By definition random can't be tested. But some edge cases, values are predictable...

@@ -1,7 +1,7 @@
-import { CustomError } from '@shared/Errors'
+import { CustomError } from '#shared/Errors'
 import { Coords, Size, Tile } from '../types'
-import { OneOrMany } from '@shared/types'
-import { toArray } from '@shared/helpers'
+import { OneOrMany } from '#shared/types'
+import { toArray } from '#shared/helpers'
 
 export function stringifyTiles (tiles: OneOrMany<Tile>): string {
   return `[${toArray<Tile>(tiles).map(id => (`${id}/${Tile[id]}`)).join(', ')}]`

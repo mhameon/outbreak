@@ -3,12 +3,12 @@
   "compilerOptions": {
     "target": "es6",
     "lib": [
-      "es2019"
+      "ES2021"
     ],
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "strict": true,
-    "outDir": "build/",
+    "outDir": "./build",
     "sourceMap": true,
     "incremental": true,
     "removeComments": true,
@@ -19,13 +19,13 @@
     "importHelpers": true,
     "baseUrl": ".",
     "paths": {
-      "@engine/*": [
+      "#engine/*": [
         "./src/engine/*"
       ],
-      "@server/*": [
+      "#server/*": [
         "./src/server/*"
       ],
-      "@shared/*": [
+      "#shared/*": [
         "./src/shared/*"
       ]
     }

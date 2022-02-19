@@ -1,7 +1,7 @@
-import { InvalidArgumentError } from '@shared/Errors'
-import { WindSettings } from '@engine/types'
-import { validate } from '@shared/validator'
-import { isNumber } from '@engine/guards'
+import { InvalidArgumentError } from '#shared/Errors'
+import { WindSettings } from '#engine/types'
+import { validate } from '#shared/validator'
+import { isNumber } from '#engine/guards'
 
 export class Wind {
   static readonly minForce = 0

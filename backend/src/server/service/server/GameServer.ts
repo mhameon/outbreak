@@ -1,4 +1,4 @@
-import { Plugin } from '@server/service/server/index'
+import { Plugin } from '#server/service/server/index'
 import assert from 'assert'
 import config from 'config'
 import http from 'http'
@@ -6,10 +6,10 @@ import type { AddressInfo } from 'net'
 import express, { Express } from 'express'
 import * as io from 'socket.io'
 import { log, registerEventLogger } from './serverLogger'
-import { GameManager } from '@engine/game/GameManager'
-import { GameId } from '@engine/types'
+import { GameManager } from '#engine/game/GameManager'
+import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
-import event from '@engine/events'
+import event from '#engine/events'
 
 // Todo: continue typing
 // Fixme: must lives in another file?

@@ -1,4 +1,4 @@
-import { Values } from '@shared/types'
+import { Values } from '#shared/types'
 
 export type Coords = {
   x: number

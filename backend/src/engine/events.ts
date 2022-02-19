@@ -1,4 +1,4 @@
-import type { Tile } from '@engine/types'
+import type { Tile } from '#engine/types'
 
 export const game = {
   join: 'game:join',

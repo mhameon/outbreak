@@ -1,6 +1,6 @@
 import config from 'config'
 import winston, { LogEntry } from 'winston'
-import { DEFAULT_LOG_FILE } from '@shared/logger/index'
+import { DEFAULT_LOG_FILE } from '#shared/logger/index'
 
 export type LogMethod = winston.LeveledLogMethod
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'

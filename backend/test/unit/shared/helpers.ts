@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { toArray, toSet } from '@shared/helpers'
+import { toArray, toSet } from '#shared/helpers'
 
 describe('shared helpers', function () {
   const num = 12, obj = { obj: true }

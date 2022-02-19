@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap } from '@engine/guards'
+import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap } from '#engine/guards'
 import * as assert from 'assert'
-import { WorldMap } from '@engine/map/WorldMap'
+import { WorldMap } from '#engine/map/WorldMap'
 
 describe('Type guards', function() {
   describe('map guards', function () {

@@ -1,10 +1,9 @@
-import 'module-alias/register'
-import { matrix } from '@engine/math'
+import { matrix } from '#engine/math/index'
 import { NoiseFactory, MatrixPipeline } from './math/NoiseFactory'
-import { WorldMap } from '@engine/map/WorldMap'
-import { Renderers } from '@engine/renderer'
-import { explosion } from '@engine/map/explosion'
-import { Tile, Size, Seed, Coords, Matrix2d } from '@engine/types'
+import { WorldMap } from '#engine/map/WorldMap'
+import { Renderers } from '#engine/renderer'
+import { explosion } from '#engine/map/explosion'
+import { Tile, Size, Seed, Coords, Matrix2d } from '#engine/types'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tumult = require('tumult')
 

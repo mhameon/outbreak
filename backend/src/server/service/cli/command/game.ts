@@ -1,10 +1,10 @@
-import { CommandLineInterface } from '@server/service/cli/CommandLineInterface'
-import { GameManager } from '@engine/game/GameManager'
-import { GameId } from '@engine/types'
-import { Nullable } from '@shared/types'
-import { Outbreak } from '@engine/outbreak'
-import { registerGameControlCommands } from '@server/service/cli/command/game-control'
-import event from '@engine/events'
+import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
+import { GameManager } from '#engine/game/GameManager'
+import { GameId } from '#engine/types'
+import { Nullable } from '#shared/types'
+import { Outbreak } from '#engine/outbreak/index'
+import { registerGameControlCommands } from '#server/service/cli/command/game-control'
+import event from '#engine/events'
 
 let currentGameId: GameId = ''
 

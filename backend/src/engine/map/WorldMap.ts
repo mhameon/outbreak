@@ -1,13 +1,13 @@
 import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoords } from '../guards'
-import { Seeder } from '@engine/map/builder/MapBuilder'
-import { InvalidArgumentError } from '@shared/Errors'
-import { getSanitizedTileset } from '@engine/map/tilerules'
-import { Values, OneOrMany } from '@shared/types'
-import { deleteInSet, toArray } from '@shared/helpers'
+import { Seeder } from '#engine/map/builder/MapBuilder'
+import { InvalidArgumentError } from '#shared/Errors'
+import { getSanitizedTileset } from '#engine/map/tilerules'
+import { Values, OneOrMany } from '#shared/types'
+import { deleteInSet, toArray } from '#shared/helpers'
 import { EventEmitter } from 'events'
-import event from '@engine/events'
+import event from '#engine/events'
 
 /**
  * A 2D map structure describing the game board

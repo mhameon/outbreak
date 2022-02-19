@@ -1,7 +1,7 @@
-import middleware from '@server/middleware'
-import type { Void } from '@shared/types'
+import middleware from '#server/middleware/index'
+import type { Void } from '#shared/types'
 import { GameServer } from './GameServer'
-import { GameManager } from '@engine/game/GameManager'
+import { GameManager } from '#engine/game/GameManager'
 
 export type Plugin<T> = ((server: GameServer) => Void<T>) | Void<T>
 

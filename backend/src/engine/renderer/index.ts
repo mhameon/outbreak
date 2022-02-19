@@ -1,5 +1,5 @@
 import { AsciiMapRenderer } from './ascii/AsciiMapRenderer'
-import { Renderable } from '@engine/renderer/MapRenderer'
+import { Renderable } from '#engine/renderer/MapRenderer'
 
 export type Renderer = 'Ascii' // | 'ThreeJS' | 'HTML'
 

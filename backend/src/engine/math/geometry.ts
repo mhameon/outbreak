@@ -1,4 +1,4 @@
-import { Coords } from '@engine/types'
+import { Coords } from '#engine/types'
 
 const PI = 3.14159265 as const
 
