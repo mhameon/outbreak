@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { matrix } from '#engine/math/index'
 import { NoiseFactory, MatrixPipeline } from './math/NoiseFactory'
 import { WorldMap } from '#engine/map/WorldMap'
