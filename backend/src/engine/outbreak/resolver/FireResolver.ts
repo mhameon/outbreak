@@ -63,9 +63,10 @@ export class FireResolver extends Resolver {
       }
     })
 
-    const ignitionsCounter = this.outbreak.map.add(Tile.Burning, ignitions)
+    const ignitionsCounter = this.outbreak.map.add([ Tile.Burning, Tile.TemporaryBlock ], ignitions)
     if (ashes.size > 0) {
       this.outbreak.map.replace(Tile.Burning, Tile.Burned, ashes)
+      this.outbreak.map.replace(Tile.TemporaryBlock, null, ashes)
       ashes.forEach(at => this.flames.delete(at))
     }
 

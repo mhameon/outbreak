@@ -52,6 +52,7 @@ export const tilerules: Tilerules = {
   ],
   properties: [
     Tile.Block,
+    Tile.TemporaryBlock,
     Tile.Walkable
   ],
   sidekicks: [
@@ -61,6 +62,9 @@ export const tilerules: Tilerules = {
   ],
   rendering: [
     // Must be declared descending
+    // { and: [ Tile.Road, Tile.Grass ], gives: RenderTile.Road },
+    // { and: [ Tile.Road, Tile.Building ], gives: RenderTile.Road },
+
     { and: [ Tile.Burning, Tile.Building, Tile.Level1 ], gives: RenderTile.BurningBuildingL1 },
     { and: [ Tile.Burning, Tile.Building, Tile.Level2 ], gives: RenderTile.BurningBuildingL2 },
     { and: [ Tile.Burning, Tile.Building, Tile.Level3 ], gives: RenderTile.BurningBuildingL3 },

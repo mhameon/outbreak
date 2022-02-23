@@ -7,13 +7,15 @@ export type Coords = {
 
 /**
  * ```
- *  NW    N    NE
- *    ↖   ↑   ↗
- *      0 1 2
- *  W ← 3 · 4 → E
- *      5 6 7
- *    ↙   ↓   ↘
- *  SW    S    SE
+ *    315°    0°    45°
+ *      NW    N    NE
+ *        ↖   ↑   ↗
+ *          0 1 2
+ * 270° W ← 3 · 4 → E 90°
+ *          5 6 7
+ *        ↙   ↓   ↘
+ *      SW    S    SE
+ *    225°   180°   135°
  * ```
  */
 export enum Direction {
@@ -41,6 +43,7 @@ export enum Tile {
   /*** Properties ***/
   Walkable,
   Block,
+  TemporaryBlock,
 
   /*** Sidekick tiles ***/
   Burned = 10,
@@ -54,6 +57,7 @@ export enum Tile {
 
   /*** Entities ***/
   Zombie = 50,
+  Human,
 
   /*** Materials ***/
   Grass = 100,
@@ -93,6 +97,7 @@ export enum RenderTile {
   BurnedBuildingL4,
   BurnedBuildingL5,
   Zombie,
+  Human,
 }
 
 export type Index = string

@@ -1,4 +1,4 @@
-import { RenderTile, Coords } from '#engine/types'
+import { RenderTile, Coords, Tile } from '#engine/types'
 import chalk from 'chalk'
 import { getRenderTile } from '#engine/map/tilerules'
 import { WorldMap } from '#engine/map/WorldMap'
@@ -35,6 +35,7 @@ TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('
 TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
 TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('Z︎')
+TileAtlas[RenderTile.Human] = chalk.hex('rgba(29,107,3,0.25)').bgHex('#81f126')('☺︎︎')
 
 export class AsciiMapRenderer extends MapRenderer {
   protected renderer (outbreak: Outbreak): string {
@@ -52,7 +53,7 @@ export class AsciiMapRenderer extends MapRenderer {
     if (outbreak.id === 'StandAloneRendering') {
       return asciiMap
     }
-    const seeder = outbreak.map.seeder ? `build with ${outbreak.map.seeder.builder}(${outbreak.map.seeder.seed})` : ''
+    const seeder = outbreak.map.seeder ? `built with ${outbreak.map.seeder.builder}(${outbreak.map.seeder.seed})` : ''
     const windForce = (''.padEnd(outbreak.wind.force, '◼')) + (''.padEnd(Wind.maxForce - outbreak.wind.force, '◻'))
     return ''
       + `Outbreak: ${outbreak.id} (${outbreak.createdAt.toISOString()})\n`
@@ -66,7 +67,8 @@ export class AsciiMapRenderer extends MapRenderer {
     const tileset = outbreak.map.get(at)
     const creatures = outbreak.creature.get(at)
     if (creatures.length) {
-      console.log(creatures)
+      // CreatureType values are based on Tile
+      return TileAtlas[getRenderTile(creatures[0].type as unknown as Tile)]
     }
     try {
       return TileAtlas[getRenderTile(tileset)]

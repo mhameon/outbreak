@@ -1,6 +1,6 @@
-import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
+import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction, DirectionInDegree } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
-import { isCoords } from '../guards'
+import { isCoords, isIndex } from '../guards'
 import { Seeder } from '#engine/map/builder/MapBuilder'
 import { InvalidArgumentError } from '#shared/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
@@ -8,6 +8,7 @@ import { Values, OneOrMany } from '#shared/types'
 import { deleteInSet, toArray } from '#shared/helpers'
 import { EventEmitter } from 'events'
 import event from '#engine/events'
+import { calculateDestination } from '#engine/math/geometry'
 
 /**
  * A 2D map structure describing the game board
@@ -104,7 +105,7 @@ export class WorldMap extends EventEmitter {
     return removed
   }
 
-  replace (wanted: Tile, substitute: Tile, at: OneOrMany<Coords>): void {
+  replace (wanted: Tile, substitute: Tile | null, at: OneOrMany<Coords>): void {
     const coords = toArray<Coords>(at)
     const here = coords.pop()
     if (coords.length) {
@@ -117,7 +118,7 @@ export class WorldMap extends EventEmitter {
         tile.delete(wanted)
         this.set([
           ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
-          substitute
+          ...(substitute ? [ substitute ]:[]),
         ], here)
       }
     }
@@ -126,28 +127,45 @@ export class WorldMap extends EventEmitter {
   /**
    * @throws OutOfMapError
    */
-  get (at: Coords): Tileset {
-    this.assertMapContains(at)
-    const tiles = this.tiles.get(WorldMap.index(at))
+  get (at: Coords | Index): Tileset {
+    let index: Index
+    let coords: Coords
+    if (isIndex(at)) {
+      index = at
+      coords = WorldMap.coords(at)
+    } else {
+      index = WorldMap.index(at)
+      coords = at
+    }
+    this.assertMapContains(coords)
+    const tiles = this.tiles.get(index)
     // Returns new Set to avoid `this.tiles` manipulation outside WorldMap
     return new Set(tiles ? tiles : WorldMap.emptyTileset)
   }
 
+  getNeighborsCoords (at: Coords): Array<Coords> {
+    return [
+      { x: at.x-1, y: at.y - 1 },
+      { x: at.x, y: at.y - 1 },
+      { x: at.x+1, y: at.y - 1 },
+      { x: at.x - 1, y: at.y },
+      { x: at.x + 1, y: at.y },
+      { x: at.x-1, y: at.y + 1 },
+      { x: at.x, y: at.y + 1 },
+      { x: at.x+1, y: at.y + 1 },
+    ].filter(here=>this.contains(here))
+  }
+
   getAround (at: Coords): Around {
     const around: Around = new Map()
-    const from = { x: at.x - 1, y: at.y - 1 }
-    const to = { x: at.x + 1, y: at.y + 1 }
-    let direction = 0
-    for (let y = from.y; y <= to.y; y++) {
-      for (let x = from.x; x <= to.x; x++) {
-        if (x !== at.x || y !== at.y) {
-          try {
-            around.set(direction as Values<typeof Direction>, this.get({ x, y }))
-          } catch (e) {
-            // Do nothing
-          }
-          direction++
-        }
+    for (let direction = 0; direction < 8; direction++) {
+      try {
+        around.set(
+          direction as Values<typeof Direction>,
+          this.get(calculateDestination(at, DirectionInDegree[direction], 1))
+        )
+      } catch (e) {
+        // Do nothing
       }
     }
     return around
@@ -207,7 +225,7 @@ export class WorldMap extends EventEmitter {
    */
   isWalkable (at: Coords): boolean {
     this.assertMapContains(at)
-    return !this.has(Tile.Block, at)
+    return !this.has(Tile.Block, at) && !this.has(Tile.TemporaryBlock, at)
   }
 
   contains (point: Coords): boolean {
@@ -227,7 +245,7 @@ export class WorldMap extends EventEmitter {
     return `${at.x},${at.y}`
   }
 
-  private static coords (index: Index): Coords {
+  static coords (index: Index): Coords {
     const [ x, y ] = index.split(',')
     return { x: Number(x), y: Number(y) }
   }

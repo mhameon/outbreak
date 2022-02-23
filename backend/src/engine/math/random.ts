@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { Direction } from '#engine/types'
 
 export const random = {
   /** Randomly pick a number between `min` and `max` (included) */
@@ -17,5 +18,7 @@ export const random = {
   chance: (percent: number): boolean => percent === 100 ? true : Math.round(Math.random() * 100) < percent,
 
   /** Generate a random hexadecimal string (string size = bytes*2) */
-  hex: (bytes = 8): string => crypto.randomBytes(bytes).toString('hex')
+  hex: (bytes = 8): string => crypto.randomBytes(bytes).toString('hex'),
+
+  direction: (): Direction => random.range(0,7)
 } as const

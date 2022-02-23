@@ -204,11 +204,21 @@ describe('WorldMap class', function () {
       assert.ok(map.has(Tile.Forest, origin))
       assert.strictEqual(map.has(Tile.Forest, at), false)
     })
+    it('should delete tile when passing null', function () {
+      map.replace(Tile.Block, null, origin)
+      assert.ok(!map.has(Tile.Forest, origin))
+      assert.ok(map.has(WorldMap.defaultTile, origin))
+    })
   })
 
   describe('get(at)', function () {
-    it('should returns correct tile', function () {
+    it('should returns correct tile with Coord', function () {
       const tile = map.get(origin)
+      assert.ok(tile.has(Tile.Block))
+      assert.strictEqual(tile.has(Tile.Walkable), false)
+    })
+    it('should returns correct tile with Index', function () {
+      const tile = map.get('0,0')
       assert.ok(tile.has(Tile.Block))
       assert.strictEqual(tile.has(Tile.Walkable), false)
     })
@@ -288,6 +298,34 @@ describe('WorldMap class', function () {
       }
     })
     assert.strictEqual(iteration, 2)
+  })
+
+  describe('getNeighborsCoords', function () {
+    it('should find all 8 neighbors', function () {
+      const neighbors = map.getNeighborsCoords({ x: 1, y: 1 })
+      assert.strictEqual(neighbors.length, 8)
+      assert.deepStrictEqual(neighbors, [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 0, y: 1 },
+        { x: 2, y: 1 },
+        { x: 0, y: 2 },
+        { x: 1, y: 2 },
+        { x: 2, y: 2 }
+      ])
+    })
+    it('should find all 5 neighbors at the map edge', function () {
+      const neighbors = map.getNeighborsCoords({ x: 0, y: 1 })
+      assert.strictEqual(neighbors.length, 5)
+      assert.deepStrictEqual(neighbors, [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+        { x: 0, y: 2 },
+        { x: 1, y: 2 }
+      ])
+    })
   })
 
   describe('extract', function () {

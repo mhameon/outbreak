@@ -42,7 +42,7 @@ describe('CreatureManager class', function () {
 
     zombie = outbreak.creature.spawn(CreatureType.Zombie, origin)
     zombie2 = outbreak.creature.spawn(CreatureType.Zombie, pos1)
-    survivor = outbreak.creature.spawn(CreatureType.Survivor, pos1)
+    survivor = outbreak.creature.spawn(CreatureType.Human, pos1)
 
     assert.strictEqual(events['creature:spawned'].length, 3)
     assert.deepStrictEqual(events['creature:spawned'], [ zombie, zombie2, survivor ])
@@ -90,16 +90,16 @@ describe('CreatureManager class', function () {
       assert.deepStrictEqual(outbreak.creature.get({ x: 0, y: 3 }), [])
     })
     it('get(Coords, CreatureType)', function () {
-      const z = outbreak.creature.get(pos1, CreatureType.Survivor)
+      const z = outbreak.creature.get(pos1, CreatureType.Human)
       assert.strictEqual(z.length, 1)
       assertCreatureEqual(z[0], survivor)
     })
     it('get(Coords, Array<CreatureType>)', function () {
-      let z = outbreak.creature.get(pos1, [ CreatureType.Survivor ])
+      let z = outbreak.creature.get(pos1, [ CreatureType.Human ])
       assert.strictEqual(z.length, 1)
       assertCreatureEqual(z[0], survivor)
 
-      z = outbreak.creature.get(pos1, [ CreatureType.Survivor, CreatureType.Zombie ])
+      z = outbreak.creature.get(pos1, [ CreatureType.Human, CreatureType.Zombie ])
       assert.strictEqual(z.length, 2)
       assertCreatureEqual(z[0], zombie2)
       assertCreatureEqual(z[1], survivor)

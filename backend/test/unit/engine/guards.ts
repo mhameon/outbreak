@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap } from '#engine/guards'
+import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap, isIndex } from '#engine/guards'
 import * as assert from 'assert'
 import { WorldMap } from '#engine/map/WorldMap'
 
@@ -17,6 +17,13 @@ describe('Type guards', function() {
       assert.strictEqual(isCoords({ x: null, y: undefined }), false)
       assert.strictEqual(isCoords('notCoords'), false)
       assert.strictEqual(isCoords(undefined), false)
+    })
+
+    it('isIndex', function (){
+      assert.ok(isIndex('1,2'))
+      assert.strictEqual(isIndex('a,b'), false)
+      assert.strictEqual(isIndex('1,'), false)
+      assert.strictEqual(isIndex('1-2'), false)
     })
 
     it('isCoordsArray', function () {

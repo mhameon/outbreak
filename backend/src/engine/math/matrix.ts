@@ -24,8 +24,8 @@ function add (value: number, array?: Matrix): Matrix | MatrixTransformer {
 function cap (floor: number, ceil: number): MatrixTransformer
 function cap (floor: number, ceil: number, array: Matrix): Matrix
 /** Cap a Matrix with floor/ceil values */
-function cap (floor: number, ceil: number, array?: Matrix): Matrix|MatrixTransformer {
-  if ( array ) {
+function cap (floor: number, ceil: number, array?: Matrix): Matrix | MatrixTransformer {
+  if (array) {
     const caper = (entry: MatrixEntry): MatrixEntry => {
       if (isNumber(entry)) {
         if (entry < floor) return floor
@@ -107,8 +107,7 @@ export const matrix = {
       if (isNumber(entry)) {
         callback({ coords: { x, y }, value: entry })
         x++
-      }
-      else {
+      } else {
         entry.forEach(traveler)
         x = 0
         y++
@@ -121,7 +120,7 @@ export const matrix = {
   /**
    * Return a console friendly version of the matrix
    */
-  debug: (array: Matrix | Matrix2d, options: { colorize?: Condition } = {}): string => {
+  debug: (array: Matrix | Matrix2d, options: { colorize?: Condition; value?: (v: number) => number | string } = {}): string => {
     validate(array, isMatrix2d)
 
     const height = array.length
@@ -165,10 +164,9 @@ export const matrix = {
         item = (array[y] as number[])[x]
         if (needColorization(item)) {
           output += chalk.bgRgb(Math.round(200 * item), 0, 0).red(item <= 0.1 ? '‧' : ' ')
-        }
-        else {
+        } else {
           rgb = Math.round(255 * item)
-          output += chalk.bgRgb(rgb, rgb, rgb)(' ')
+          output += chalk.bgRgb(rgb, rgb, rgb).hex('#000')(options.value ? options.value(item) : ' ')
         }
       }
       output += '\n'

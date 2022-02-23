@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import type { Coords, Index } from '#engine/types'
-import { Direction, DirectionInDegree } from '#engine/types'
+import { Direction, DirectionInDegree, Tile } from '#engine/types'
 import type { Logger } from '#shared/logger/index'
 import { Outbreak } from '#engine/outbreak/index'
 import { random } from '#engine/math/index'
@@ -17,14 +17,15 @@ import { OutOfMapError } from '#engine/map/WorldMapErrors'
 export type CreatureId = string
 
 export enum CreatureType {
-  'Zombie',
-  'Survivor'
+  'Zombie' = Tile.Zombie,
+  'Human' = Tile.Human
 }
 
 export interface Creature {
   id: CreatureId
   at: Coords
   type: CreatureType
+  toward: Direction
 }
 
 /**
@@ -41,8 +42,8 @@ export class CreatureManager extends EventEmitter {
   readonly log: Logger
   readonly outbreak: Outbreak
   private readonly creatures = new Map<CreatureId, Creature>()
-  private readonly creatureIdsByCoords: Map<Index, Set<CreatureId>> = new Map()
-  private readonly creatureIdsByTypes: Map<CreatureType, Set<CreatureId>> = new Map()
+  private readonly creatureIdsByCoords = new Map<Index, Set<CreatureId>>()
+  private readonly creatureIdsByTypes = new Map<CreatureType, Set<CreatureId>>()
 
   constructor (outbreak: Outbreak) {
     super()
@@ -50,10 +51,10 @@ export class CreatureManager extends EventEmitter {
     this.outbreak = outbreak
   }
 
-  spawn (type: CreatureType, at: Coords): Readonly<Creature> {
+  spawn (type: CreatureType, at: Coords, toward: Direction = random.direction()): Readonly<Creature> {
     this.outbreak.map.assertMapContains(at)
 
-    const creature: Creature = { id: random.hex(), at, type }
+    const creature: Creature = { id: random.hex(), at, toward, type }
     this.add(creature)
 
     this.log.info('Creature spawned %j', creature)
@@ -112,11 +113,11 @@ export class CreatureManager extends EventEmitter {
     return null
   }
 
-  move (id: CreatureId, toward: Direction): Creature {
+  move (id: CreatureId, to: Direction|Coords): Creature {
     this.assertCreatureIdExists(id)
     const creature = this.get(id) as Creature
     const from = creature.at
-    const destination = calculateDestination(creature.at, DirectionInDegree[toward], 1)
+    const destination = isCoords(to) ? to:calculateDestination(creature.at, DirectionInDegree[to], 1)
 
     try {
       if (this.outbreak.map.isWalkable(destination)) {

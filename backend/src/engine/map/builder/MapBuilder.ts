@@ -37,7 +37,7 @@ abstract class MapBuilder {
 
   protected abstract build (): WorldMap
 
-  abstract populate (world: CreatureManager): void
+  abstract populate (world: CreatureManager, map:WorldMap): void
 }
 
 export default MapBuilder

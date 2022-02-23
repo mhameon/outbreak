@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorldMap } from '#engine/map/WorldMap'
-import { Coords, Matrix2d } from './types'
+import { Coords, Matrix2d, Index } from './types'
 import { CreatureType } from '#engine/outbreak/entities/CreatureManager'
 
 export function isNumber (arg: any): arg is number {
@@ -12,6 +12,11 @@ const isSomeEnum = <T> (e: T) => (token: any): token is T[keyof T] => Object.val
 export function isCoords (arg: any): arg is Coords {
   const coords: Coords = arg
   return isNumber(coords?.x) && isNumber(coords?.y)
+}
+
+const indexRegexp = new RegExp(/^\d,\d$/)
+export function isIndex(arg:any):arg is Index{
+  return indexRegexp.test(arg)
 }
 
 // TODO: Keep?
