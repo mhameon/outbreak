@@ -79,7 +79,7 @@ export class CityMapBuilder extends MapBuilder {
 
     Array.from({ length: map.size.height }, (_, y) =>
       Array.from({ length: map.size.width }, (_, x) => {
-        if (random.chance(75)) {
+        if (random.chance(25)) {
           if ( map.isWalkable({ x,y })) {
             world.spawn(CreatureType.Zombie, { x, y })
           }

@@ -13,9 +13,14 @@ import event from '#engine/events'
 
 // Todo: continue typing
 // Fixme: must lives in another file?
-export interface Player {
+export type Player = {
   id: string
   name?: string
+}
+
+type SocketInformation = {
+  id: string
+  connectedAt: Date
 }
 
 export interface ServerStatus {
@@ -39,7 +44,7 @@ export class GameServer {
 
   readonly game: GameManager
   private readonly rooms = new Set<string>()
-  private readonly clients = new WeakMap<io.Socket, { player: Player; socket: any }>()
+  private readonly clients = new WeakMap<io.Socket, { player: Player; socket: SocketInformation }>()
 
   private isShuttingDown = false
   private startListeningAt?: Date

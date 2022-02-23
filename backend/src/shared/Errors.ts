@@ -41,6 +41,7 @@ export class NotFoundError extends CustomError {
 
 export class UnexpectedError extends CustomError {
   constructor (error: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     super((error as any)?.message ?? 'UnexpectedError: WTF, isn\'t that supposed to happen ?!')
   }
 }

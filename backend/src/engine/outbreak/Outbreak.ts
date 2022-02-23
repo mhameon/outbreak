@@ -4,11 +4,12 @@ import { GameId } from '../types'
 import { getLogger, Logger } from '#shared/logger/index'
 import { FireResolver } from './resolver'
 import type { Resolvable } from './resolver'
-import { Options } from './'
+import { OutbreakOptions } from './'
 import { Wind } from '#engine/outbreak/environment/Wind'
 import { Player } from '#server/service/server/GameServer'
 import { CreatureManager } from '#engine/outbreak/entities/CreatureManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
+import { ZombieResolver } from '#engine/outbreak/resolver/ZombieResolver'
 
 export class Outbreak {
   //private static renderer = Renderers.Ascii()
@@ -26,7 +27,7 @@ export class Outbreak {
   private turn = 0 // 0 means not started
   private players = new Map()
 
-  constructor(id: GameId, map: WorldMap, option?: Options) {
+  constructor(id: GameId, map: WorldMap, option?: OutbreakOptions) {
     Outbreak.renderer = Renderers.Ascii()
     this.id = id
     this.log = getLogger('Outbreak', { gameId: this.id })
@@ -38,6 +39,7 @@ export class Outbreak {
 
     this.resolvers = [
       new FireResolver(this),
+      new ZombieResolver(this)
     ]
   }
 
@@ -57,8 +59,6 @@ export class Outbreak {
 
     // this.log.profile('sound')
     // this.log.profile('sound', { message: '🔊 Resolve: Sound propagation', level: 'debug' })
-    // this.log.profile('zombie')
-    // this.log.profile('zombie', { message: '🧟 Resolve: Zombies move', level: 'debug' })
 
     this.log.profile('resolveTurn', { message: `Turn ${this.turn} resolved`, level: 'info' })
     return ++this.turn

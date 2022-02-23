@@ -47,7 +47,7 @@ export function registerGameControlCommands (cli: CommandLineInterface, getOutbr
       console.log(
         '   ▼\n' +
         `  ${map[0]}  At ${at.x},${at.y} - tiles ${stringifyTiles(tileset)}\n` +
-        `︎︎▶${map[1]}  renders ${renderedTile}/${RenderTile[renderedTile]}, ${outbreak.map.isWalkable(at)?'':'NOT'} walkable\n` +
+        `︎︎▶${map[1]}  renders ${renderedTile}/${RenderTile[renderedTile]}, ${outbreak.map.isWalkable(at)?'':'NOT '}walkable\n` +
         `  ${map[2]}\n` +
         '       ' + creatures.map(c => JSON.stringify(c)).join('\n       ')
       )
