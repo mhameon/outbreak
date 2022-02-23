@@ -127,9 +127,9 @@ export class CommandLineInterface {
 
   print (errorOrMessage: string | Error | unknown): void {
     console.log(
-      errorOrMessage instanceof Error
-        ? chalk.red(`❌ ${errorOrMessage.message}`)
-        : errorOrMessage
+      errorOrMessage instanceof Error ? chalk.red(`❌ ${errorOrMessage.message}`) : 'Error',
+      '\n',
+      errorOrMessage
     )
   }
 }
