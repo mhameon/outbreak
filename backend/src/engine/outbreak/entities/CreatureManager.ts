@@ -11,7 +11,7 @@ import { toArray } from '#shared/helpers'
 import event from '#engine/events'
 import { NotFoundError, expect } from '#shared/Errors'
 import assert from 'assert'
-import { calculateDestination } from '#engine/math/geometry'
+import { calculateDestination, calculateDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 
 export type CreatureId = string
@@ -21,11 +21,21 @@ export enum CreatureType {
   'Human' = Tile.Human
 }
 
+export enum Attitude {
+  /** Default behavior: walks straight ahead, changes direction when encountering an obstacle or stimulus */
+  'Wandering',
+  /** Has a target in line of sight and tries to reach it to attack it. Emit a sound (growl) when detecting it */
+  'Tracking',
+  /** Following a target detected by his scent */
+  'Sniffing',
+}
+
 export interface Creature {
   id: CreatureId
   at: Coords
   type: CreatureType
-  toward: Direction
+  facing: Direction
+  attitude: Attitude
 }
 
 /**
@@ -51,10 +61,16 @@ export class CreatureManager extends EventEmitter {
     this.outbreak = outbreak
   }
 
-  spawn (type: CreatureType, at: Coords, toward: Direction = random.direction()): Readonly<Creature> {
+  spawn (type: CreatureType, at: Coords, facing: Direction = random.direction()): Readonly<Creature> {
     this.outbreak.map.assertMapContains(at)
 
-    const creature: Creature = { id: random.hex(), at, toward, type }
+    const creature: Creature = {
+      id: random.hex(),
+      at,
+      facing: facing,
+      type,
+      attitude: Attitude.Wandering,
+    }
     this.add(creature)
 
     this.log.info('Creature spawned %j', creature)
@@ -113,25 +129,47 @@ export class CreatureManager extends EventEmitter {
     return null
   }
 
-  move (id: CreatureId, to: Direction|Coords): Creature {
+  move (id: CreatureId, to: Direction | Coords): Creature {
     this.assertCreatureIdExists(id)
     const creature = this.get(id) as Creature
-    const from = creature.at
-    const destination = isCoords(to) ? to:calculateDestination(creature.at, DirectionInDegree[to], 1)
+    if (this.canMove(creature, to)) {
+      const from = creature.at
+      let destination: Coords
+      let facing: Direction
+      if (isCoords(to)) {
+        destination = to
+        facing = calculateDirection(creature.at, to)
+      } else {
+        destination = calculateDestination(creature.at, DirectionInDegree[to], 1)
+        facing = to
+      }
+
+      this.delete(creature)
+      creature.at = destination
+      creature.facing = facing
+      this.add(creature)
+      this.emit(event.creature.moved, { creature, from })
+      return creature
+    }
+
+    return creature
+  }
+
+  canMove (creature: Creature, to: Direction | Coords): boolean {
+    let destination: Coords
+    if (isCoords(to)) { // Todo check distance?
+      destination = to
+    } else {
+      destination = calculateDestination(creature.at, DirectionInDegree[to], 1)
+    }
 
     try {
-      if (this.outbreak.map.isWalkable(destination)) {
-        this.delete(creature)
-        creature.at = destination
-        this.add(creature)
-        this.emit(event.creature.moved, { creature, from } )
-        return creature
-      }
+      return this.outbreak.map.isWalkable(destination)
     } catch (error) {
       expect(error, OutOfMapError)
     }
 
-    return creature
+    return false
   }
 
   private add (creature: Creature): Creature {

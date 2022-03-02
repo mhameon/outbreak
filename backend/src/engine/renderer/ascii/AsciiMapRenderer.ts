@@ -1,10 +1,11 @@
-import { RenderTile, Coords, Tile } from '#engine/types'
+import { RenderTile, Coords } from '#engine/types'
 import chalk from 'chalk'
 import { getRenderTile } from '#engine/map/tilerules'
 import { WorldMap } from '#engine/map/WorldMap'
 import { Outbreak } from '#engine/outbreak/index'
 import { MapRenderer } from '#engine/renderer/MapRenderer'
 import { Wind } from '#engine/outbreak/environment/Wind'
+import { Creature, CreatureType } from '#engine/outbreak/entities/CreatureManager'
 
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')
@@ -34,8 +35,6 @@ TileAtlas[RenderTile.BurnedBuildingL2] = chalk.hex('#000000').bgHex('#999999')('
 TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('▒')
 TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
-TileAtlas[RenderTile.Zombie] = chalk.hex('#FFF').bgHex('#C00')('Z︎')
-TileAtlas[RenderTile.Human] = chalk.hex('rgba(29,107,3,0.25)').bgHex('#81f126')('☺︎︎')
 
 export class AsciiMapRenderer extends MapRenderer {
   protected renderer (outbreak: Outbreak): string {
@@ -68,7 +67,8 @@ export class AsciiMapRenderer extends MapRenderer {
     const creatures = outbreak.creature.get(at)
     if (creatures.length) {
       // CreatureType values are based on Tile
-      return TileAtlas[getRenderTile(creatures[0].type as unknown as Tile)]
+      //return TileAtlas[getRenderTile(creatures[0].type as unknown as Tile)]
+      return AsciiMapRenderer.creature(creatures[0])
     }
     try {
       return TileAtlas[getRenderTile(tileset)]
@@ -80,5 +80,16 @@ export class AsciiMapRenderer extends MapRenderer {
       }
     }
     return chalk.hex('#ea6a6a').bgHex('#6c0101')('?')
+  }
+
+  static creature(creature: Creature):string{
+    const facing = [ '↖', '↑', '↗', '←', '→', '↙', '↓','↘' ]
+    switch (creature.type) {
+      case CreatureType.Zombie:
+        return chalk.hex('#FFF').bgHex('#C00')(facing[creature.facing])
+      case CreatureType.Human:
+        return chalk.hex('rgba(29,107,3,0.25)').bgHex('#81f126')('☺︎︎')
+    }
+    return '?'
   }
 }

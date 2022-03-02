@@ -1,19 +1,35 @@
-import { Coords } from '#engine/types'
-
-const PI = 3.14159265 as const
+import { Coords, Direction, DirectionClockwise } from '#engine/types'
 
 /**
  * @param origin Coords
  * @param angle in degrees, 0° point to north, clockwise
- * @param distance Distance (in tiles) from origin
+ * @param distance in number of tiles from origin
  */
-function calculateDestination (origin: Coords, angle: number, distance = 1): Coords {
-  const radian = PI / 2 - (angle * PI / 180)
+export function calculateDestination (origin: Coords, angle: number, distance = 1): Coords {
+  const radian = Math.PI / 2 - (angle * Math.PI / 180)
   return {
     x: origin.x + Math.round(distance * Math.cos(radian)),
     y: origin.y - Math.round(distance * Math.sin(radian)),
   }
 }
+
+/**
+ * @return Angle in degrees (0-360), always > 0
+ */
+export function calculateAngleInDegrees (origin: Coords, to: Coords): number {
+  const angleInRadians = Math.atan2(to.y - origin.y, to.x - origin.x) + 0.5 * Math.PI
+  return (angleInRadians >= 0 ? angleInRadians : (2 * Math.PI + angleInRadians)) * 180 / Math.PI
+}
+
+export function calculateDirection (origin: Coords, to: Coords): Direction {
+  return closestDirection(calculateAngleInDegrees(origin, to))
+}
+
+export function closestDirection (degrees: number): Direction {
+  const direction = Math.floor(Math.abs(degrees) / 45) + (Math.abs(degrees) % 45 >= 22.5 ? 1 : 0)
+  return DirectionClockwise[direction >= 8 ? 0 : direction]
+}
+
 
 // http://members.chello.at/~easyfilter/bresenham.html
 function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {
@@ -28,7 +44,7 @@ function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {
   const dy = Math.abs(y1 - y0)
   const sy = y0 < y1 ? 1 : -1
   let err = dx - dy
-  let e2, x2, y2 /* error value e_xy */
+  let e2, x2, y2 /* error display e_xy */
   const ed = dx + dy == 0 ? 1 : Math.sqrt(dx * dx + dy * dy)
 
   const seuil = 96
@@ -66,7 +82,7 @@ function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {
 }
 
 // http://members.chello.at/~easyfilter/bresenham.html
-function line (from: Coords, to: Coords, width = 1): Array<Coords> {
+export function line (from: Coords, to: Coords, width = 1): Array<Coords> {
   if (width > 1) {
     return lineWidth(from, to, width)
   }
@@ -100,9 +116,4 @@ function line (from: Coords, to: Coords, width = 1): Array<Coords> {
   }
 
   return pixels
-}
-
-export {
-  calculateDestination,
-  line
 }

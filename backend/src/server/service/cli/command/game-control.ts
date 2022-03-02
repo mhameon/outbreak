@@ -1,12 +1,13 @@
 import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
 import { Outbreak } from '#engine/outbreak/index'
 import { Nullable } from '#shared/types'
-import { Coords, RenderTile } from '#engine/types'
+import { Coords, RenderTile, Direction } from '#engine/types'
 import { stringifyTiles } from '#engine/map/WorldMapErrors'
 import { AsciiMapRenderer } from '#engine/renderer/ascii/AsciiMapRenderer'
 import assert from 'assert'
 import { InvalidArgumentError } from '#shared/Errors'
 import { getRenderTile } from '#engine/map/tilerules'
+import { CreatureType, Attitude } from '#engine/outbreak/entities/CreatureManager'
 
 export function registerGameControlCommands (cli: CommandLineInterface, getOutbreak: () => Nullable<Outbreak>): void {
   cli
@@ -49,7 +50,7 @@ export function registerGameControlCommands (cli: CommandLineInterface, getOutbr
         `  ${map[0]}  At ${at.x},${at.y} - tiles ${stringifyTiles(tileset)}\n` +
         `︎︎▶${map[1]}  renders ${renderedTile}/${RenderTile[renderedTile]}, ${outbreak.map.isWalkable(at)?'':'NOT '}walkable\n` +
         `  ${map[2]}\n` +
-        '       ' + creatures.map(c => JSON.stringify(c)).join('\n       ')
+        '       ' + creatures.map(c => `${c.id} - ${CreatureType[c.type]} facing ${Direction[c.facing]} (${Attitude[c.attitude]})`).join('\n       ')
       )
     }
   }

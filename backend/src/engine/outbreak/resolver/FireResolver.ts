@@ -63,6 +63,7 @@ export class FireResolver extends Resolver {
       }
     })
 
+    // Fixme TemporaryBlock not always set on map (visible in Dijkstra map of ZombieResolver)
     const ignitionsCounter = this.outbreak.map.add([ Tile.Burning, Tile.TemporaryBlock ], ignitions)
     if (ashes.size > 0) {
       this.outbreak.map.replace(Tile.Burning, Tile.Burned, ashes)

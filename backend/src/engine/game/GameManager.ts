@@ -34,10 +34,9 @@ export class GameManager extends EventEmitter {
     return `${GameManager.GAME_ID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
   }
 
-  create (): GameId {
+  create (id?:GameId): GameId {
     log.verbose('Creating outbreak...')
-
-    const gameId = GameManager.buildGameId()
+    const gameId = id ?? GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
     this.games.set(gameId, outbreak)
 

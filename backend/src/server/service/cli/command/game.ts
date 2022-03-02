@@ -47,9 +47,9 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
     }
   }
 
-  function createGame (): void {
+  function createGame (gameId?:GameId): void {
     console.log('')
-    selectGame(game.create())
+    selectGame(game.create(gameId))
     displayMap()
   }
 

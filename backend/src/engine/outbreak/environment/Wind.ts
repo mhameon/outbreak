@@ -2,11 +2,12 @@ import { InvalidArgumentError } from '#shared/Errors'
 import { WindSettings } from '#engine/types'
 import { validate } from '#shared/validator'
 import { isNumber } from '#engine/guards'
+import { closestDirection } from '#engine/math/geometry'
 
 export class Wind {
   static readonly minForce = 0
   static readonly maxForce = 10
-  static readonly rose = [ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
+  static readonly rose = [ '↖', '↑', '↗', '←', '→', '↙', '↓','↘' ] //[ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
 
   private _angle = 45
   private _force = 5
@@ -42,10 +43,6 @@ export class Wind {
   }
 
   get arrow (): string {
-    const negativeAngle = this._angle < 0
-    let direction = Math.floor(Math.abs(this._angle) / 45) + (Math.abs(this._angle) % 45 >= 22.5 ? 1 : 0)
-    direction = direction >= 8 ? 0 : direction
-
-    return Wind.rose[negativeAngle ? 8 - direction : direction]
+    return Wind.rose[closestDirection(this.angle)]
   }
 }

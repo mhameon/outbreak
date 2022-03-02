@@ -1,13 +1,10 @@
 import { Values } from '#shared/types'
 
-export type Coords = {
-  x: number
-  y: number
-}
+export type Coords = { x: number; y: number }
 
 /**
  * ```
- *    315°    0°    45°
+ *  315°      0°     45°
  *      NW    N    NE
  *        ↖   ↑   ↗
  *          0 1 2
@@ -15,7 +12,7 @@ export type Coords = {
  *          5 6 7
  *        ↙   ↓   ↘
  *      SW    S    SE
- *    225°   180°   135°
+ *  225°     180°    135°
  * ```
  */
 export enum Direction {
@@ -32,10 +29,10 @@ export enum Direction {
 /** DirectionInDegree[Direction.NorthEast] will give you 45° */
 export const DirectionInDegree = [ 315, 0, 45, 270, 90, 225, 180, 135 ] as const
 
-export type Size = {
-  width: number
-  height: number
-}
+/** DirectionClockwise[0] will give you Direction.North */
+export const DirectionClockwise = [ 1, 2, 4, 7, 6, 5, 3, 0 ] as const
+
+export type Size = { width: number; height: number }
 
 export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
@@ -113,7 +110,6 @@ export type Seed = number | string
 
 /** A matrix is an array of numbers of N dimensions */
 export type Matrix = Array<Matrix | number> // Recursive type
-
 export type Matrix2d = number[][]
 
 export type WindSettings = {

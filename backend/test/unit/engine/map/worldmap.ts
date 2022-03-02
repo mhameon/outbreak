@@ -335,7 +335,7 @@ describe('WorldMap class', function () {
         assert.fail('InvalidArgumentError should have been thrown')
       } catch (e) {
         assert.ok(e instanceof InvalidArgumentError)
-        assert.strictEqual(e.message, 'Expected Surface dimensions must be odd')
+        assert.strictEqual(e.message, 'surface Size must be odd')
       }
     })
     describe('a "sub" WorldMap', function () {

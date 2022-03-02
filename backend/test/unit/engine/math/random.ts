@@ -28,7 +28,7 @@ describe('random', function () {
     })
   })
   describe('choose', function () {
-    it('should pick a value', function () {
+    it('should pick a display', function () {
       let almostChosen = random.choose('a', 'b')
       assert.ok(almostChosen === 'a' || almostChosen === 'b', almostChosen)
 

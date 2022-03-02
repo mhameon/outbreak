@@ -11,9 +11,9 @@ export const random = {
   /** Randomly choose one entry in `values` */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   choose: (...values: any[]): any => {
+  //choose: <T>(...values: [T]): T => { // Fixme ReturnType<T> is T[] :'(
     return values.flatMap(x => x)[random.range(0, values.length - 1)]
   },
-
   /** Return `true` with the probability of `percent`/100 chance */
   chance: (percent: number): boolean => percent === 100 ? true : Math.round(Math.random() * 100) < percent,
 

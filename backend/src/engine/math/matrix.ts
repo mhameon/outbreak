@@ -2,17 +2,25 @@ import { isMatrix2d, isNumber } from '#engine/guards'
 import { Coords, Matrix, Matrix2d, Size } from '#engine/types'
 import { validate } from '#shared/validator'
 import chalk from 'chalk'
-
-export type MatrixTransformer = (matrix: Matrix) => Matrix
+import { color, Gradient } from '#engine/math/color'
 
 type MatrixEntry = Matrix | number
+
+type MatrixDebuggingOptions = {
+  colorize?: Condition
+  display?: (value: number) => number | string
+  heatmap?: {
+    colors: Gradient
+    ignore?: Array<number>
+  }
+}
 type Comparators = 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
 type Condition = { [K in Comparators]?: number }
-
+export type MatrixTransformer = (matrix: Matrix) => Matrix
 
 function add (value: number): MatrixTransformer
 function add (value: number, array: Matrix): Matrix
-/** Add `value` to all matrix entries **/
+/** Add `display` to all matrix entries **/
 function add (value: number, array?: Matrix): Matrix | MatrixTransformer {
   if (array) {
     const adder = (entry: MatrixEntry): MatrixEntry => isNumber(entry) ? entry + value : entry.map(adder)
@@ -40,7 +48,6 @@ function cap (floor: number, ceil: number, array?: Matrix): Matrix | MatrixTrans
 }
 
 export const matrix = {
-
   create: (size: Size, fill: number | ((x: number, y: number) => number)): Matrix2d => (
     Array.from({ length: size.height }, (_, y) =>
       Array.from({ length: size.width }, (_, x) => (
@@ -49,8 +56,8 @@ export const matrix = {
     )
   ),
 
-  min: (array: Matrix): number => Math.min(...array.map(e => isNumber(e) ? e : matrix.min(e))),
-  max: (array: Matrix): number => Math.max(...array.map(e => isNumber(e) ? e : matrix.max(e))),
+  min: (array: Matrix, ignore: Array<number> = []): number => Math.min(...array.map(e => isNumber(e) ? e : matrix.min(e, ignore))),
+  max: (array: Matrix, ignore: Array<number> = []): number => Math.max(...array.filter(e => (isNumber(e) ? !ignore.includes(e) : true)).map(e => isNumber(e) ? e : matrix.max(e, ignore))),
 
   /**
    * Apply Math.abs() on all Matrix entries. Noise maps becomes "sharper".
@@ -70,7 +77,7 @@ export const matrix = {
     return array.map(pow)
   },
 
-  /** Normalize a Matrix (converts all entries to values between 0 to 1 with magnitude scale conservation) */
+  /** Normalize a Matrix (converts all entries to values between 0 and 1 with magnitude scale conservation) */
   normalize: (array: Matrix): Matrix => {
     const min = matrix.min(array)
     const max = matrix.max(array)
@@ -87,7 +94,7 @@ export const matrix = {
   /** Cap a Matrix with floor/ceil values */
   cap,
 
-  /** Add `value` to all matrix entries **/
+  /** Add `display` to all matrix entries **/
   add,
 
   inverse: (array: Matrix): Matrix => {
@@ -120,16 +127,23 @@ export const matrix = {
   /**
    * Return a console friendly version of the matrix
    */
-  debug: (array: Matrix | Matrix2d, options: { colorize?: Condition; value?: (v: number) => number | string } = {}): string => {
+  debug: (array: Matrix | Matrix2d, options: MatrixDebuggingOptions = {}): string => {
     validate(array, isMatrix2d)
 
+    let min = 0, max = 0, delta = 0
     const height = array.length
     const width = array[0] ? (array[0] as number[]).length : 0
-    let output = `${width}x${height}`
-    output += ` (min=${matrix.min(array)}, max=${matrix.max(array)})`
 
-    // noinspection JSUnusedLocalSymbols
-    let needColorization = (value: number): boolean => false
+    if (options.heatmap) {
+      min = matrix.min(array, options.heatmap.ignore ?? [])
+      max = matrix.max(array, options.heatmap.ignore ?? [])
+      delta = max - min
+    }
+
+    let output = `${width}x${height}`
+    output += ` (min=${min}, max=${max}${options?.heatmap?.ignore ? `, ignored=${options?.heatmap?.ignore}` : ''})`
+
+    let needColorization = (_value: number): boolean => false
     if (options.colorize) {
       const comparator = Object.keys(options.colorize)[0] as Comparators
       const value = options.colorize[comparator] as number
@@ -153,9 +167,6 @@ export const matrix = {
     }
 
     output += '\n'
-    // if (width === 0 || height === 0) {
-    //   throw new Error('Cannot render empty matrix !')
-    // }
 
     let item: number
     let rgb: number
@@ -165,8 +176,15 @@ export const matrix = {
         if (needColorization(item)) {
           output += chalk.bgRgb(Math.round(200 * item), 0, 0).red(item <= 0.1 ? '‧' : ' ')
         } else {
-          rgb = Math.round(255 * item)
-          output += chalk.bgRgb(rgb, rgb, rgb).hex('#000')(options.value ? options.value(item) : ' ')
+          const show = options.display ? options.display(item) : ' '
+          if (options.heatmap) {
+            const { r, g, b } = color.range(delta === 0 ? min : (item - min) / delta, options.heatmap.colors)
+            output += chalk.bgRgb(r, g, b).hex('#000')(show)
+          } else {
+            rgb = Math.round(255 * item)
+            output += chalk.bgRgb(rgb, rgb, rgb).hex('#000')(show)
+          }
+
         }
       }
       output += '\n'

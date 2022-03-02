@@ -2,7 +2,7 @@ import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction, Di
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoords, isIndex } from '../guards'
 import { Seeder } from '#engine/map/builder/MapBuilder'
-import { InvalidArgumentError } from '#shared/Errors'
+import { InvalidArgumentError, expect } from '#shared/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
 import { Values, OneOrMany } from '#shared/types'
 import { deleteInSet, toArray } from '#shared/helpers'
@@ -38,7 +38,7 @@ export class WorldMap extends EventEmitter {
   }
 
   /**
-   * @return Number of added tiles (can differs from `tiles` size due to tiles rules)
+   * @return Number of added tiles (may differ from `tiles` size due to tiles rules)
    * @see tilerules.ts
    */
   add (tiles: OneOrMany<Tile>, at: OneOrMany<Coords>): number {
@@ -166,6 +166,7 @@ export class WorldMap extends EventEmitter {
         )
       } catch (e) {
         // Do nothing
+        expect(e, OutOfMapError)
       }
     }
     return around
@@ -178,7 +179,7 @@ export class WorldMap extends EventEmitter {
   extract (center: Coords, surface: Size): WorldMap {
     this.assertMapContains(center)
     if ((surface.width - 1) % 2 !== 0 || (surface.height - 1) % 2 !== 0) {
-      throw new InvalidArgumentError('Expected Surface dimensions must be odd')
+      throw new InvalidArgumentError('surface Size must be odd')
     }
 
     const offsetX = (surface.width - 1) / 2
@@ -216,6 +217,7 @@ export class WorldMap extends EventEmitter {
       return toArray<Tile>(tiles).every(tile => tileset.has(tile))
     } catch (e) {
       // Do nothing
+      expect(e, OutOfMapError)
     }
     return false
   }

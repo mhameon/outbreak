@@ -3,3 +3,4 @@ export interface Resolvable {
 }
 
 export { FireResolver } from './FireResolver'
+export { ZombieResolver } from './ZombieResolver'

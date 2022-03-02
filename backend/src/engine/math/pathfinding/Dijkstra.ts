@@ -2,9 +2,17 @@ import { WorldMap } from '#engine/map/WorldMap'
 import type { Index, Coords } from '#engine/types'
 import type { OneOrMany } from '#shared/types'
 import { toArray } from '#shared/helpers'
+import { expect } from '#shared/Errors'
+import { OutOfMapError } from '#engine/map/WorldMapErrors'
+import { isCoords } from '#engine/guards'
 
 type DistanceMap = Map<Index, number>
 type SourceMap = Map<Index, Index>
+
+export type Node = {
+  at: Coords
+  weight: number
+}
 
 /**
  * Graph search algorithm
@@ -19,19 +27,19 @@ export class Dijkstra {
     this.world = world
   }
 
-  // Todo Tweak params to allow a start weight != 0 for each "from" (or an option for all?)
-  calculate (from: OneOrMany<Coords>): { distance: DistanceMap; seed: SourceMap } {
-    const starts = toArray(from)
+  calculateMap (points: OneOrMany<Node | Coords>): { distance: DistanceMap; predecessors: SourceMap } {
+    const goals = toArray(points)
 
     const frontier = new Array<Coords>()
     const distance: DistanceMap = new Map()
-    const seed: SourceMap = new Map()
+    const predecessors: SourceMap = new Map()
 
-    starts.forEach(start => {
-      const index = WorldMap.index(start)
-      frontier.push(start)
-      distance.set(index, 0)
-      seed.set(index, index)
+    goals.forEach(start => {
+      const { at, weight } = isCoords(start) ? { at: start, weight: 0 }: start
+      const index = WorldMap.index(at)
+      frontier.push(at)
+      distance.set(index, weight)
+      predecessors.set(index, index)
     })
 
     while (frontier.length) {
@@ -42,12 +50,12 @@ export class Dijkstra {
         if (!distance.has(nextIndex)) {
           // Todo weight "1" can be tweaked regarding this.world tiles
           distance.set(nextIndex, 1 + (distance.get(currentIndex) as number))
-          seed.set(nextIndex, currentIndex)
+          predecessors.set(nextIndex, currentIndex)
           frontier.push(next)
         }
       }
     }
-    return { distance, seed }
+    return { distance, predecessors }
   }
 
   neighbors (at: Coords): Array<Coords> {
@@ -60,6 +68,7 @@ export class Dijkstra {
       try {
         return this.world.isWalkable(here)
       } catch (e) {
+        expect(e, OutOfMapError)
         return false
       }
     })

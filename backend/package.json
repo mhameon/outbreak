@@ -11,7 +11,7 @@
     "build": "echo 'Compiling TypeScript' && tsc --version && tsc",
     "lint": "eslint --cache 'src/**'",
     "test": "mocha",
-    "test:watch": "tsc-watch --onSuccess 'npm run test'",
+    "test:watch": "tsc-watch --onSuccess 'npm run test -- --reporter=dot'",
     "test:coverage": "nyc --reporter=text --reporter=html mocha",
     "postinstall": "npm run clean && npm run build",
     "clean": "npx rimraf 'build/**/!(tsconfig.tsbuildinfo)'"
