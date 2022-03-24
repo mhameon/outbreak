@@ -15,22 +15,41 @@ describe('random', function () {
   })
   describe('range', function () {
     it('should find integer between 1 and 2', function () {
-      const range = random.range(1, 2)
-      assert.ok(range === 1 || range === 2, `Unexpected random number: ${range}`)
+      expectDifferentResults(2, () => {
+        const range = random.range(1, 2)
+        assert.ok([ 1, 2 ].includes(range), `Unexpected random number: ${range}`)
+        return range
+      })
     })
     it('should find integer between -1 and -2', function () {
-      const range = random.range(-2, -1)
-      assert.ok(range === -1 || range === -2, `Unexpected random number: ${range}`)
+      expectDifferentResults(2, () => {
+        const range = random.range(-2, -1)
+        assert.ok([ -1, -2 ].includes(range), `Unexpected random number: ${range}`)
+        return range
+      })
     })
     it('should find float between 1.0 and 1.2', function () {
-      const range = random.range(1, 1.2, 1)
-      assert.ok(range === 1 || range === 1.1 || range === 1.2, `Unexpected random number: ${range}`)
+      expectDifferentResults(3, () => {
+        const range = random.range(1, 1.2, 1)
+        assert.ok([ 1, 1.1, 1.2 ].includes(range), `Unexpected random number: ${range}`)
+        return range
+      })
     })
   })
   describe('choose', function () {
-    it('should choose a value', function () {
-      const almostChosen = random.choose('a', 'b')
-      assert.ok(almostChosen === 'a' || almostChosen === 'b', almostChosen)
+    it('should choose a value from values', function () {
+      expectDifferentResults(2, () => {
+        const almostChosen = random.choose('a', 'b')
+        assert.ok([ 'a', 'b' ].includes(almostChosen))
+        return almostChosen
+      })
+    })
+    it('should choose a value from array of values', function () {
+      expectDifferentResults(2, () => {
+        const almostChosen = random.choose([ 'a', 'b' ])
+        assert.ok([ 'a', 'b' ].includes(almostChosen))
+        return almostChosen
+      })
     })
   })
   describe('hex', function () {
@@ -39,3 +58,15 @@ describe('random', function () {
     })
   })
 })
+
+/**
+ * Run `assertion` `iteration` times and expect `howMany` different results.
+ */
+function expectDifferentResults (howMany: number, assertion: () => string | number, iteration = 15): void {
+  const distribution: Record<string, number> = {}
+  for (let i = 0; i < iteration; i++) {
+    const value = assertion()
+    distribution[`R${value}`] = (distribution[`R${value}`] ?? 0) + 1
+  }
+  assert.strictEqual(Object.entries(distribution).length, howMany)
+}
