@@ -67,6 +67,7 @@ export class FireResolver extends Resolver {
     const ignitionsCounter = this.outbreak.map.add([ Tile.Burning, Tile.TemporaryBlock ], ignitions)
     if (ashes.size > 0) {
       this.outbreak.map.replace(Tile.Burning, Tile.Burned, ashes)
+      // Todo use this.outbreak.map.remove() with
       this.outbreak.map.replace(Tile.TemporaryBlock, null, ashes)
       ashes.forEach(at => this.flames.delete(at))
     }
@@ -84,7 +85,7 @@ export class FireResolver extends Resolver {
 
       return random.chance(this.outbreak.wind.force * 10)
     } catch (e) {
-      // Can't spreads outside the map!
+      // Can't spread outside the map!
     }
     return false
   }

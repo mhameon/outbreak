@@ -10,10 +10,13 @@ if (config.get('logger.exception')) {
   logErrorWithDefaultLevel = getLogger('Exception').error
 }
 
-export function expect (error: unknown, toBeOneOfThem: OneOrMany<Error|unknown>): void {
+/**
+ * @throws {UnexpectedError} if `error` isn't in `toBeInstanceOf`
+ */
+export function expect (error: unknown, toBeInstanceOf: OneOrMany<Error | unknown>): void {
   assert(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toArray<any>(toBeOneOfThem).some(err => error instanceof err),
+    toArray<any>(toBeInstanceOf).some(err => error instanceof err),
     new UnexpectedError(error)
   )
 }

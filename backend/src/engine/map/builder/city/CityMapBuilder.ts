@@ -3,7 +3,8 @@ import MapBuilder from '#engine/map/builder/MapBuilder'
 import { WorldMap } from '#engine/map/WorldMap'
 import { Tile, BuildingLevel } from '#engine/types'
 import { line } from '#engine/math/geometry'
-import { CreatureManager, CreatureType } from '#engine/outbreak/entities/CreatureManager'
+import { EntityManager } from '#engine/outbreak/entities/EntityManager'
+import { EntityType } from '#engine/outbreak/entities/types'
 
 const { normalize, cap } = matrix
 
@@ -50,7 +51,11 @@ export class CityMapBuilder extends MapBuilder {
 
     //this.map.add(Tile.Burning, line({ x: 0,y: 0 }, { x: 40,y: 25 }))
     this.map.add(Tile.Burning, line({ x: 3, y: 3 }, { x: 10, y: 13 }))
-    this.map.set([ Tile.Road, Tile.Walkable ], line({ x: 0,y: 0 }, { x: this.map.size.width-1,y: this.map.size.height-1 }))
+    this.map.set([ Tile.Road, Tile.Walkable ], line({ x: 0, y: 0 }, {
+      x: this.map.size.width - 1,
+      y: this.map.size.height - 1
+    }))
+
     // this.map.add(Tile.Burning, { x: 0,y: 0 })
     // this.map.set(Tile.Walkable, [{ x: 1,y: 0 },{ x: 2,y: 0 }])
 
@@ -73,22 +78,24 @@ export class CityMapBuilder extends MapBuilder {
     return this.map
   }
 
-  populate (world: CreatureManager, map:WorldMap): void {
-    // world.spawn(CreatureType.Zombie, { x: 5, y: 5 })
-    // world.spawn(CreatureType.Zombie, { x: 6, y: 29 })
+  populate (entity: EntityManager, map: WorldMap): void {
+    // entity.spawn(EntityType.Zombie, { x: 5, y: 5 })
+    // entity.spawn(EntityType.Zombie, { x: 6, y: 29 })
 
     Array.from({ length: map.size.height }, (_, y) =>
       Array.from({ length: map.size.width }, (_, x) => {
         if (random.chance(25)) {
-          if ( map.isWalkable({ x,y })) {
-            world.spawn(CreatureType.Zombie, { x, y })
+          if (map.isWalkable({ x, y })) {
+            entity.spawn(EntityType.Zombie, { x, y })
           }
         }
       }),
     )
-    //world.spawn(CreatureType.Zombie, { x: 6, y: 29 })
+    //entity.spawn(EntityType.Zombie, { x: 6, y: 29 })
 
-    world.spawn(CreatureType.Human, { x: 6, y: 5 })
-    world.spawn(CreatureType.Human, { x: 40, y: 15 })
+    entity.spawn(EntityType.Human, { x: 6, y: 5 })
+    entity.spawn(EntityType.Human, { x: 40, y: 15 })
+
+    entity.spawn(EntityType.Sound, { x: 10, y: 10 }, { volume: 7 })
   }
 }

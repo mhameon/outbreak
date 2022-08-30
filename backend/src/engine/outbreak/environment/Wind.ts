@@ -7,7 +7,7 @@ import { closestDirection } from '#engine/math/geometry'
 export class Wind {
   static readonly minForce = 0
   static readonly maxForce = 10
-  static readonly rose = [ '↖', '↑', '↗', '←', '→', '↙', '↓','↘' ] //[ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
+  static readonly rose = [ '↖', '↑', '↗', '←', '→', '↙', '↓', '↘' ] //[ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
 
   private _angle = 45
   private _force = 5

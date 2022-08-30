@@ -7,7 +7,7 @@ import type { Resolvable } from './resolver'
 import { OutbreakOptions } from './'
 import { Wind } from './environment/Wind'
 import { Player } from '#server/service/server/GameServer'
-import { CreatureManager } from './entities/CreatureManager'
+import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
 
 export class Outbreak {
@@ -19,7 +19,7 @@ export class Outbreak {
   readonly createdAt: Date
 
   readonly wind: Wind
-  readonly creature: CreatureManager
+  readonly entity: EntityManager
   readonly resolvers: Array<Resolvable>
 
   private turn = 0 // 0 means not started
@@ -33,7 +33,7 @@ export class Outbreak {
     this.createdAt = new Date()
 
     this.wind = new Wind(option?.wind)
-    this.creature = new CreatureManager(this)
+    this.entity = new EntityManager(this)
 
     this.resolvers = [
       new FireResolver(this),

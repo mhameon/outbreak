@@ -6,7 +6,7 @@ import { Tile, RenderTile } from '#engine/types'
 describe('tilerules', function () {
   describe('Data validation', function () {
     //
-    // Theses tests ensure tilerules are correctly formatted
+    // These tests ensure tilerules are correctly formatted
     //
     describe('Exclusions', function () {
       it('declarations are sorted in descending order', function () {

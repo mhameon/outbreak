@@ -4,7 +4,7 @@ import { GameId } from '#engine/types'
 import { Nullable } from '#shared/types'
 import { Outbreak } from '#engine/outbreak/index'
 import { registerGameControlCommands } from '#server/service/cli/command/game-control'
-import event from '#engine/events'
+import { event } from '#engine/events'
 
 let currentGameId: GameId = ''
 
@@ -20,13 +20,13 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
     if (currentGameId) {
       return game.get(currentGameId)
     }
-    console.log('Please enters in CLI interaction mode with "game:enter" before use this command')
+    console.warn('Please enters in CLI interaction mode with "game:enter" before use this command')
     return null
   }
 
   cli
-    .registerCommand('game:list', 'List in progress games', listGames)
     .registerCommand('game:create', 'Create a new game and go inside', createGame)
+    .registerCommand('game:list', 'List in progress games', listGames)
     .registerCommand('game:enter', 'Enter in CLI interaction mode with gameId', selectGame)
     .registerCommand('game:quit', 'Leave CLI interaction mode', unselectGame)
     .registerCommand('game:show', 'Display map', displayMap)
@@ -47,7 +47,7 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
     }
   }
 
-  function createGame (gameId?:GameId): void {
+  function createGame (gameId?: GameId): void {
     console.log('')
     selectGame(game.create(gameId))
     displayMap()

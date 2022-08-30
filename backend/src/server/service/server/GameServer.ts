@@ -9,7 +9,7 @@ import { log, registerEventLogger } from './serverLogger'
 import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
-import event from '#engine/events'
+import { event } from '#engine/events'
 
 // Todo: continue typing
 // Fixme: must lives in another file?
@@ -167,7 +167,7 @@ export class GameServer {
 
       // Strange bug: this.io.sockets.emit() or this.io.emit() don't always emit (if join a game before)
       this.io.emit('shutdown')
-      // Seems to works better. bug in io?
+      // Seems to work better. bug in io?
       // for (const [ id, socket ] of this.io.sockets.sockets) { socket.emit('shutdown') }
 
       this.stopWhenClientsAreDisconnected()

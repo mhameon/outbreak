@@ -3,7 +3,7 @@ import { GameId } from '../types'
 // Fixme IoD: use interfaces & inject them in constructor
 import { Outbreak, OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
-import event from '#engine/events'
+import { event } from '#engine/events'
 
 import { getLogger } from '#shared/logger/index'
 import { EventEmitter } from 'events'
@@ -34,7 +34,7 @@ export class GameManager extends EventEmitter {
     return `${GameManager.GAME_ID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
   }
 
-  create (id?:GameId): GameId {
+  create (id?: GameId): GameId {
     log.verbose('Creating outbreak...')
     const gameId = id ?? GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)

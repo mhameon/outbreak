@@ -7,7 +7,7 @@ import { getSanitizedTileset } from '#engine/map/tilerules'
 import { Values, OneOrMany } from '#shared/types'
 import { deleteInSet, toArray } from '#shared/helpers'
 import { EventEmitter } from 'events'
-import event from '#engine/events'
+import { event } from '#engine/events'
 import { calculateDestination } from '#engine/math/geometry'
 
 /**
@@ -118,7 +118,7 @@ export class WorldMap extends EventEmitter {
         tile.delete(wanted)
         this.set([
           ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
-          ...(substitute ? [ substitute ]:[]),
+          ...(substitute ? [ substitute ] : []),
         ], here)
       }
     }
@@ -143,17 +143,23 @@ export class WorldMap extends EventEmitter {
     return new Set(tiles ? tiles : WorldMap.emptyTileset)
   }
 
-  getNeighborsCoords (at: Coords): Array<Coords> {
+  getNeighborsCoords (at: Coords, includeAt = false): Array<Coords> {
+    const xMin = at.x - 1
+    const yMin = at.y - 1
+    const xMax = at.x + 1
+    const yMax = at.y + 1
+
     return [
-      { x: at.x-1, y: at.y - 1 },
-      { x: at.x, y: at.y - 1 },
-      { x: at.x+1, y: at.y - 1 },
-      { x: at.x - 1, y: at.y },
-      { x: at.x + 1, y: at.y },
-      { x: at.x-1, y: at.y + 1 },
-      { x: at.x, y: at.y + 1 },
-      { x: at.x+1, y: at.y + 1 },
-    ].filter(here=>this.contains(here))
+      ...(includeAt ? [ at ] : []),
+      { x: xMin, y: yMin },
+      { x: at.x, y: yMin },
+      { x: xMax, y: yMin },
+      { x: xMin, y: at.y },
+      { x: xMax, y: at.y },
+      { x: xMin, y: yMax },
+      { x: at.x, y: yMax },
+      { x: xMax, y: yMax },
+    ].filter(here => this.contains(here))
   }
 
   getAround (at: Coords): Around {
@@ -227,7 +233,7 @@ export class WorldMap extends EventEmitter {
    */
   isWalkable (at: Coords): boolean {
     this.assertMapContains(at)
-    return !this.has(Tile.Block, at) && !this.has(Tile.TemporaryBlock, at)
+    return !(this.has(Tile.Block, at) || this.has(Tile.TemporaryBlock, at))
   }
 
   contains (point: Coords): boolean {

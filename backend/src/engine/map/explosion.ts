@@ -6,7 +6,7 @@ export function explosion (at: Coords, intensity: number): Set<Coords> {
   let blast: Array<Coords> = []
 
   //intensity = 2
-  const branches = Math.floor(Math.pow(intensity + 1, 2)/2)
+  const branches = Math.floor(Math.pow(intensity + 1, 2) / 2)
   //const branches = Math.pow(intensity, intensity + 1)
   const angle = {
     start: 0,

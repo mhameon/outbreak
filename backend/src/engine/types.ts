@@ -32,15 +32,31 @@ export const DirectionInDegree = [ 315, 0, 45, 270, 90, 225, 180, 135 ] as const
 /** DirectionClockwise[0] will give you Direction.North */
 export const DirectionClockwise = [ 1, 2, 4, 7, 6, 5, 3, 0 ] as const
 
-export type Size = { width: number; height: number }
+export type Size = {
+  width: number
+  height: number
+}
 
 export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
+
+export type SoundIntensity =
+  'Volume1'
+  | 'Volume2'
+  | 'Volume3'
+  | 'Volume4'
+  | 'Volume5'
+  | 'Volume6'
+  | 'Volume7'
+  | 'Volume8'
+  | 'Volume9'
+  | 'Volume10'
 
 export enum Tile {
   /*** Properties ***/
   Walkable,
   Block,
   TemporaryBlock,
+  Sound,
 
   /*** Sidekick tiles ***/
   Burned = 10,
@@ -51,6 +67,17 @@ export enum Tile {
   Level3,
   Level4,
   Level5,
+
+  Volume1,
+  Volume2,
+  Volume3,
+  Volume4,
+  Volume5,
+  Volume6,
+  Volume7,
+  Volume8,
+  Volume9,
+  Volume10,
 
   /*** Entities ***/
   Zombie = 50,
@@ -95,6 +122,7 @@ export enum RenderTile {
   BurnedBuildingL5,
   Zombie,
   Human,
+  Sound
 }
 
 export type Index = string
@@ -113,7 +141,7 @@ export type Matrix = Array<Matrix | number> // Recursive type
 export type Matrix2d = number[][]
 
 export type WindSettings = {
-  /** Wind angle in degrees, 0° is North, clockwise */
+  /** Wind's angle in degrees, 0° is North, clockwise */
   angle: number
   /**
    * Wind force (0-10): 0 - no spread, 10 - 100% flame spread

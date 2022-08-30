@@ -5,7 +5,7 @@ import { WorldMap } from '#engine/map/WorldMap'
 import { Outbreak } from '#engine/outbreak/index'
 import { MapRenderer } from '#engine/renderer/MapRenderer'
 import { Wind } from '#engine/outbreak/environment/Wind'
-import { Creature, CreatureType } from '#engine/outbreak/entities/CreatureManager'
+import { Zombie, Entity, EntityType } from '#engine/outbreak/entities/types'
 
 const TileAtlas: string[] = []
 TileAtlas[RenderTile.Grass] = chalk.bgHex('#23301A').hex('#465C38')('░')
@@ -35,6 +35,7 @@ TileAtlas[RenderTile.BurnedBuildingL2] = chalk.hex('#000000').bgHex('#999999')('
 TileAtlas[RenderTile.BurnedBuildingL3] = chalk.hex('#000000').bgHex('#AAAAAA')('▒')
 TileAtlas[RenderTile.BurnedBuildingL4] = chalk.hex('#000000').bgHex('#BBBBBB')('▒')
 TileAtlas[RenderTile.BurnedBuildingL5] = chalk.hex('#000000').bgHex('#CCCCCC')('▒')
+TileAtlas[RenderTile.Sound] = chalk.hex('#d20ae5')('♫')
 
 export class AsciiMapRenderer extends MapRenderer {
   protected renderer (outbreak: Outbreak): string {
@@ -64,9 +65,9 @@ export class AsciiMapRenderer extends MapRenderer {
 
   private static draw (outbreak: Outbreak, at: Coords): string {
     const tileset = outbreak.map.get(at)
-    const creatures = outbreak.creature.get(at)
+    const creatures = outbreak.entity.get(at)
     if (creatures.length) {
-      // CreatureType values are based on Tile
+      // EntityType values are based on Tile
       //return TileAtlas[getRenderTile(creatures[0].type as unknown as Tile)]
       return AsciiMapRenderer.creature(creatures[0])
     }
@@ -82,12 +83,12 @@ export class AsciiMapRenderer extends MapRenderer {
     return chalk.hex('#ea6a6a').bgHex('#6c0101')('?')
   }
 
-  static creature(creature: Creature):string{
-    const facing = [ '↖', '↑', '↗', '←', '→', '↙', '↓','↘' ]
+  static creature (creature: Entity): string {
+    const facing = [ '↖', '↑', '↗', '←', '→', '↙', '↓', '↘' ]
     switch (creature.type) {
-      case CreatureType.Zombie:
-        return chalk.hex('#FFF').bgHex('#C00')(facing[creature.facing])
-      case CreatureType.Human:
+      case EntityType.Zombie:
+        return chalk.hex('#FFF').bgHex('#C00')(facing[(creature as Zombie).facing])
+      case EntityType.Human:
         return chalk.hex('rgba(29,107,3,0.25)').bgHex('#81f126')('☺︎︎')
     }
     return '?'

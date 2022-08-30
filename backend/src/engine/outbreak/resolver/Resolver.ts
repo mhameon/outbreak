@@ -4,27 +4,27 @@ import { Logger } from '#shared/logger/index'
 import { Outbreak } from '#engine/outbreak/index'
 import { Resolvable } from './index'
 import { Bootable } from '#shared/types'
-import { CreatureManager } from '#engine/outbreak/entities/CreatureManager'
+import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 import { WorldMap } from '#engine/map/WorldMap'
 
 export abstract class Resolver implements Bootable, Resolvable {
   readonly log: Logger
   readonly outbreak: Outbreak
-  attribute: Record<string, any>
+  embedded: Record<string, any>
 
   constructor (outbreak: Outbreak) {
     this.log = outbreak.log.child({ label: this.constructor.name })
     this.outbreak = outbreak
-    this.attribute = {}
+    this.embedded = {}
 
     this.boot()
   }
 
-  get creature():CreatureManager {
-    return this.outbreak.creature
+  get entity (): EntityManager {
+    return this.outbreak.entity
   }
 
-  get map():WorldMap{
+  get map (): WorldMap {
     return this.outbreak.map
   }
 

@@ -1,5 +1,1 @@
-import router from './router'
-
-export default {
-  router
-}
+export { default as routes } from './routes'

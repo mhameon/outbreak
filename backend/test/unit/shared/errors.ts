@@ -3,7 +3,7 @@ import assert from 'assert'
 
 describe('Errors', function () {
   describe('expect', function () {
-    it('should throw UnexpectedError', function() {
+    it('should throw UnexpectedError', function () {
       try {
         expect(new Error('Not an InvalidArgumentError'), InvalidArgumentError)
         assert.fail('Should have thrown UnexpectedError')
@@ -11,7 +11,7 @@ describe('Errors', function () {
         assert.ok(e instanceof UnexpectedError)
       }
     })
-    it('should not throw UnexpectedError', function() {
+    it('should not throw UnexpectedError', function () {
       try {
         expect(new NotFoundError('not not found'), [ InvalidArgumentError, NotFoundError ])
         assert.ok(true)

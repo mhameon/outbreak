@@ -1,4 +1,4 @@
-import middleware from '#server/middleware/index'
+import { routes } from '#server/middleware/index'
 import type { Void } from '#shared/types'
 import { GameServer } from './GameServer'
 import { GameManager } from '#engine/game/GameManager'
@@ -13,7 +13,7 @@ export function createGameServer (): GameServer {
   }
 
   server = new GameServer(new GameManager())
-  server.express.use(middleware.router)
+  server.express.use(routes)
 
   return server
 }

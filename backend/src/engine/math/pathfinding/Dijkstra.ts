@@ -5,14 +5,10 @@ import { toArray } from '#shared/helpers'
 import { expect } from '#shared/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { isCoords } from '#engine/guards'
+import { Node } from '#engine/math/pathfinding/index'
 
 type DistanceMap = Map<Index, number>
 type SourceMap = Map<Index, Index>
-
-export type Node = {
-  at: Coords
-  weight: number
-}
 
 /**
  * Graph search algorithm
@@ -21,21 +17,26 @@ export type Node = {
  * https://www.redblobgames.com/pathfinding/distance-to-any/#region-growth
  */
 export class Dijkstra {
+  static ignoreNode = 999999 as const
+
   readonly world: WorldMap
 
   constructor (world: WorldMap) {
     this.world = world
   }
 
-  calculateMap (points: OneOrMany<Node | Coords>): { distance: DistanceMap; predecessors: SourceMap } {
-    const goals = toArray(points)
+  /**
+   * @param sources Sources with weight <0 are more attractive, >0 are less
+   */
+  calculateMap (sources: OneOrMany<Node | Coords>): { distance: DistanceMap; predecessors: SourceMap } {
+    const goals = toArray(sources)
 
     const frontier = new Array<Coords>()
     const distance: DistanceMap = new Map()
     const predecessors: SourceMap = new Map()
 
     goals.forEach(start => {
-      const { at, weight } = isCoords(start) ? { at: start, weight: 0 }: start
+      const { at, weight } = isCoords(start) ? { at: start, weight: 0 } : start
       const index = WorldMap.index(at)
       frontier.push(at)
       distance.set(index, weight)
@@ -48,10 +49,13 @@ export class Dijkstra {
       for (const next of this.neighbors(current)) {
         const nextIndex = WorldMap.index(next)
         if (!distance.has(nextIndex)) {
-          // Todo weight "1" can be tweaked regarding this.world tiles
-          distance.set(nextIndex, 1 + (distance.get(currentIndex) as number))
-          predecessors.set(nextIndex, currentIndex)
-          frontier.push(next)
+          // Todo detection area 10 should be tweakable
+          if ((distance.get(currentIndex) as number) < 10) {
+            // Todo weight "1" can be tweaked regarding this.world tiles
+            distance.set(nextIndex, (distance.get(currentIndex) as number) + 1)
+            predecessors.set(nextIndex, currentIndex)
+            frontier.push(next)
+          }
         }
       }
     }
@@ -74,3 +78,7 @@ export class Dijkstra {
     })
   }
 }
+
+//game:9acd9f18583caaec71254289
+
+//game:f8177d50cb75206cf3b083a3

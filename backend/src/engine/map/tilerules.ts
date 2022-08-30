@@ -1,6 +1,6 @@
 import { Tile, RenderTile, Tileset } from '#engine/types'
 import { UnknownRenderTile } from '#engine/map/WorldMapErrors'
-import { toSet, toArray, deleteInSet } from '#shared/helpers'
+import { toSet, toArray } from '#shared/helpers'
 import { OneOrMany } from '#shared/types'
 
 /**
@@ -10,7 +10,7 @@ import { OneOrMany } from '#shared/types'
  * Examples: Building, Water, Forest...
  * ==> We call them simply "Tile"
  *
- * Some tiles are mutually exclusives: they can't lives at the same coords, nor add/set in a WorldMap.
+ * Some tiles are mutually exclusives: they can't live at the same coords, nor add/set in a WorldMap.
  * Examples:
  * - Block vs. Walkable
  * - Burning vs. Water
@@ -57,8 +57,8 @@ export const tilerules: Tilerules = {
   ],
   sidekicks: [
     Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5,
-    Tile.Burning,
-    Tile.Burned,
+    Tile.Burning, Tile.Burned,
+    Tile.Volume1, Tile.Volume2, Tile.Volume3, Tile.Volume4, Tile.Volume5, Tile.Volume6, Tile.Volume7, Tile.Volume8, Tile.Volume9, Tile.Volume10,
   ],
   rendering: [
     // Must be declared descending
@@ -82,8 +82,8 @@ export const tilerules: Tilerules = {
     { and: [ Tile.Building, Tile.Level3 ], gives: RenderTile.BuildingL3 },
     { and: [ Tile.Building, Tile.Level4 ], gives: RenderTile.BuildingL4 },
     { and: [ Tile.Building, Tile.Level5 ], gives: RenderTile.BuildingL5 },
-    { and: [ Tile.Burning, Tile.Grass ], gives: RenderTile.BurningGrass },
     //{ and: [ Tile.Burning, Tile.Walkable ], gives: RenderTile.BurningGrass }, // default
+    { and: [ Tile.Burning, Tile.Grass ], gives: RenderTile.BurningGrass },
     { and: [ Tile.Burning, Tile.Forest ], gives: RenderTile.BurningForest },
     { and: [ Tile.Burning, Tile.Road ], gives: RenderTile.BurningRoad },
     { and: [ Tile.Burned, Tile.Grass ], gives: RenderTile.BurnedGrass },
@@ -167,35 +167,35 @@ export function getSanitizedTileset (tiles: OneOrMany<Tile>, removeOrphanSidekic
   return tileset
 }
 
-export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMany<Tile>): Tileset {
-  const tileset = toSet<Tile>(tiles)
-  const existing = toSet<Tile>(toExisting)
-  tilerules.exclusions.forEach(excluded => {
-    if (excluded.every(tile => tileset.has(tile))) {
-      excluded.forEach(tile => tileset.delete(tile))
-    }
-  })
-  existing.forEach(exists => {
-    if (tileset.has(exists)) {
-      tileset.delete(exists)
-    }
-  })
-
-  const unusedTiles = new Set(tileset)
-  tilerules.rendering.forEach(({ and }) => {
-    if (and.every(tile => tileset.has(tile))) {
-      and.forEach(tile => unusedTiles.delete(tile))
-    }
-  })
-
-  tilerules.sidekicks.forEach(sidekick => {
-    if (!unusedTiles.has(sidekick)) {
-      unusedTiles.delete(sidekick)
-    }
-  })
-
-  return deleteInSet<Tileset>(tileset, unusedTiles)
-}
+// export function addSanitizedTileset (tiles: OneOrMany<Tile>, toExisting: OneOrMany<Tile>): Tileset {
+//   const tileset = toSet<Tile>(tiles)
+//   const existing = toSet<Tile>(toExisting)
+//   tilerules.exclusions.forEach(excluded => {
+//     if (excluded.every(tile => tileset.has(tile))) {
+//       excluded.forEach(tile => tileset.delete(tile))
+//     }
+//   })
+//   existing.forEach(exists => {
+//     if (tileset.has(exists)) {
+//       tileset.delete(exists)
+//     }
+//   })
+//
+//   const unusedTiles = new Set(tileset)
+//   tilerules.rendering.forEach(({ and }) => {
+//     if (and.every(tile => tileset.has(tile))) {
+//       and.forEach(tile => unusedTiles.delete(tile))
+//     }
+//   })
+//
+//   tilerules.sidekicks.forEach(sidekick => {
+//     if (!unusedTiles.has(sidekick)) {
+//       unusedTiles.delete(sidekick)
+//     }
+//   })
+//
+//   return deleteInSet<Tileset>(tileset, unusedTiles)
+// }
 
 /**
  * Compute tiles rules to find the `RenderTile` matching with `tiles` argument

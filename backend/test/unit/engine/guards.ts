@@ -3,7 +3,7 @@ import { isCoords, isCoordsArray, isMatrix2d, isNumber, isWorldMap, isIndex } fr
 import * as assert from 'assert'
 import { WorldMap } from '#engine/map/WorldMap'
 
-describe('Type guards', function() {
+describe('Type guards', function () {
   describe('map guards', function () {
     it('isNumber', function () {
       assert.ok(isNumber(0))
@@ -19,7 +19,7 @@ describe('Type guards', function() {
       assert.strictEqual(isCoords(undefined), false)
     })
 
-    it('isIndex', function (){
+    it('isIndex', function () {
       assert.ok(isIndex('1,2'))
       assert.strictEqual(isIndex('a,b'), false)
       assert.strictEqual(isIndex('1,'), false)
