@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorldMap } from '#engine/map/WorldMap'
-import { Coords, Matrix2d, Index } from './types'
+import { Coords, Matrix2d, Index, GameId } from './types'
 import { isObject } from '#shared/guards'
 import { EntityType } from '#engine/outbreak/entities/types'
+import { GameManager } from '#engine/game/GameManager'
 
 export function isNumber (arg: any): arg is number {
   return !isNaN(+arg)
@@ -34,6 +35,10 @@ export function isMatrix2d (arg: any): arg is Matrix2d {
 
 export function isWorldMap (arg: any): arg is WorldMap {
   return arg instanceof WorldMap
+}
+
+export function isGameId (name: unknown): name is GameId {
+  return typeof name === 'string' && name.startsWith(GameManager.GAME_ID_PREFIX)
 }
 
 export const isEntityType = isSomeEnum(EntityType)

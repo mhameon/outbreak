@@ -28,7 +28,9 @@ export class ZombieIA {
     return this.outbreak.map
   }
 
-  follow (): void {
+  // todo store tracked EntityId in zombie Entity (zombie.target)
+  // todo generalize tracking without hardcoded EntityType selection
+  track (): void {
     // const detectionArea = 20
     let movedZombies = 0
     let waitingZombies = 0
@@ -36,6 +38,7 @@ export class ZombieIA {
     const targets = this.entity.get(EntityType.Human).map(creature => creature.at)
     const dijkstraMap = this.pathfinding.calculateMap(targets)
 
+    // -- debug -------
     const m = matrix.create(this.map.size, (x, y) => {
       const weight = dijkstraMap.distance.get(WorldMap.index({ x, y })) ?? Dijkstra.ignoreNode
       return weight
@@ -43,8 +46,9 @@ export class ZombieIA {
     })
     console.log(matrix.debug(m, {
       display: (v: number) => (v === Dijkstra.ignoreNode ? ' ' : v.toString(36)),
-      heatmap: { ignore: [ Dijkstra.ignoreNode ], colors: [ '#FFFF00', '#FF1700', '#0002E1' ] },
+      heatmap: { colors: [ '#FFFF00', '#FF1700', '#0002E1' ], ignore: [ Dijkstra.ignoreNode ] },
     }))
+    // -- end debug ---
 
     const zombies = this.entity.get<Zombie>(EntityType.Zombie)
     zombies.forEach((zombie) => {

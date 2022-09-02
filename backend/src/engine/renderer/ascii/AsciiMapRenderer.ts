@@ -50,7 +50,7 @@ export class AsciiMapRenderer extends MapRenderer {
       asciiMap += '\n'
     })
 
-    if (outbreak.id === 'StandAloneRendering') {
+    if (outbreak.id === 'game:StandAloneRendering') {
       return asciiMap
     }
     const seeder = outbreak.map.seeder ? `built with ${outbreak.map.seeder.builder}(${outbreak.map.seeder.seed})` : ''

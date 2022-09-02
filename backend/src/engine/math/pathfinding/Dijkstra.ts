@@ -62,6 +62,13 @@ export class Dijkstra {
     return { distance, predecessors }
   }
 
+  /**
+   * ```
+   *   ↑
+   * ← · →  Get direct walkable neighbors coords
+   *   ↓
+   * ```
+   */
   neighbors (at: Coords): Array<Coords> {
     return [
       { x: at.x, y: at.y - 1 },

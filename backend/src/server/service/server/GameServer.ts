@@ -4,12 +4,16 @@ import config from 'config'
 import http from 'http'
 import type { AddressInfo } from 'net'
 import express, { Express } from 'express'
-import * as io from 'socket.io'
-import { log, registerEventLogger } from './serverLogger'
+import { Server } from 'socket.io'
+import type { Socket } from 'socket.io'
+import { log, registerSocketEventLogger } from './socketEventLogger'
 import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
-import { event } from '#engine/events'
+import { isGameId } from '#engine/guards'
+import { ClientToServerEvents, InterServerEvents, SocketData } from '#engine/events'
+import { Nullable } from '#shared/types'
+
 
 // Todo: continue typing
 // Fixme: must lives in another file?
@@ -30,7 +34,10 @@ export interface ServerStatus {
   clients: Array<{ id: string; rooms: string[] }>
 }
 
-const LOBBY = 'lobby'
+const LOBBY = 'lobby' as const
+
+class ServerToClientEvents {
+}
 
 /**
  * Multiplayer socket server
@@ -40,11 +47,11 @@ export class GameServer {
 
   readonly express: Express
   private readonly http: http.Server
-  private readonly io: io.Server
+  private readonly io: Server
 
   readonly game: GameManager
   private readonly rooms = new Set<string>()
-  private readonly clients = new WeakMap<io.Socket, { player: Player; socket: SocketInformation }>()
+  private readonly clients = new WeakMap<Socket, { player: Player; socket: SocketInformation }>()
 
   private isShuttingDown = false
   private startListeningAt?: Date
@@ -54,7 +61,8 @@ export class GameServer {
 
     this.express = express()
     this.http = http.createServer(this.express)
-    this.io = new io.Server(this.http, {
+    this.io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.http, {
+      // todo check options to use
       cors: {
         origin: [ config.server.http.host ],
         methods: [ 'GET', 'POST' ],
@@ -64,73 +72,23 @@ export class GameServer {
     })
 
     this.registerMiddlewares()
-    // room middleware seems to work
-    // this.io.in(LOBBY).use((socket, next) => {
-    //   log.debug('lobby')
-    //   next()
-    // })
-    this.io.on('connect', (socket: io.Socket) => {
-      const { 'user-agent': userAgent, host } = socket.request.headers
+    this.registerGameManager()
+
+    this.io.on('connect', (socket: Socket) => {
+      const { 'user-agent': agent, host } = socket.request.headers
       log.http(
         '🟢 Here come a new challenger! Total %d client(s)', this.connectedClientCounter,
-        { socketId: socket.id, host, agent: userAgent },
+        { socketId: socket.id, host, agent },
       )
-
-      this.joinRoom(socket, LOBBY)
 
       this.registerDisconnectionHandler(socket)
       this.registerErrorHandler(socket)
-      registerEventLogger(socket)
 
-      socket.on(event.game.join, (args: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
-        // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
-        // socket.use(([ event, ...args ], next) => {
-        //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAME_ID_PREFIX))
-        //   if (game) {
-        //     socket.emit('msg', `Already in ${game}`)
-        //     // //ack({ gameId: game })
-        //     // return
-        //     next(new ConnectionRefusedError(`Already in ${game}`))
-        //   }
-        // })
+      registerSocketEventLogger(socket)
 
-        // Act like middleware, but simpler
-        let gameId = [ ...socket.rooms ].find(room => room.startsWith(GameManager.GAME_ID_PREFIX))
-        if (gameId) {
-          log.warn('Already in %s', gameId)
-          socket.emit('msg', `Already in ${gameId}`)
-          return
-        }
+      this.registerPlayerActions(socket)
 
-        if (!args.gameId) {
-          gameId = this.game.create()
-        } else {
-          gameId = args.gameId
-          if (!this.game.has(gameId)) {
-            return ack({ gameId: null })
-          }
-          log.debug('join %s', gameId)
-        }
-
-        this.leaveRoom(socket, LOBBY)
-        this.joinRoom(socket, gameId)
-        this.game.get(gameId).joinPlayer({ id: 'player' })
-
-        socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
-        socket.emit('msg', `You joined the game, ${socket.id}`)
-
-        return ack({ gameId })
-      })
-
-      socket.on(event.game.leave, (args: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
-        this.leaveRoom(socket, args.gameId, (wasLast) => {
-          if (wasLast) {
-            this.game.delete(args.gameId)
-          }
-        })
-        this.joinRoom(socket, LOBBY)
-        return ack({ ok: true })
-      })
+      this.joinRoom(socket, LOBBY)
     })
 
     process.on('SIGINT', this.gracefulShutdown.bind(this))
@@ -184,7 +142,7 @@ export class GameServer {
   }
 
   get connectedClientCounter (): number {
-    return this.io.sockets.sockets.size
+    return this.io.engine.clientsCount
   }
 
   get status (): ServerStatus {
@@ -205,7 +163,75 @@ export class GameServer {
     }
   }
 
+  private registerGameManager (): void {
+    this.game.on('game:created', (outbreak) => {
+      outbreak.on('game:turn:resolved', ({ gameId, turn }) => {
+        const newTurn = turn + 1
+        this.io.in(gameId).emit('msg', `Turn ${newTurn} is starting`)
+        //todo + send updated game state (Outbreak in JSON)
+      })
+    })
+  }
+
+  private registerPlayerActions (socket: Socket): void {
+    socket
+      //.on(event.player.join.game, ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
+      .on('player:join:game', ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
+        // socket.on(event.game.join, (args) => {
+        // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
+        // socket.use(([ event, ...args ], next) => {
+        //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAME_ID_PREFIX))
+        //   if (game) {
+        //     socket.emit('msg', `Already in ${game}`)
+        //     // //ack({ gameId: game })
+        //     // return
+        //     next(new ConnectionRefusedError(`Already in ${game}`))
+        //   }
+        // })
+
+        // A player can be only in one game at the time
+        let gameId = [ ...socket.rooms ].find(isGameId)
+        if (gameId) {
+          log.warn('Already in %s', gameId)
+          socket.emit('msg', `Already in ${gameId}`)
+          return
+        }
+
+        if (!requestedGameId) {
+          gameId = this.game.create()
+        } else {
+          gameId = requestedGameId
+          if (!this.game.has(gameId)) {
+            return ack({ gameId: null })
+          }
+          log.debug('join %s', gameId)
+        }
+
+        this.leaveRoom(socket, LOBBY)
+        this.joinRoom(socket, gameId)
+
+        const game = this.game.get(gameId)
+        game.joinPlayer({ id: 'player' })
+
+        socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
+        socket.emit('msg', `You joined the game, ${socket.id}`)
+
+        return ack({ gameId })
+      })
+      .on('player:leave:game', ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
+        this.leaveRoom(socket, gameId, (wasLast) => {
+          if (wasLast) {
+            this.game.delete(gameId)
+          }
+        })
+        this.joinRoom(socket, LOBBY)
+
+        return ack({ ok: true })
+      })
+  }
+
   private registerMiddlewares (): void {
+    // Reject new connection when server is shutting down
     this.io.use((socket, next) => {
       if (this.isShuttingDown) {
         next(new ConnectionRefusedError('Server is shutting down', log.info))
@@ -213,6 +239,7 @@ export class GameServer {
       next()
     })
 
+    // Manage authentification
     this.io.use((socket, next) => {
       // Todo Properly check if clients are authorize to connect (valid session cookie)
       // Todo Check authentication & get user information
@@ -226,7 +253,7 @@ export class GameServer {
       this.clients.set(socket, {
         player: {
           id: +new Date() + '',
-          name: 'Harcoded name ' + Math.random(),
+          name: 'Hardcoded name ' + Math.random(),
         },
         socket: {
           id: socket.id,
@@ -236,17 +263,21 @@ export class GameServer {
 
       next()
     })
+
+    // room middleware seems to work
+    // this.io.in(LOBBY).use((socket, next) => {
+    //   log.debug('lobby')
+    //   next()
+    // })
   }
 
-  private registerDisconnectionHandler (socket: io.Socket): void {
+  private registerDisconnectionHandler (socket: Socket): void {
     socket
       .on('disconnecting', (reason) => {
-        const gameRooms = [ ...socket.rooms ].filter(room => room.startsWith(GameManager.GAME_ID_PREFIX))
-
+        const gameRooms = [ ...socket.rooms ].filter(isGameId)
         log.http('🟠 Disconnecting (%s)', reason, { socketId: socket.id })
-
         if (gameRooms.length === 1) {
-          const gameId = gameRooms[0]
+          const [ gameId ] = gameRooms
 
           this.leaveRoom(socket, gameId, (wasLast) => {
             if (wasLast) {
@@ -258,44 +289,43 @@ export class GameServer {
         }
       })
       .on('disconnect', (reason: string) => {
-        //log.debug('Bye %o', this.clients.get(socket))
         this.clients.delete(socket)
         socket.disconnect(true)
         log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socketId: socket.id })
       })
   }
 
-  private registerErrorHandler (socket: io.Socket): void {
+  private registerErrorHandler (socket: Socket): void {
     socket.on('error', (error) => {
       log.error(error)
     })
   }
 
-  private joinRoom (socket: io.Socket, room: string): boolean {
+  private joinRoom (client: Socket, room: string): boolean {
     let isFirst = false
-    if (!socket.rooms.has(room)) {
+    if (!client.rooms.has(room)) {
       if (!this.rooms.has(room)) {
         this.rooms.add(room)
         isFirst = true
       }
-      socket.join(room)
-      log.info('💚 Join room `%s`', room, { socketId: socket.id, room, isFirst })
+      client.join(room)
+      log.info('💚 Join room `%s`', room, { socketId: client.id, room, isFirst })
     }
     return isFirst
   }
 
-  private leaveRoom (socket: io.Socket, room: string, callback?: (wasLast: boolean) => void): void {
+  private leaveRoom (client: Socket, room: string, callback?: (wasLast: boolean) => void): void {
     let wasLast = false
-    if (socket.rooms.has(room)) {
-      socket.leave(room)
+    if (client.rooms.has(room)) {
+      client.leave(room)
       const socketsInRoom = [ ...this.io.sockets.sockets.values() ].filter(socket => socket.rooms.has(room))
       if (socketsInRoom.length === 0) {
         this.rooms.delete(room)
         wasLast = true
       }
-      log.info('💔 Leave room `%s`', room, { socketId: socket.id, room, wasLast })
+      log.info('💔 Leave room `%s`', room, { socketId: client.id, room, wasLast })
     } else {
-      log.warn('Can\'t leave a room you\'re not in', room, { socketId: socket.id, room })
+      log.warn('Can\'t leave a room you\'re not in', room, { socketId: client.id, room })
     }
     if (callback) {
       callback(wasLast)

@@ -13,7 +13,7 @@ export class ZombieResolver extends Resolver {
     this.log.profile('zombie')
 
     //this.embedded.ia.zombie.attack()
-    this.embedded.ia.zombie.follow()
+    this.embedded.ia.zombie.track()
     //this.embedded.ia.zombie.sniff()
     //this.embedded.ia.zombie.wander()
 

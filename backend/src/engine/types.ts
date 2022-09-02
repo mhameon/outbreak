@@ -1,4 +1,5 @@
 import { Values } from '#shared/types'
+import { GameManager } from '#engine/game/GameManager'
 
 export type Coords = { x: number; y: number }
 
@@ -39,18 +40,6 @@ export type Size = {
 
 export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
-export type SoundIntensity =
-  'Volume1'
-  | 'Volume2'
-  | 'Volume3'
-  | 'Volume4'
-  | 'Volume5'
-  | 'Volume6'
-  | 'Volume7'
-  | 'Volume8'
-  | 'Volume9'
-  | 'Volume10'
-
 export enum Tile {
   /*** Properties ***/
   Walkable,
@@ -67,17 +56,6 @@ export enum Tile {
   Level3,
   Level4,
   Level5,
-
-  Volume1,
-  Volume2,
-  Volume3,
-  Volume4,
-  Volume5,
-  Volume6,
-  Volume7,
-  Volume8,
-  Volume9,
-  Volume10,
 
   /*** Entities ***/
   Zombie = 50,
@@ -128,11 +106,10 @@ export enum RenderTile {
 export type Index = string
 export type Tileset = Set<Tile>
 export type InMapTileset = { at: Coords; tileset: Tileset }
-export type InMapTile = { at: Coords; tile: Tile }
 
 export type Around = Map<Values<typeof Direction>, Tileset>
 
-export type GameId = string
+export type GameId = `${typeof GameManager.GAME_ID_PREFIX}${string}`
 
 export type Seed = number | string
 

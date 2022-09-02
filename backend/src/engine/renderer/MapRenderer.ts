@@ -9,7 +9,7 @@ export interface Renderable {
 export abstract class MapRenderer implements Renderable {
   render (world: WorldMap | Outbreak): string {
     if (isWorldMap(world)) {
-      return this.renderer(new Outbreak('StandAloneRendering', world))
+      return this.renderer(new Outbreak('game:StandAloneRendering', world))
     }
 
     return this.renderer(world)

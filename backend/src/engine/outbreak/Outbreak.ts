@@ -2,15 +2,25 @@ import { WorldMap } from '../map/WorldMap'
 import { Renderers } from '../renderer'
 import { GameId } from '../types'
 import { getLogger, Logger } from '#shared/logger/index'
-import { FireResolver, ZombieResolver } from './resolver'
 import type { Resolvable } from './resolver'
+import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
 import { Wind } from './environment/Wind'
 import { Player } from '#server/service/server/GameServer'
 import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
+import { EventEmitter } from '#shared/TypedEventEmitter'
+import { OutbreakEvents } from '#engine/events'
 
-export class Outbreak {
+/**
+ * An Outbreak represent a game
+ *
+ * Emitted events:
+ * | Name                 | Handler signature                  |
+ * |----------------------|------------------------------------|
+ * | `game:turn:resolved` | ({ gameId: GameId, turn: number }) |
+ */
+export class Outbreak extends EventEmitter<OutbreakEvents> {
   private static renderer: Renderable
 
   readonly id: GameId
@@ -26,6 +36,7 @@ export class Outbreak {
   private players = new Map()
 
   constructor (id: GameId, map: WorldMap, option?: OutbreakOptions) {
+    super()
     Outbreak.renderer = Renderers.Ascii()
     this.id = id
     this.log = getLogger('Outbreak', { gameId: this.id })
@@ -54,12 +65,12 @@ export class Outbreak {
     this.log.debug(`Resolving turn ${this.turn}...`)
 
     this.resolvers.forEach(resolver => resolver.resolve())
-
-    // this.log.profile('sound')
-    // this.log.profile('sound', { message: '🔊 Resolve: Sound propagation', level: 'debug' })
+    this.emit('game:turn:resolved', { gameId: this.id, turn: this.turn })
 
     this.log.profile('resolveTurn', { message: `Turn ${this.turn} resolved`, level: 'info' })
-    return ++this.turn
+    this.turn++
+
+    return this.turn
   }
 
   render (): string {

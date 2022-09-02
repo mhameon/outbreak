@@ -28,9 +28,9 @@ export class FireResolver extends Resolver {
   private flames: Map<Coords, FlameProps> = new Map()
 
   boot (): void {
-    this.outbreak.map.on(`tile:${Tile.Burning}:added`, (at: Coords, ground: Tileset) => {
+    this.outbreak.map.on(`tile:${Tile.Burning}:added`, ({ at, originalTileset }) => {
       // TODO add some randomness in lifetime init
-      const lifetime = FireResolver.getDefaultFlameLifetime(ground)
+      const lifetime = FireResolver.getDefaultFlameLifetime(originalTileset)
       //this.flames.set(at, { lifetime: random.range(Math.floor(lifetime / 2), lifetime) })
       this.flames.set(at, { lifetime })
     })

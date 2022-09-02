@@ -4,15 +4,14 @@ import { GameId } from '#engine/types'
 import { Nullable } from '#shared/types'
 import { Outbreak } from '#engine/outbreak/index'
 import { registerGameControlCommands } from '#server/service/cli/command/game-control'
-import { event } from '#engine/events'
 
-let currentGameId: GameId = ''
+let currentGameId: Nullable<GameId> = null
 
 export function registerGameCommands (cli: CommandLineInterface, game: GameManager): void {
-  game.on(event.game.deleted, (gameId: GameId) => {
+  game.on('game:deleted', (gameId) => {
     if (currentGameId === gameId) {
       console.log(`${gameId} deleted, automatically leave CLI interaction mode`)
-      currentGameId = ''
+      currentGameId = null
     }
   })
 
@@ -54,7 +53,7 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
   }
 
   function selectGame (gameId: GameId): void {
-    if (currentGameId === '') {
+    if (currentGameId === null) {
       if (game.has(gameId)) {
         currentGameId = gameId
         console.log(`Successfully entered in CLI interaction mode with "${gameId}"`)
@@ -67,9 +66,9 @@ export function registerGameCommands (cli: CommandLineInterface, game: GameManag
   }
 
   function unselectGame (): void {
-    if (currentGameId !== '') {
+    if (currentGameId !== null) {
       console.log(`Successfully leave the CLI interaction mode with "${currentGameId}"`)
-      currentGameId = ''
+      currentGameId = null
     } else {
       console.log('Nothing happens, you\'re not in CLI interaction mode')
     }

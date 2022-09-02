@@ -58,7 +58,6 @@ export const tilerules: Tilerules = {
   sidekicks: [
     Tile.Level1, Tile.Level2, Tile.Level3, Tile.Level4, Tile.Level5,
     Tile.Burning, Tile.Burned,
-    Tile.Volume1, Tile.Volume2, Tile.Volume3, Tile.Volume4, Tile.Volume5, Tile.Volume6, Tile.Volume7, Tile.Volume8, Tile.Volume9, Tile.Volume10,
   ],
   rendering: [
     // Must be declared descending

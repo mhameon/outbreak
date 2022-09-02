@@ -7,8 +7,6 @@ export type Values<T> = T[keyof T]
 
 export type OneOrMany<T> = T | Array<T> | Set<T>
 
-export type Arrayable<T> = T | Array<T>
-
 /**
  * The `Bootable` interface means the `boot()` method is called after `__construct()`
  */

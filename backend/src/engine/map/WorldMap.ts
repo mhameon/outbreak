@@ -6,20 +6,20 @@ import { InvalidArgumentError, expect } from '#shared/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
 import { Values, OneOrMany } from '#shared/types'
 import { deleteInSet, toArray } from '#shared/helpers'
-import { EventEmitter } from 'events'
-import { event } from '#engine/events'
+import { EventEmitter } from '#shared/TypedEventEmitter'
 import { calculateDestination } from '#engine/math/geometry'
+import { WorldMapEvents } from '#engine/events'
 
 /**
  * A 2D map structure describing the game board
  *
- * Emitted event:
+ * Emitted events:
  * | Name                 | Handler signature                                      |
  * |----------------------|--------------------------------------------------------|
- * | `tile:added`         | ({ tile: Tile, at: Coords }, originalTileset: Tileset) |
+ * | `tile:added`         | ({ tile: Tile, at: Coords, originalTileset: Tileset }) |
  * | `tile:${Tile}:added` | (at: Coords, originalTileset: Tileset)                 |
  */
-export class WorldMap extends EventEmitter {
+export class WorldMap extends EventEmitter<WorldMapEvents> {
   static readonly defaultTile = Tile.Grass
   static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
 
@@ -72,8 +72,8 @@ export class WorldMap extends EventEmitter {
   private emitTileAdded (tileset: Tileset, at: Coords, original?: Tileset): number {
     const originalTileset = original ?? WorldMap.emptyTileset
     tileset.forEach(tile => {
-      this.emit(`tile:${tile}:added`, at, originalTileset)
-      this.emit(event.tile.added, { tile, at }, originalTileset)
+      this.emit(`tile:${tile}:added`, { at, originalTileset })
+      this.emit('tile:added', { tile, at, originalTileset })
     })
     return tileset.size
   }

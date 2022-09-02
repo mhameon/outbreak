@@ -1,9 +1,10 @@
 import { WorldMap } from '#engine/map/WorldMap'
-import { Tile, Direction, Tileset, Coords, InMapTile } from '#engine/types'
-import { event } from '#engine/events'
-import * as assert from 'assert'
+import { Tile, Direction, Tileset, Coords } from '#engine/types'
+
+import * as assert from '../../shared/assert'
 import { InvalidArgumentError } from '#shared/Errors'
 import { stringifyTiles } from '#engine/map/WorldMapErrors'
+import { WorldMapEvents } from '#engine/events'
 
 describe('WorldMap class', function () {
   let map: WorldMap
@@ -21,11 +22,11 @@ describe('WorldMap class', function () {
   })
 
   describe('add()', function () {
-    let tileAddedEvents: Array<InMapTile>
+    let tileAddedEvents: Array<WorldMapEvents['tile:added']>
     beforeEach(function () {
       tileAddedEvents = []
-      map.on(event.tile.added, (added: InMapTile, originalTileset?: Tileset) => {
-        tileAddedEvents.push(added)
+      map.on('tile:added', (args) => {
+        tileAddedEvents.push(args)
       })
     })
     afterEach(function () {
@@ -44,7 +45,7 @@ describe('WorldMap class', function () {
         assert.ok(map.has(Tile.Block, origin))
       })
       it('should not add tiles twice', function () {
-        map.on(`tile:${Tile.Water}:added`, (at: Coords) => {
+        map.on(`tile:${Tile.Water}:added`, ({ at }) => {
           assert.strictEqual(at, origin)
         })
         assert.strictEqual(map.add(Tile.Block, origin), 0)
@@ -52,8 +53,11 @@ describe('WorldMap class', function () {
         assert.strictEqual(map.add(Tile.Water, origin), 1)
         assert.strictEqual(map.add(Tile.Water, origin), 0)
         assert.strictEqual(map.get(origin).size, 2)
-
-        assert.deepStrictEqual(tileAddedEvents, [{ tile: Tile.Water, at: origin }])
+        assert.deepTileAddedEqual(tileAddedEvents, [{
+          tile: Tile.Water,
+          at: origin,
+          originalTileset: [ Tile.Block ]
+        }])
       })
       it('should not possible to burn water', function () {
         map.set(Tile.Water, at)
@@ -89,10 +93,10 @@ describe('WorldMap class', function () {
         assert.ok(map.has([ Tile.Road, Tile.Block ], origin))
         assert.ok(map.has(Tile.Road, { x: 1, y: 0 }))
         assert.ok(map.has(Tile.Road, { x: 2, y: 0 }))
-        assert.deepStrictEqual(tileAddedEvents, [
-          { tile: Tile.Road, at: origin },
-          { tile: Tile.Road, at: { x: 1, y: 0 } },
-          { tile: Tile.Road, at: { x: 2, y: 0 } }
+        assert.deepTileAddedEqual(tileAddedEvents, [
+          { tile: Tile.Road, at: origin, originalTileset: [ Tile.Block ] },
+          { tile: Tile.Road, at: { x: 1, y: 0 }, originalTileset: [] },
+          { tile: Tile.Road, at: { x: 2, y: 0 }, originalTileset: [] }
         ])
       })
       it('should add nothing with an empty at coords', function () {
@@ -212,7 +216,7 @@ describe('WorldMap class', function () {
   })
 
   describe('get(at)', function () {
-    it('should returns correct tile with Coord', function () {
+    it('should returns correct tile with Coords', function () {
       const tile = map.get(origin)
       assert.ok(tile.has(Tile.Block))
       assert.strictEqual(tile.has(Tile.Walkable), false)

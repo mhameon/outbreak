@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from '#shared/TypedEventEmitter'
 import type { Coords, Index } from '#engine/types'
 import { Direction, DirectionInDegree } from '#engine/types'
 import type { Logger } from '#shared/logger/index'
@@ -8,30 +8,32 @@ import { WorldMap } from '#engine/map/WorldMap'
 import { isCoords, isEntityType, isCoordsArray } from '#engine/guards'
 import { Nullable, OneOrMany } from '#shared/types'
 import { toArray } from '#shared/helpers'
-import { event } from '#engine/events'
 import { expect, NotFoundError } from '#shared/Errors'
 import { calculateDestination, calculateDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import assert from 'assert'
 import { hasAttitudeProperty, hasFacingProperty, isEntityId } from '#engine/outbreak/entities/guards'
 import { Entity, EntityProperties, Attitude, EntityType, EntityId } from '#engine/outbreak/entities/types'
+import { EntityManagerEvents } from '#engine/events'
 
 /**
  * Handle entities in an Outbreak and apply map constraints, lifecycle, etc.
  *
- * Emitted event:
+ * Emitted events:
  *
- * | Name               | Handler signature                      |
- * |--------------------|----------------------------------------|
- * | `entity:spawned`   | (entity: Entity)                       |
- * | `entity:moved`     | ({ entity: Entity, from: Coords })     |
+ * | Name               | Handler signature                  |
+ * |--------------------|------------------------------------|
+ * | `entity:spawned`   | (entity: Entity)                   |
+ * | `entity:moved`     | ({ entity: Entity, from: Coords }) |
  */
-export class EntityManager extends EventEmitter {
+export class EntityManager extends EventEmitter<EntityManagerEvents> {
   readonly log: Logger
   readonly outbreak: Outbreak
   private readonly entities = new Map<EntityId, Entity>()
   private readonly entityIdsByCoords = new Map<Index, Set<EntityId>>()
   private readonly entityIdsByTypes = new Map<EntityType, Set<EntityId>>()
+
+  //todo generalize with entityIdsByAttributes
 
   constructor (outbreak: Outbreak) {
     super()
@@ -52,7 +54,7 @@ export class EntityManager extends EventEmitter {
     this.add(entity)
 
     this.log.info('Entity spawned %j', entity)
-    this.emit(event.entity.spawned, entity)
+    this.emit('entity:spawned', entity)
 
     return entity
   }
@@ -130,34 +132,34 @@ export class EntityManager extends EventEmitter {
   }
 
   move<AnEntity extends Entity = Entity> (id: EntityId, to: Direction | Coords): AnEntity {
-    const creature = this.get<AnEntity>(id)
-    assert(creature, new NotFoundError(id, 'EntityId'))
+    const entity = this.get<AnEntity>(id)
+    assert(entity, new NotFoundError(id, 'EntityId'))
 
-    if (!this.canMove(creature, to)) {
-      return creature
+    if (!this.canMove(entity, to)) {
+      return entity
     }
 
-    const from = creature.at
+    const from = entity.at
     let destination: Coords
     let facing: Direction
     if (isCoords(to)) {
       destination = to
-      facing = calculateDirection(creature.at, to)
+      facing = calculateDirection(entity.at, to)
     } else {
-      destination = calculateDestination(creature.at, DirectionInDegree[to], 1)
+      destination = calculateDestination(entity.at, DirectionInDegree[to], 1)
       facing = to
     }
-    this.delete(creature)
-    creature.at = destination
+    this.delete(entity)
+    entity.at = destination
 
-    if (hasFacingProperty(creature)) {
-      creature.facing = facing
+    if (hasFacingProperty(entity)) {
+      entity.facing = facing
     }
 
-    this.add(creature)
-    this.emit(event.entity.moved, { creature, from })
+    this.add(entity)
+    this.emit('entity:moved', { entity, from })
 
-    return creature
+    return entity
   }
 
   canMove (creature: Entity, to: Direction | Coords): boolean {

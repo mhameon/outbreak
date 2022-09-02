@@ -1,28 +1,44 @@
-import type { Tile } from '#engine/types'
+import { Entity } from '#engine/outbreak/entities/types'
+import { Coords, GameId, Tile, Tileset } from '#engine/types'
+import { Outbreak } from '#engine/outbreak'
+import { Nullable } from '#shared/types'
 
-const game = {
-  join: 'game:join',
-  leave: 'game:leave',
-  deleted: 'game:deleted'
-} as const
 
-const tile = {
-  added: 'tile:added'
-  // + `tile:${Tile}:added` in TileEvent (below)
-} as const
+//-- Socket.io events --------------------------------------------------------------------------------------------------
+export interface ClientToServerEvents {
+  'player:join:game': ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => void
+  'player:leave:game': ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => void
+}
 
-const entity = {
-  spawned: 'entity:spawned',
-  moved: 'entity:moved'
-} as const
+export interface ServerToClientEvent {
+  'shutdown': () => void
+}
 
-export const event = {
-  ...{ game },
-  ...{ tile },
-  ...{ entity }
-} as const
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InterServerEvents {
+}
 
-type ExtractEvents<T> = T[keyof T]
-export type GameEvent = ExtractEvents<typeof game>
-export type TileEvent = ExtractEvents<typeof tile> | `tile:${Tile}:added`
-export type EntityEvent = ExtractEvents<typeof entity>
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SocketData {
+}
+
+//-- Node EventEmitter events ------------------------------------------------------------------------------------------
+export type EntityManagerEvents = {
+  'entity:spawned': Entity
+  'entity:moved': { entity: Entity; from: Coords }
+}
+
+export type GameManagerEvents = {
+  'game:created': Outbreak
+  'game:deleted': GameId
+}
+
+export type WorldMapEvents = {
+  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
+  // Todo improve typing: 'tile:70000:added' works but this is not Tile value
+  [Tile: string]: { at: Coords; originalTileset: Tileset }
+}
+
+export type OutbreakEvents = {
+  'game:turn:resolved': { gameId: GameId; turn: number }
+}

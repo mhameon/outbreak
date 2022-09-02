@@ -9,7 +9,7 @@ const uri = `${protocol}//${hostname}:8080`
 
 // const socket = io(uri, { autoConnect: false })
 const socket = io(uri, {
-  transports: ['websocket'],
+  transports: [ 'websocket' ],
   withCredentials: true,
   // extraHeaders: {
   //   "my-custom-header": "abcd",
@@ -17,15 +17,15 @@ const socket = io(uri, {
 })
 
 function Client (props: { path: string }): JSX.Element {
-  const [connecting, isConnecting] = useState(false)
-  const [attempt, setAttempt] = useState(0)
-  const [connection, setConnection] = useState<{ id: string | null; gameId: string | null; isConnected: boolean }>({
+  const [ connecting, isConnecting ] = useState(false)
+  const [ attempt, setAttempt ] = useState(0)
+  const [ connection, setConnection ] = useState<{ id: string | null; gameId: string | null; isConnected: boolean }>({
     id: null,
     gameId: null,
     isConnected: false,
   })
 
-  const [requestedGameId, setRequestedGameId] = useState('')
+  const [ requestedGameId, setRequestedGameId ] = useState('')
 
   function connect (): void {
     if (!connecting) {
@@ -45,20 +45,19 @@ function Client (props: { path: string }): JSX.Element {
     console.log(`Trying to join ${requestedGameId ? `"${requestedGameId}"` : 'a game'}...`)
     //socket.emit('game:join',null, (response:any) =>{
     //socket.emit('game:join','asked one', 'param1', 'param2', (response:any) =>{
-    socket.emit('game:join', { gameId: requestedGameId }, (response: any) => {
+    socket.emit('player:join:game', { gameId: requestedGameId }, (response: any) => {
       setConnection({ ...connection, gameId: response.gameId })
       if (response.gameId === null) {
         console.log(`${requestedGameId} doesn't exists`)
         setRequestedGameId('')
-      }
-      else {
+      } else {
         console.log(`Welcome to ${response.gameId} !`)
       }
     })
   }
 
   function leave (): void {
-    socket.emit('game:leave', { gameId: connection.gameId }, (response: any) => {
+    socket.emit('player:leave:game', { gameId: connection.gameId }, (response: any) => {
       if (response.ok) {
         setConnection({
           id: connection.id,

@@ -1,11 +1,11 @@
 import { Outbreak } from '#engine/outbreak/index'
 import { WorldMap } from '#engine/map/WorldMap'
 import * as assert from 'assert'
-import { event } from '#engine/events'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { NotFoundError } from '#shared/Errors'
 import { Direction, Coords, Tile } from '#engine/types'
 import { Entity, EntityType } from '#engine/outbreak/entities/types'
+import { EntityManagerEvents } from '#engine/events'
 
 function assertCreatureEqual (actual: Entity | null, expected: Entity): void {
   assert.ok(actual)
@@ -15,8 +15,8 @@ function assertCreatureEqual (actual: Entity | null, expected: Entity): void {
 }
 
 const events = {
-  [event.entity.spawned]: new Array<Entity>(),
-  [event.entity.moved]: new Array<{ creature: Entity; from: Coords }>()
+  ['entity:spawned']: new Array<EntityManagerEvents['entity:spawned']>(),
+  ['entity:moved']: new Array<EntityManagerEvents['entity:moved']>()
 }
 
 describe('EntityManager class', function () {
@@ -30,13 +30,13 @@ describe('EntityManager class', function () {
   before(function () {
     map = new WorldMap({ width: 5, height: 5 })
     map.set(Tile.Block, { x: 0, y: 1 })
-    outbreak = new Outbreak('CreatureManagerTest', map)
+    outbreak = new Outbreak('game:CreatureManagerTest', map)
 
-    outbreak.entity.on(event.entity.spawned, (creature: Entity) => {
-      events[event.entity.spawned].push(creature)
+    outbreak.entity.on('entity:spawned', (creature) => {
+      events['entity:spawned'].push(creature)
     })
-    outbreak.entity.on(event.entity.moved, (payload: { creature: Entity; from: Coords }) => {
-      events[event.entity.moved].push(payload)
+    outbreak.entity.on('entity:moved', (payload) => {
+      events['entity:moved'].push(payload)
     })
 
     zombie = outbreak.entity.spawn(EntityType.Zombie, origin)
@@ -48,8 +48,8 @@ describe('EntityManager class', function () {
   })
 
   afterEach(function () {
-    events[event.entity.spawned] = []
-    events[event.entity.moved] = []
+    events['entity:spawned'] = []
+    events['entity:moved'] = []
   })
 
   describe('spawn', function () {
@@ -140,21 +140,21 @@ describe('EntityManager class', function () {
     it('should not move when destination is out of the map', function () {
       outbreak.entity.move(zombie.id, Direction.North)
       assert.deepStrictEqual((outbreak.entity.get(zombie.id) as Entity).at, origin)
-      assert.strictEqual(events[event.entity.moved].length, 0)
+      assert.strictEqual(events['entity:moved'].length, 0)
     })
 
     it('should not move when destination is a Tile.Block', function () {
       outbreak.entity.move(zombie.id, Direction.South)
       assert.deepStrictEqual((outbreak.entity.get(zombie.id) as Entity).at, origin)
-      assert.strictEqual(events[event.entity.moved].length, 0)
+      assert.strictEqual(events['entity:moved'].length, 0)
     })
 
     it('should move the survivor', function () {
       assertCreatureEqual(outbreak.entity.get(survivor.id), survivor)
       outbreak.entity.move(survivor.id, Direction.East)
 
-      let { creature, from } = events[event.entity.moved][0]
-      assertCreatureEqual(creature, survivor)
+      let { entity, from } = events['entity:moved'][0]
+      assertCreatureEqual(entity, survivor)
       assert.deepStrictEqual(from, pos1)
 
       assert.deepStrictEqual(outbreak.entity.get(pos1), [ zombie2 ])
@@ -164,10 +164,10 @@ describe('EntityManager class', function () {
 
       //move back
       outbreak.entity.move(survivor.id, Direction.West)
-      ;({ creature, from } = events[event.entity.moved][1])
-      assertCreatureEqual(creature, survivor)
+      ;({ entity, from } = events['entity:moved'][1])
+      assertCreatureEqual(entity, survivor)
       assert.deepStrictEqual(from, { x: 2, y: 0 })
-      assert.deepStrictEqual(creature.at, pos1)
+      assert.deepStrictEqual(entity.at, pos1)
     })
   })
 })

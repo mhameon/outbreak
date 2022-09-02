@@ -78,7 +78,7 @@ export function getLogger (label = 'default', metadata: Record<string, any> = {}
         errors({ stack: true }),
         printf(info => {
           // line.level.padEnd(17) instead of 7: level is colored in terminal, the extra length (10) is probably caused by that
-          let message = `${info.timestamp} ${info.ms.padStart(7)} │ ${(info?.metadata.label ?? '').padEnd(16)} │ ${info.level.padEnd(17)} │ ${info.stack ?? info.message}`
+          let message = `${info.timestamp} ${info.ms.padStart(7)} │ ${(info?.metadata.label ?? '').padEnd(17)} │ ${info.level.padEnd(17)} │ ${info.stack ?? info.message}`
 
           let maxWith = 0
           const metadata = Object.entries(info.metadata).filter(([ key ]) => {
@@ -91,7 +91,7 @@ export function getLogger (label = 'default', metadata: Record<string, any> = {}
 
           if (metadata.length) {
             maxWith = Math.max(maxWith + 4, 16)
-            const prefix = `${' '.padEnd(20)} │ ${' '.padEnd(16)} │ ${' '.padEnd(7)} │`
+            const prefix = `${' '.padEnd(20)} │ ${' '.padEnd(17)} │ ${' '.padEnd(7)} │`
             const meta = metadata
               .map(([ key, value ], index) => {
                 return `${prefix} ${(index + 1 < metadata.length) ? '├' : '└'}─ ${(key + ' ').padEnd(maxWith, '·')} ${value}`

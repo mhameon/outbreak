@@ -3,10 +3,9 @@ import { GameId } from '../types'
 // Fixme IoD: use interfaces & inject them in constructor
 import { Outbreak, OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
-import { event } from '#engine/events'
-
 import { getLogger } from '#shared/logger/index'
-import { EventEmitter } from 'events'
+import { EventEmitter } from '#shared/TypedEventEmitter'
+import { GameManagerEvents } from '#engine/events'
 
 const log = getLogger('GameManager')
 
@@ -20,13 +19,14 @@ type Game = {
 /**
  * Handle & Manage games (Outbreak)
  *
- * Emitted event:
- * | Name           | Handler signature |
- * |----------------|-------------------|
- * | `game:deleted` | (gameId: GameId)  |
+ * Emitted events:
+ * | Name           | Handler signature    |
+ * |----------------|----------------------|
+ * | `game:created` | (outbreak: Outbreak) |
+ * | `game:deleted` | (gameId: GameId)     |
  */
-export class GameManager extends EventEmitter {
-  static GAME_ID_PREFIX = 'game:'
+export class GameManager extends EventEmitter<GameManagerEvents> {
+  static GAME_ID_PREFIX = 'game:' as const
 
   private readonly games: Map<GameId, Outbreak> = new Map()
 
@@ -39,7 +39,7 @@ export class GameManager extends EventEmitter {
     const gameId = id ?? GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
     this.games.set(gameId, outbreak)
-
+    this.emit('game:created', outbreak)
     return gameId
   }
 
@@ -51,10 +51,11 @@ export class GameManager extends EventEmitter {
    * @throws {NotFoundError}
    */
   get (gameId: GameId): Outbreak {
-    if (!this.has(gameId)) {
+    const outbreak = this.games.get(gameId)
+    if (!outbreak) {
       throw new NotFoundError(gameId, 'GameId', log.error)
     }
-    return this.games.get(gameId) as Outbreak
+    return outbreak
   }
 
   /**
@@ -63,7 +64,7 @@ export class GameManager extends EventEmitter {
   delete (gameId: GameId): void {
     this.get(gameId)
     this.games.delete(gameId)
-    this.emit(event.game.deleted, gameId)
+    this.emit('game:deleted', gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 
