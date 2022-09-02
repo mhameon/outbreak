@@ -1,6 +1,7 @@
 import { getLogger } from '#shared/logger/index'
-import util from 'util'
 import { Socket } from 'socket.io'
+import { isGameId } from '#engine/guards'
+import { GameId } from '#engine/types'
 
 export const log = getLogger('GameServer')
 
@@ -22,12 +23,17 @@ export function registerSocketEventLogger (socket: Socket): void {
   })
 }
 
-function extractRooms (socket: Socket): { room: Array<string> } {
+function extractRooms (socket: Socket): { rooms: Array<string> } | { gameId: GameId } {
   // To improve readability, we remove the (default) room named `socket.id`
-  return { room: [ ...socket.rooms ].filter(r => r !== socket.id) }
+  const rooms = [ ...socket.rooms ].filter(r => r !== socket.id)
+  if (rooms.length === 1 && isGameId(rooms[0])) {
+    return { gameId: rooms[0] }
+  }
+  return { rooms: [ ...socket.rooms ] }
 }
 
-function extractEventArguments (args: Array<unknown>): { args: string; has_ack: boolean } {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractEventArguments (args: Array<unknown>): { args: any; has_ack: boolean } {
   let has_ack = false
   const [ ack ] = args.slice(-1)
   if (ack instanceof Function) {
@@ -35,5 +41,5 @@ function extractEventArguments (args: Array<unknown>): { args: string; has_ack: 
     args.pop()
   }
 
-  return { args: util.inspect(args.length === 1 ? args[0] : args), has_ack }
+  return { args, has_ack }
 }

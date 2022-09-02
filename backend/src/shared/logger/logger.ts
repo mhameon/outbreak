@@ -1,6 +1,7 @@
 import config from 'config'
 import winston, { LogEntry } from 'winston'
 import { DEFAULT_LOG_FILE } from '#shared/logger/index'
+import util from 'util'
 
 export type LogMethod = winston.LeveledLogMethod
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
@@ -94,7 +95,13 @@ export function getLogger (label = 'default', metadata: Record<string, any> = {}
             const prefix = `${' '.padEnd(20)} │ ${' '.padEnd(17)} │ ${' '.padEnd(7)} │`
             const meta = metadata
               .map(([ key, value ], index) => {
-                return `${prefix} ${(index + 1 < metadata.length) ? '├' : '└'}─ ${(key + ' ').padEnd(maxWith, '·')} ${value}`
+                return `${prefix} ${(index + 1 < metadata.length) ? '├' : '└'}─ ${(key + ' ').padEnd(maxWith, '·')} ${util.inspect(value, {
+                  compact: true,
+                  //showHidden: true,
+                  colors: true,
+                  depth: 5,
+                  breakLength: 80
+                }).replace(/\r?\n/g, `\n${prefix}     ${' '.padEnd(maxWith, ' ')}`)}`
               })
 
             message += '\n' + meta.join('\n')
