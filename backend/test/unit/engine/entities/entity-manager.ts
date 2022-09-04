@@ -30,7 +30,7 @@ describe('EntityManager class', function () {
   before(function () {
     map = new WorldMap({ width: 5, height: 5 })
     map.set(Tile.Block, { x: 0, y: 1 })
-    outbreak = new Outbreak('game:CreatureManagerTest', map)
+    outbreak = new Outbreak('game_CreatureManagerTest', map)
 
     outbreak.entity.on('entity:spawned', (creature) => {
       events['entity:spawned'].push(creature)

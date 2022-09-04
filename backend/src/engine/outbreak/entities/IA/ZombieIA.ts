@@ -8,6 +8,8 @@ import { DirectionInDegree, Direction } from '#engine/types'
 import { closestDirection } from '#engine/math/geometry'
 import { Logger } from '#shared/logger'
 import { Zombie, Entity, Attitude, EntityType } from '#engine/outbreak/entities/types'
+import { expect } from '#shared/Errors'
+import { OutOfMapError } from '#engine/map/WorldMapErrors'
 
 export class ZombieIA {
   readonly log: Logger
@@ -31,18 +33,16 @@ export class ZombieIA {
   // todo store tracked EntityId in zombie Entity (zombie.target)
   // todo generalize tracking without hardcoded EntityType selection
   track (): void {
-    // const detectionArea = 20
+    const detectionArea = 10
     let movedZombies = 0
     let waitingZombies = 0
 
     const targets = this.entity.get(EntityType.Human).map(creature => creature.at)
-    const dijkstraMap = this.pathfinding.calculateMap(targets)
+    const dijkstraMap = this.pathfinding.calculateMap(targets, detectionArea)
 
     // -- debug -------
     const m = matrix.create(this.map.size, (x, y) => {
-      const weight = dijkstraMap.distance.get(WorldMap.index({ x, y })) ?? Dijkstra.ignoreNode
-      return weight
-      //return weight <= detectionArea ? weight : Dijkstra.ignoreNode
+      return dijkstraMap.distance.get(WorldMap.index({ x, y })) ?? Dijkstra.ignoreNode
     })
     console.log(matrix.debug(m, {
       display: (v: number) => (v === Dijkstra.ignoreNode ? ' ' : v.toString(36)),
@@ -52,27 +52,41 @@ export class ZombieIA {
 
     const zombies = this.entity.get<Zombie>(EntityType.Zombie)
     zombies.forEach((zombie) => {
-
       const previouslyAt = { ...zombie.at }
+      //const currentNodeWeight = dijkstraMap.distance.get(WorldMap.index(zombie.at)) ?? Dijkstra.ignoreNode
 
-      const sortedNodes = this.map
+      const sortedNodes: Array<Node> = this.map
         .getNeighborsCoords(zombie.at, true)
-        .filter(here => {
-          try {
-            return this.map.isWalkable(here)
-          } catch (e) {
-            return false
+        .reduce<Node[]>((nodes, at) => {
+        try {
+          if (this.map.isWalkable(at)) {
+            const weight = dijkstraMap.distance.get(WorldMap.index(at))
+            if (weight !== undefined) {
+              nodes.push({ at, weight })
+            }
           }
-        })
-        .map<Node>(coords => ({ at: coords, weight: dijkstraMap.distance.get(WorldMap.index(coords)) as number }))
+        } catch (error) {
+          expect(error, OutOfMapError)
+        }
+        return nodes
+      }, [])
         .sort(byLightWeightFirst)
 
       let movedCreature: Entity | null
       if (sortedNodes.length) {
         const lowerWeight = sortedNodes[0].weight
-        if (lowerWeight >= 0) {//} <= detectionArea) { // todo detection radius could be parameterizable
+        // const lowerWeight2 = Math.min(...sortedNodes.reduce<number[]>((min, node) => {
+        //   if (node.weight > lowerWeight && node.weight < currentNodeWeight) {
+        //     min.push(node.weight)
+        //   }
+        //   return min
+        // }, []))
+
+        if (lowerWeight >= 0) {
           zombie.attitude = Attitude.Tracking
+
           const closerNodes: Node[] = sortedNodes.filter(c => c.weight === lowerWeight)
+          //const closerNodes: Node[] = sortedNodes.filter(c => c.weight === lowerWeight || c.weight === lowerWeight2)
           // todo choose node regarding zombie.direction instead random
           // todo if the orientation doesn't match before moving, change the orientation and wait. Move will apply next turn
           movedCreature = this.entity.move(zombie.id, random.choose(closerNodes).at)
@@ -80,7 +94,7 @@ export class ZombieIA {
           movedCreature = this.wander(zombie)
         }
       } else {
-        movedCreature = this.wait(zombie)
+        movedCreature = this.wander(zombie)
       }
 
       const hasMoved = movedCreature.at.x !== previouslyAt.x || movedCreature.at.y !== previouslyAt.y
@@ -121,9 +135,5 @@ export class ZombieIA {
       console.warn(`${zombie.id} Zombie at ${zombie.at.x}, ${zombie.at.y} facing ${Direction[zombie.facing]} is stuck`)
     }
     return this.entity.move<Zombie>(zombie.id, destination)
-  }
-
-  private wait (zombie: Zombie): Zombie {
-    return this.entity.move<Zombie>(zombie.id, zombie.at)
   }
 }

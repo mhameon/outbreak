@@ -150,11 +150,11 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
     const yMax = at.y + 1
 
     return [
-      ...(includeAt ? [ at ] : []),
       { x: xMin, y: yMin },
       { x: at.x, y: yMin },
       { x: xMax, y: yMin },
       { x: xMin, y: at.y },
+      ...(includeAt ? [ at ] : []),
       { x: xMax, y: at.y },
       { x: xMin, y: yMax },
       { x: at.x, y: yMax },
@@ -212,9 +212,10 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
   }
 
   each (callback: (square: InMapTileset) => void): void {
-    this.tiles.forEach(
-      (tileset, index) => callback({ tileset, at: WorldMap.coords(index) }),
-    )
+    this.tiles.forEach((tileset, index) => callback({
+      tileset,
+      at: WorldMap.coords(index)
+    }))
   }
 
   has (tiles: OneOrMany<Tile>, at: Coords): boolean {

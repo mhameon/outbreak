@@ -6,6 +6,7 @@ import { expect } from '#shared/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { isCoords } from '#engine/guards'
 import { Node } from '#engine/math/pathfinding/index'
+import { getLogger, Logger } from '#shared/logger/index'
 
 type DistanceMap = Map<Index, number>
 type SourceMap = Map<Index, Index>
@@ -20,15 +21,18 @@ export class Dijkstra {
   static ignoreNode = 999999 as const
 
   readonly world: WorldMap
+  private log: Logger
 
   constructor (world: WorldMap) {
     this.world = world
+    this.log = getLogger(this.constructor.name, { gameId: this.world.seeder?.seed })
   }
 
   /**
    * @param sources Sources with weight <0 are more attractive, >0 are less
    */
-  calculateMap (sources: OneOrMany<Node | Coords>): { distance: DistanceMap; predecessors: SourceMap } {
+  calculateMap (sources: OneOrMany<Node | Coords>, detectionArea = 10): { distance: DistanceMap; predecessors: SourceMap } {
+    //todo detectionArea should embedded in sources
     const goals = toArray(sources)
 
     const frontier = new Array<Coords>()
@@ -37,6 +41,9 @@ export class Dijkstra {
 
     goals.forEach(start => {
       const { at, weight } = isCoords(start) ? { at: start, weight: 0 } : start
+      if (!this.world.isWalkable(at)) {
+        this.log.warn('Node unreachable', { at })
+      }
       const index = WorldMap.index(at)
       frontier.push(at)
       distance.set(index, weight)
@@ -49,8 +56,7 @@ export class Dijkstra {
       for (const next of this.neighbors(current)) {
         const nextIndex = WorldMap.index(next)
         if (!distance.has(nextIndex)) {
-          // Todo detection area 10 should be tweakable
-          if ((distance.get(currentIndex) as number) < 10) {
+          if ((distance.get(currentIndex) as number) < detectionArea) {
             // Todo weight "1" can be tweaked regarding this.world tiles
             distance.set(nextIndex, (distance.get(currentIndex) as number) + 1)
             predecessors.set(nextIndex, currentIndex)

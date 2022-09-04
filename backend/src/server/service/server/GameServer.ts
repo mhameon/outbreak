@@ -11,32 +11,38 @@ import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 import { isGameId } from '#engine/guards'
-import { ClientToServerEvents, InterServerEvents, SocketData } from '#engine/events'
+import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from '#engine/events'
 import { Nullable } from '#shared/types'
+import type { SocketId } from 'socket.io-adapter'
+import { NotFoundError } from '#shared/Errors'
 
+
+const LOBBY = 'lobby' as const
 
 // Todo: continue typing
 // Fixme: must lives in another file?
+export type PlayerId = string
 export type Player = {
-  id: string
+  id: PlayerId // fixme we are using SocketId for now, but will player db id
   name?: string
 }
 
+export type ConnectedPlayer = {
+  player: Player
+  socket: SocketInformation
+}
+
 type SocketInformation = {
-  id: string
-  connectedAt: Date
+  id: SocketId
+  room: Nullable<string>
+  connectedAt: Date // fixme improve structure: this date of server connection, not room connection
 }
 
 export interface ServerStatus {
   started: boolean
   uptime: number
   rooms: Array<string>
-  clients: Array<{ id: string; rooms: string[] }>
-}
-
-const LOBBY = 'lobby' as const
-
-class ServerToClientEvents {
+  clients: Array<{ id: string; rooms: string[]; connectedPlayer?: ConnectedPlayer }>
 }
 
 /**
@@ -51,7 +57,7 @@ export class GameServer {
 
   readonly game: GameManager
   private readonly rooms = new Set<string>()
-  private readonly clients = new WeakMap<Socket, { player: Player; socket: SocketInformation }>()
+  private readonly clients = new Map<SocketId, ConnectedPlayer>()
 
   private isShuttingDown = false
   private startListeningAt?: Date
@@ -148,8 +154,11 @@ export class GameServer {
   get status (): ServerStatus {
     const clients = []
     for (const [ id, socket ] of this.io.sockets.sockets) {
+      const connectedPlayer = this.clients.get(id)
       clients.push({
-        id, rooms: [ ...socket.rooms ].filter(r => r !== id),
+        id,
+        rooms: [ ...socket.rooms ].filter(r => r !== id),
+        connectedPlayer
       })
     }
 
@@ -167,7 +176,16 @@ export class GameServer {
     this.game.on('game:created', (outbreak) => {
       outbreak.on('game:turn:resolved', ({ gameId, turn }) => {
         const newTurn = turn + 1
-        this.io.in(gameId).emit('msg', `Turn ${newTurn} is starting`)
+        this.io.in(gameId).allSockets().then((socketIds) => {
+          for (const socketId of socketIds) {
+            const client = this.clients.get(socketId)
+            if (client) {
+              const socket = this.io.to(socketId)
+              socket.emit('msg', `Turn ${newTurn} is starting`)
+              socket.emit('game:state', outbreak.getGameState(client.player.id))
+            }
+          }
+        })
         //todo + send updated game state (Outbreak in JSON)
       })
     })
@@ -175,8 +193,7 @@ export class GameServer {
 
   private registerPlayerActions (socket: Socket): void {
     socket
-      //.on(event.player.join.game, ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: GameId | null }) => void) => {
-      .on('player:join:game', ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
+      .on('player:join:game', ({ requestedGameId }: { requestedGameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
         // socket.on(event.game.join, (args) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
@@ -188,6 +205,8 @@ export class GameServer {
         //     next(new ConnectionRefusedError(`Already in ${game}`))
         //   }
         // })
+        const connectedPlayer = this.clients.get(socket.id)
+        assert(connectedPlayer, new NotFoundError(socket.id))
 
         // A player can be only in one game at the time
         let gameId = [ ...socket.rooms ].find(isGameId)
@@ -210,8 +229,8 @@ export class GameServer {
         this.leaveRoom(socket, LOBBY)
         this.joinRoom(socket, gameId)
 
-        const game = this.game.get(gameId)
-        game.joinPlayer({ id: 'player' })
+        const party = this.game.get(gameId)
+        party.joinPlayer(connectedPlayer.player)
 
         socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
         socket.emit('msg', `You joined the game, ${socket.id}`)
@@ -249,14 +268,15 @@ export class GameServer {
         next(new ConnectionRefusedError('Unauthenticated user', log.error))
       }
 
-      // Fixme Keep? Or move clients in each Outbreak via GameManager?
-      this.clients.set(socket, {
+      // Fixme: identify player and set it here
+      this.clients.set(socket.id, {
         player: {
-          id: +new Date() + '',
+          id: socket.id,
           name: 'Hardcoded name ' + Math.random(),
         },
         socket: {
           id: socket.id,
+          room: null,
           connectedAt: new Date()
         }
       })
@@ -289,7 +309,7 @@ export class GameServer {
         }
       })
       .on('disconnect', (reason: string) => {
-        this.clients.delete(socket)
+        this.clients.delete(socket.id)
         socket.disconnect(true)
         log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socketId: socket.id })
       })
@@ -309,6 +329,12 @@ export class GameServer {
         isFirst = true
       }
       client.join(room)
+
+      const connectedPlayer = this.clients.get(client.id)
+      assert(connectedPlayer)
+      connectedPlayer.socket.room = room
+      this.clients.set(client.id, connectedPlayer)
+
       log.info('💚 Join room `%s`', room, { socketId: client.id, room, isFirst })
     }
     return isFirst

@@ -1,6 +1,5 @@
 import { NotFoundError } from '#shared/Errors'
 import { GameId } from '../types'
-// Fixme IoD: use interfaces & inject them in constructor
 import { Outbreak, OutbreakFactory } from '../outbreak/'
 import crypto from 'crypto'
 import { getLogger } from '#shared/logger/index'
@@ -26,7 +25,7 @@ type Game = {
  * | `game:deleted` | (gameId: GameId)     |
  */
 export class GameManager extends EventEmitter<GameManagerEvents> {
-  static GAME_ID_PREFIX = 'game:' as const
+  static GAME_ID_PREFIX = 'game_' as const
 
   private readonly games: Map<GameId, Outbreak> = new Map()
 

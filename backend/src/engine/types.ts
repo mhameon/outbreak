@@ -103,7 +103,7 @@ export enum RenderTile {
   Sound
 }
 
-export type Index = string
+export type Index = `${number},${number}`
 export type Tileset = Set<Tile>
 export type InMapTileset = { at: Coords; tileset: Tileset }
 

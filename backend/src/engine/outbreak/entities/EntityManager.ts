@@ -53,7 +53,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
 
     this.add(entity)
 
-    this.log.info('Entity spawned %j', entity)
+    this.log.debug('Entity spawned', { entity })
     this.emit('entity:spawned', entity)
 
     return entity

@@ -6,11 +6,11 @@ import { Nullable } from '#shared/types'
 
 //-- Socket.io events --------------------------------------------------------------------------------------------------
 export interface ClientToServerEvents {
-  'player:join:game': ({ gameId: requestedGameId }: { gameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => void
-  'player:leave:game': ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => void
+  'player:join:game': (join: { requestedGameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => void
+  'player:leave:game': (leave: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => void
 }
 
-export interface ServerToClientEvent {
+export interface ServerToClientEvents {
   'shutdown': () => void
 }
 
@@ -23,22 +23,22 @@ export interface SocketData {
 }
 
 //-- Node EventEmitter events ------------------------------------------------------------------------------------------
-export type EntityManagerEvents = {
-  'entity:spawned': Entity
-  'entity:moved': { entity: Entity; from: Coords }
-}
-
 export type GameManagerEvents = {
   'game:created': Outbreak
   'game:deleted': GameId
 }
 
-export type WorldMapEvents = {
-  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
-  // Todo improve typing: 'tile:70000:added' works but this is not Tile value
-  [Tile: string]: { at: Coords; originalTileset: Tileset }
-}
-
 export type OutbreakEvents = {
   'game:turn:resolved': { gameId: GameId; turn: number }
+}
+
+// Todo improve typing: 'tile:70000:added' works but this is not Tile value
+export type WorldMapEvents = Record<`tile:${number}:added`, { at: Coords; originalTileset: Tileset }> & {
+  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
+  //[Tile: string]: { at: Coords; originalTileset: Tileset }
+} //& Record<`tile:${keyof typeof Tile}:added`, { at: Coords; originalTileset: Tileset }>
+
+export type EntityManagerEvents = {
+  'entity:spawned': Entity
+  'entity:moved': { entity: Entity; from: Coords }
 }

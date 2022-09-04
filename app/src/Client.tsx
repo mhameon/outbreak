@@ -45,7 +45,7 @@ function Client (props: { path: string }): JSX.Element {
     console.log(`Trying to join ${requestedGameId ? `"${requestedGameId}"` : 'a game'}...`)
     //socket.emit('game:join',null, (response:any) =>{
     //socket.emit('game:join','asked one', 'param1', 'param2', (response:any) =>{
-    socket.emit('player:join:game', { gameId: requestedGameId }, (response: any) => {
+    socket.emit('player:join:game', { requestedGameId }, (response: any) => {
       setConnection({ ...connection, gameId: response.gameId })
       if (response.gameId === null) {
         console.log(`${requestedGameId} doesn't exists`)

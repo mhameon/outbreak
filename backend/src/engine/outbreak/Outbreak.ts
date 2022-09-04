@@ -6,11 +6,13 @@ import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
 import { Wind } from './environment/Wind'
-import { Player } from '#server/service/server/GameServer'
+import { Player, PlayerId } from '#server/service/server/GameServer'
 import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
 import { EventEmitter } from '#shared/TypedEventEmitter'
 import { OutbreakEvents } from '#engine/events'
+import assert from 'assert'
+import { NotFoundError } from '#shared/Errors'
 
 /**
  * An Outbreak represent a game
@@ -83,5 +85,16 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
     } else {
       // Game is already started
     }
+  }
+
+  /**
+   * Return game state saw by the Player
+   */
+  getGameState (playerId: PlayerId): any {
+    assert(this.players.has(playerId), new NotFoundError(playerId, 'Player'))
+
+    // Todo create a gameStateBuilder to build the structure (+share things with clients to allow easier handle)
+
+    return { turn: this.currentTurn, size: this.map.size }
   }
 }

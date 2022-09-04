@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import { getRenderTile } from '#engine/map/tilerules'
 import { WorldMap } from '#engine/map/WorldMap'
 import { Outbreak } from '#engine/outbreak/index'
-import { MapRenderer } from '#engine/renderer/MapRenderer'
+import { MapRenderer, STANDALONE_RENDER } from '#engine/renderer/MapRenderer'
 import { Wind } from '#engine/outbreak/environment/Wind'
 import { Zombie, Entity, EntityType } from '#engine/outbreak/entities/types'
 
@@ -39,18 +39,19 @@ TileAtlas[RenderTile.Sound] = chalk.hex('#d20ae5')('♫')
 
 export class AsciiMapRenderer extends MapRenderer {
   protected renderer (outbreak: Outbreak): string {
-    const width = { length: outbreak.map.size.width }
-    const height = { length: outbreak.map.size.height }
-
     let asciiMap = ''
-    Array.from(height, (_, y) => {
-      Array.from(width, (_, x) => {
-        asciiMap += AsciiMapRenderer.draw(outbreak, { x, y })
-      })
-      asciiMap += '\n'
+    let previousAt: Coords = { x: 0, y: 0 }
+    outbreak.map.each(({ at }) => {
+      if (previousAt.y !== at.y) {
+        asciiMap += '\n'
+      }
+
+      asciiMap += AsciiMapRenderer.draw(outbreak, at)
+
+      previousAt = { ...at }
     })
 
-    if (outbreak.id === 'game:StandAloneRendering') {
+    if (outbreak.id === STANDALONE_RENDER) {
       return asciiMap
     }
     const seeder = outbreak.map.seeder ? `built with ${outbreak.map.seeder.builder}(${outbreak.map.seeder.seed})` : ''
@@ -68,7 +69,6 @@ export class AsciiMapRenderer extends MapRenderer {
     const creatures = outbreak.entity.get(at)
     if (creatures.length) {
       // EntityType values are based on Tile
-      //return TileAtlas[getRenderTile(creatures[0].type as unknown as Tile)]
       return AsciiMapRenderer.creature(creatures[0])
     }
     try {
