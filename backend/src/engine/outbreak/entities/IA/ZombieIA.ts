@@ -112,7 +112,7 @@ export class ZombieIA {
     let angle: number
     let attempt = 1
     zombie.attitude = Attitude.Wandering
-    while (attempt < 4 && !this.entity.canMove(zombie, destination)) {
+    while (attempt <= 4 && !this.entity.canMove(zombie, destination)) {
       // Attempt on the left
       angle = DirectionInDegree[zombie.facing] - attempt * 45
       if (angle < 0) {
