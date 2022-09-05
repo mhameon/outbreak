@@ -9,9 +9,7 @@ export function isNumber (arg: any): arg is number {
   return !isNaN(+arg)
 }
 
-// ArrayLike<unknown>) required in TS 4.8
-//const isSomeEnum = <T> (e: T) => (token: unknown): token is T[keyof T] => Object.values(e as ArrayLike<unknown>).includes(token as T[keyof T])
-const isSomeEnum = <T> (e: T) => (token: unknown): token is T[keyof T] => Object.values(e).includes(token as T[keyof T])
+const isSomeEnum = <T extends { [n: number | string]: unknown }> (enumType: T) => (token: unknown): token is T[keyof T] => Object.values(enumType).includes(token as T[keyof T])
 
 export function isCoords (coords: unknown): coords is Coords {
   return isObject(coords) && isNumber(coords.x) && isNumber(coords.y)
