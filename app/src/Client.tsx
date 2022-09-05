@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { io } from 'socket.io-client'
+import type { Socket } from 'socket.io-client'
 import logo from './logo.svg'
 
 import './App.css'
@@ -7,16 +8,9 @@ import './App.css'
 const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`
 
-// const socket = io(uri, { autoConnect: false })
-const socket = io(uri, {
-  transports: [ 'websocket' ],
-  withCredentials: true,
-  // extraHeaders: {
-  //   "my-custom-header": "abcd",
-  // },
-})
-
 function Client (props: { path: string }): JSX.Element {
+  const [ client, initClient ] = useState<Socket | null>(null)
+
   const [ connecting, isConnecting ] = useState(false)
   const [ attempt, setAttempt ] = useState(0)
   const [ connection, setConnection ] = useState<{ id: string | null; gameId: string | null; isConnected: boolean }>({
@@ -27,25 +21,38 @@ function Client (props: { path: string }): JSX.Element {
 
   const [ requestedGameId, setRequestedGameId ] = useState('')
 
-  function connect (): void {
+  function connect (c: Socket): void {
+    console.log('connect()')
+    if (!c) {
+      console.error('client not initialized')
+      return
+    }
     if (!connecting) {
-      console.log('connect()')
-      socket.connect()
+      c.connect()
       isConnecting(true)
     }
   }
 
-  function disconnect (): void {
+  function disconnect (c: Socket): void {
     console.log('disconnect()')
+    if (!c) {
+      console.error('client not initialized')
+      return
+    }
     isConnecting(false)
-    socket.disconnect()
+    c.disconnect()
   }
 
-  function join (): void {
+  function join (c: Socket): void {
     console.log(`Trying to join ${requestedGameId ? `"${requestedGameId}"` : 'a game'}...`)
+    if (!c) {
+      console.error('client not initialized')
+      return
+    }
+
     //socket.emit('game:join',null, (response:any) =>{
     //socket.emit('game:join','asked one', 'param1', 'param2', (response:any) =>{
-    socket.emit('player:join:game', { requestedGameId }, (response: any) => {
+    c.emit('player:join:game', { requestedGameId }, (response: any) => {
       setConnection({ ...connection, gameId: response.gameId })
       if (response.gameId === null) {
         console.log(`${requestedGameId} doesn't exists`)
@@ -56,8 +63,13 @@ function Client (props: { path: string }): JSX.Element {
     })
   }
 
-  function leave (): void {
-    socket.emit('player:leave:game', { gameId: connection.gameId }, (response: any) => {
+  function leave (c: Socket): void {
+    console.log('leaving...')
+    if (!c) {
+      console.error('client not initialized')
+      return
+    }
+    c.emit('player:leave:game', { gameId: connection.gameId }, (response: any) => {
       if (response.ok) {
         setConnection({
           id: connection.id,
@@ -69,17 +81,25 @@ function Client (props: { path: string }): JSX.Element {
   }
 
   useEffect(() => {
-    socket
+    const client = io(uri, {
+      transports: [ 'websocket' ],
+      withCredentials: true,
+    })
+
+    client
       .on('msg', (message: string) => {
         console.log(`[msg] ${message}`)
       })
+      .onAny((message) => {
+        console.log(`>>> ${message} (onAny)`)
+      })
       .on('connect', () => {
-        console.log('connected:', socket.id)
+        console.log('connected:', client.id)
         isConnecting(false)
         setConnection({
-          id: socket.id,
+          id: client.id,
           gameId: null,
-          isConnected: socket.connected,
+          isConnected: client.connected,
         })
         setAttempt(0)
       })
@@ -99,24 +119,33 @@ function Client (props: { path: string }): JSX.Element {
       .on('reconnect_error', (error: Error) => console.log('reconnect_error', error.message))
       .on('shutdown', () => {
         console.log('Server shutdown')
-        disconnect()
+        disconnect(client)
       })
       .on('disconnect', (reason: string) => {
         console.log(`disconnected (${reason})`)
         isConnecting(false)
         setRequestedGameId('')
         setConnection({
-          id: socket.id,
+          id: client.id,
           gameId: null,
-          isConnected: socket.connected,
+          isConnected: client.connected,
         })
       })
 
+    initClient(client)
+
     return () => {
       console.log('cleanUp')
-      disconnect()
+      client.close()
     }
-  }, [])
+  }, [ initClient ])
+
+
+  if (!client) {
+    // catch and show some loading screen
+    // while the socket connection gets ready
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="App">
@@ -140,18 +169,18 @@ function Client (props: { path: string }): JSX.Element {
                 onChange={e => setRequestedGameId(e.target.value)}
               />
 
-              <button onClick={leave}>Leave</button>
-              <button onClick={join}>Join</button>
+              <button onClick={() => leave(client)}>Leave</button>
+              <button onClick={() => join(client)}>Join</button>
 
               <br/>
-              <button onClick={disconnect}>Déconnecter</button>
+              <button onClick={() => disconnect(client)}>Déconnecter</button>
             </div>
             :
             <div>
               <button
-                onClick={connect}>{connecting ? `Connexion en cours${'.'.padEnd(1 + attempt % 3, '.')}` : 'Connecter'}
+                onClick={() => connect(client)}>{connecting ? `Connexion en cours${'.'.padEnd(1 + attempt % 3, '.')}` : 'Connecter'}
               </button>
-              {connecting && attempt > 0 && <button onClick={disconnect}>Annuler</button>}
+              {connecting && attempt > 0 && <button onClick={() => disconnect(client)}>Annuler</button>}
             </div>
           }
         </div>
