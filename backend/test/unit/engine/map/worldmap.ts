@@ -215,7 +215,7 @@ describe('WorldMap class', function () {
     })
   })
 
-  describe('get(at)', function () {
+  describe('find(at)', function () {
     it('should returns correct tile with Coords', function () {
       const tile = map.get(origin)
       assert.ok(tile.has(Tile.Block))

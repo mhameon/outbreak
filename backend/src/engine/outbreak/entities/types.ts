@@ -1,4 +1,6 @@
-import { Tile, Direction, Coords } from '#engine/types'
+import { Tile, Direction, Coords, Index } from '#engine/types'
+
+export const QUERYABLE_ENTITY_ATTRIBUTES = [ 'at', 'type' ] as const
 
 export type EntityId = string
 
@@ -42,3 +44,18 @@ export type EntityProperties = Partial<WithFacing> & Partial<WithAttitude> & Par
 // -- Entities ---------------------------------------------------------------------------------------------------------
 export type Zombie = Entity & WithFacing & WithAttitude
 export type Sound = Entity & WithVolume
+
+// -- Entities querying types ------------------------------------------------------------------------------------------
+export type QueryableEntityAttribute = typeof QUERYABLE_ENTITY_ATTRIBUTES[number] extends keyof Entity ? typeof QUERYABLE_ENTITY_ATTRIBUTES[number] : never
+export type QueryableEntityAttributeType = Entity[QueryableEntityAttribute]
+export type QueryableEntityAttributeSanitizedType = Index | Exclude<Entity[QueryableEntityAttribute], Coords>
+
+export type EntityQuery = {
+  [K in QueryableEntityAttribute]?: QueryableEntityAttributeType
+}
+
+export type EntityQueryFilters = {
+  [K in QueryableEntityAttribute]?: QueryableEntityAttributeType | Array<QueryableEntityAttributeType>
+}
+
+

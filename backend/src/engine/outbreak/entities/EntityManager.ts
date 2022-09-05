@@ -1,19 +1,29 @@
 import { EventEmitter } from '#shared/TypedEventEmitter'
-import type { Coords, Index } from '#engine/types'
+import type { Coords } from '#engine/types'
 import { Direction, DirectionInDegree } from '#engine/types'
 import type { Logger } from '#shared/logger/index'
 import { Outbreak } from '#engine/outbreak/index'
 import { random } from '#engine/math/index'
 import { WorldMap } from '#engine/map/WorldMap'
-import { isCoords, isEntityType, isCoordsArray } from '#engine/guards'
-import { Nullable, OneOrMany } from '#shared/types'
+import { isCoords } from '#engine/guards'
+import { Nullable } from '#shared/types'
 import { toArray } from '#shared/helpers'
 import { expect, NotFoundError } from '#shared/Errors'
 import { calculateDestination, calculateDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import assert from 'assert'
-import { hasAttitudeProperty, hasFacingProperty, isEntityId } from '#engine/outbreak/entities/guards'
-import { Entity, EntityProperties, Attitude, EntityType, EntityId } from '#engine/outbreak/entities/types'
+import { hasAttitudeProperty, hasFacingProperty, isEntityId, isEntityQuery } from '#engine/outbreak/entities/guards'
+import {
+  Entity,
+  EntityProperties,
+  Attitude,
+  EntityType,
+  EntityId,
+  EntityQuery,
+  QueryableEntityAttributeSanitizedType,
+  QueryableEntityAttribute,
+  QUERYABLE_ENTITY_ATTRIBUTES, EntityQueryFilters, QueryableEntityAttributeType
+} from '#engine/outbreak/entities/types'
 import { EntityManagerEvents } from '#engine/events'
 
 /**
@@ -30,21 +40,21 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   readonly log: Logger
   readonly outbreak: Outbreak
   private readonly entities = new Map<EntityId, Entity>()
-  private readonly entityIdsByCoords = new Map<Index, Set<EntityId>>()
-  private readonly entityIdsByTypes = new Map<EntityType, Set<EntityId>>()
-
-  //todo generalize with entityIdsByAttributes
+  private readonly entitiesByAttribute = new Map<QueryableEntityAttribute, Map<QueryableEntityAttributeSanitizedType, Set<EntityId>>>()
 
   constructor (outbreak: Outbreak) {
     super()
     this.log = outbreak.log.child({ label: this.constructor.name })
     this.outbreak = outbreak
+    QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
+      this.entitiesByAttribute.set(attribute, new Map())
+    })
   }
 
   spawn (type: EntityType, at: Coords, attributes?: EntityProperties): Readonly<Entity> {
     this.outbreak.map.assertMapContains(at)
 
-    const entity: Entity = this.fillWithDefaultValues({
+    const entity: Entity = this.buildWithDefaultValues({
       ...attributes,
       id: random.hex(),
       at,
@@ -59,7 +69,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return entity
   }
 
-  private fillWithDefaultValues (entity: Entity): Entity {
+  private buildWithDefaultValues (entity: Entity): Entity {
     switch (entity.type) {
       case EntityType.Zombie:
         if (!hasFacingProperty(entity)) {
@@ -74,65 +84,55 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return entity
   }
 
-  get<AnEntity extends Entity = Entity> (at: Coords, type?: OneOrMany<EntityType>): Array<AnEntity>
-  get<AnEntity extends Entity = Entity> (type: EntityType, at?: OneOrMany<Coords>): Array<AnEntity>
-  get<AnEntity extends Entity = Entity> (id: Array<EntityId>): Array<AnEntity>
-  get<AnEntity extends Entity = Entity> (id: EntityId): Nullable<AnEntity>
-  get<AnEntity extends Entity = Entity> (
-    p1: Coords | EntityType | EntityId | Array<EntityId>,
-    p2?: OneOrMany<EntityType> | OneOrMany<Coords>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): any {
+  find<AnEntity extends Entity = Entity> (id: Array<EntityId>): Array<AnEntity>
+  find<AnEntity extends Entity = Entity> (id: EntityId): Nullable<AnEntity>
+  find<AnEntity extends Entity = Entity> (query: EntityQuery, filter?: EntityQueryFilters): Array<AnEntity>
+  find<AnEntity extends Entity = Entity> (
+    p1: EntityId | Array<EntityId> | EntityQuery,
+    filters?: EntityQueryFilters
+  ): Array<AnEntity> | Nullable<AnEntity> | Entity {
     if (isEntityId(p1)) {
-      // get( EntityId )
+      // find( EntityId )
       return this.entities.get(p1) ?? null
     }
 
-    if (isCoords(p1)) {
-      // get( Coords )
-      // get( Coords, EntityType )
-      // get( Coords, Array<EntityType> )
-      this.outbreak.map.assertMapContains(p1)
-      const here = WorldMap.index(p1)
-      const entityIdsFromHere = this.entityIdsByCoords.get(here)
-      if (!entityIdsFromHere?.size) {
+    if (isEntityQuery(p1)) {
+      // find(query: EntityQuery, filter?: EntityQueryFilters)
+      const parameters = Object.entries(p1)
+      const [[ attribute, value ]] = parameters.splice(0)
+      const attributeMap = this.entitiesByAttribute.get(attribute as QueryableEntityAttribute)
+      const entityIds = attributeMap?.get(isCoords(value) ? WorldMap.index(value) : value)
+      if (!entityIds?.size) {
         return []
       }
-      const entities = this.get<AnEntity>(toArray(entityIdsFromHere))
-      const types = toArray(p2)
-      if (types.length > 0 && isEntityType(types[0])) {
-        return entities.filter(({ type }) => types.includes(type))
-      }
-      return entities
-    }
+      const entities = this.find<AnEntity>(toArray(entityIds))
 
-    if (isEntityType(p1)) {
-      // get( EntityType )
-      // get( EntityType, Coords )
-      // get( EntityType, Array<Coords> )
-      const creatureIdsByType = this.entityIdsByTypes.get(p1)
-      if (!creatureIdsByType?.size) {
-        return []
+      if (!filters) {
+        return entities
       }
-      const creatures = this.get<AnEntity>(toArray(creatureIdsByType))
-      const coords = toArray(p2)
-      if (isCoordsArray(coords)) {
-        return creatures.filter(({ at }) => coords.find(({ x, y }) => (at.x === x && at.y === y)))
-      }
-      return creatures
+
+      return entities.filter(entity => {
+        return Object.entries(filters).reduce((keep, [ attribute, value ]) => {
+          if (!(attribute in entity)) {
+            return false
+          }
+          const entityAttribute = entity[attribute as QueryableEntityAttribute]
+          return keep && (Array.isArray(value) ? value : [ value ]).includes(entityAttribute)
+        }, true)
+      })
     }
 
     if (p1?.length > 0 && isEntityId(p1[0])) {
-      // get( Array<EntityId> )
-      return p1.flatMap(id => this.get<AnEntity>(id) ?? [])
+      // find( Array<EntityId> )
+      return p1.flatMap(id => this.find<AnEntity>(id) ?? [])
     }
 
-    this.log.error('WTF?! get(%j, %j)', p1, p2)
+    this.log.error('WTF?! find(%j)', p1)
     return null
   }
 
   move<AnEntity extends Entity = Entity> (id: EntityId, to: Direction | Coords): AnEntity {
-    const entity = this.get<AnEntity>(id)
+    const entity = this.find<AnEntity>(id)
     assert(entity, new NotFoundError(id, 'EntityId'))
 
     if (!this.canMove(entity, to)) {
@@ -179,52 +179,59 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return false
   }
 
-  private add (creature: Entity): Entity {
-    const here = WorldMap.index(creature.at)
+  private add (entity: Entity): Entity {
+    this.entities.set(entity.id, entity)
+    QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
+      if (attribute in entity) {
+        const attributeMap = this.entitiesByAttribute.get(attribute)
+        assert(attributeMap, `entitiesByAttribute must exists for "${attribute}"`)
+        const attributeValue = this.getSanitizedAttribute(entity[attribute])
+        const entities = attributeMap?.get(attributeValue)
+        this.entitiesByAttribute.set(
+          attribute,
+          attributeMap.set(
+            attributeValue,
+            entities ? entities.add(entity.id) : new Set([ entity.id ])
+          )
+        )
+      }
+    })
 
-    this.entities.set(creature.id, creature)
-
-    const creatureIdsFromHere = this.entityIdsByCoords.get(here)
-    if (creatureIdsFromHere) {
-      creatureIdsFromHere.add(creature.id)
-      this.entityIdsByCoords.set(here, creatureIdsFromHere)
-    } else {
-      this.entityIdsByCoords.set(here, new Set([ creature.id ]))
-    }
-
-    const creatureIdsOfType = this.entityIdsByTypes.get(creature.type)
-    if (creatureIdsOfType) {
-      creatureIdsOfType.add(creature.id)
-      this.entityIdsByTypes.set(creature.type, creatureIdsOfType)
-    } else {
-      this.entityIdsByTypes.set(creature.type, new Set([ creature.id ]))
-    }
-    return creature
+    return entity
   }
 
   private delete (entity: Entity): void {
     this.entities.delete(entity.id)
-
-    const here = WorldMap.index(entity.at)
-    const creatureIdsByCoords = this.entityIdsByCoords.get(here)
-    if (creatureIdsByCoords) {
-      creatureIdsByCoords.delete(entity.id)
-      if (creatureIdsByCoords.size) {
-        this.entityIdsByCoords.set(here, creatureIdsByCoords)
-      } else {
-        this.entityIdsByCoords.delete(here)
+    QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
+      if (attribute in entity) {
+        const attributeMap = this.entitiesByAttribute.get(attribute)
+        assert(attributeMap, `entitiesByAttribute must exists for "${attribute}"`)
+        const attributeValue = this.getSanitizedAttribute(entity[attribute])
+        const entities = attributeMap?.get(attributeValue)
+        if (entities) {
+          entities.delete(entity.id)
+          if (entities.size) {
+            this.entitiesByAttribute.set(
+              attribute,
+              attributeMap.set(attributeValue, entities)
+            )
+          } else {
+            attributeMap.delete(attributeValue)
+            this.entitiesByAttribute.set(attribute, attributeMap)
+          }
+        }
       }
-    }
+    })
+  }
 
-    const creatureIdsByType = this.entityIdsByTypes.get(entity.type)
-    if (creatureIdsByType) {
-      creatureIdsByType.delete(entity.id)
-      if (creatureIdsByType.size) {
-        this.entityIdsByTypes.set(entity.type, creatureIdsByType)
-      } else {
-        this.entityIdsByTypes.delete(entity.type)
-      }
+  /**
+   * Returns the sanitized entity's attribute value
+   */
+  private getSanitizedAttribute (value: QueryableEntityAttributeType): QueryableEntityAttributeSanitizedType {
+    if (isCoords(value)) {
+      return WorldMap.index(value)
     }
+    return value
   }
 }
 

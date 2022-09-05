@@ -261,7 +261,7 @@ export class GameServer {
     // Manage authentification
     this.io.use((socket, next) => {
       // Todo Properly check if clients are authorize to connect (valid session cookie)
-      // Todo Check authentication & get user information
+      // Todo Check authentication & find user information
       const authenticated = true
 
       if (!authenticated) {

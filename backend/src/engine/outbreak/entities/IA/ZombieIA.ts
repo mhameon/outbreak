@@ -37,7 +37,7 @@ export class ZombieIA {
     let movedZombies = 0
     let waitingZombies = 0
 
-    const targets = this.entity.get(EntityType.Human).map(creature => creature.at)
+    const targets = this.entity.find({ type: EntityType.Human }).map(creature => creature.at)
     const dijkstraMap = this.pathfinding.calculateMap(targets, detectionArea)
 
     // -- debug -------
@@ -50,10 +50,10 @@ export class ZombieIA {
     }))
     // -- end debug ---
 
-    const zombies = this.entity.get<Zombie>(EntityType.Zombie)
+    const zombies = this.entity.find<Zombie>({ type: EntityType.Zombie })
     zombies.forEach((zombie) => {
       const previouslyAt = { ...zombie.at }
-      //const currentNodeWeight = dijkstraMap.distance.get(WorldMap.index(zombie.at)) ?? Dijkstra.ignoreNode
+      //const currentNodeWeight = dijkstraMap.distance.find(WorldMap.index(zombie.at)) ?? Dijkstra.ignoreNode
 
       const sortedNodes: Array<Node> = this.map
         .getNeighborsCoords(zombie.at, true)

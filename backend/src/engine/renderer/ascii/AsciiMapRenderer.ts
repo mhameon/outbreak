@@ -66,7 +66,7 @@ export class AsciiMapRenderer extends MapRenderer {
 
   private static draw (outbreak: Outbreak, at: Coords): string {
     const tileset = outbreak.map.get(at)
-    const creatures = outbreak.entity.get(at)
+    const creatures = outbreak.entity.find({ at })
     if (creatures.length) {
       // EntityType values are based on Tile
       return AsciiMapRenderer.creature(creatures[0])

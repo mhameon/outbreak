@@ -7,7 +7,10 @@ import {
   WithFacing,
   Entity,
   EntityType,
-  EntityId
+  EntityId,
+  QueryableEntityAttribute,
+  QUERYABLE_ENTITY_ATTRIBUTES,
+  EntityQuery
 } from '#engine/outbreak/entities/types'
 
 export const isEntityId = (id: unknown): id is EntityId => typeof id === 'string'
@@ -30,4 +33,18 @@ export const isZombie = (entity: unknown): entity is Zombie => {
 
 export const hasVolumeProperty = (entity: unknown): entity is WithVolume => {
   return isObject(entity) && 'volume' in entity
+}
+
+export const isEntityQuery = (query: unknown): query is EntityQuery => {
+  if (isObject(query)) {
+    return Object.entries(query).reduce((isEntityQuery, [ attribute, ]) => {
+      return isEntityQuery && isQueryableEntityAttribute(attribute)
+    }, true)
+  }
+  return false
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isQueryableEntityAttribute = (attribute: any): attribute is QueryableEntityAttribute => {
+  return QUERYABLE_ENTITY_ATTRIBUTES.includes(attribute)
 }

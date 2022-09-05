@@ -6,11 +6,11 @@ import html from 'remark-html'
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
-export function getSortedPostsData() {
+export function getSortedPostsData () {
   // Get file names under /posts
   const fileNames = fs.readdirSync(postsDirectory)
   const allPostsData = fileNames.map(fileName => {
-    // Remove ".md" from file name to get id
+    // Remove ".md" from file name to find id
     const id = fileName.replace(/\.md$/, '')
 
     // Read markdown file as string
@@ -24,7 +24,7 @@ export function getSortedPostsData() {
     return {
       id,
       ...(matterResult.data as { date: string; title: string })
-  }
+    }
   })
   // Sort posts by date
   return allPostsData.sort((a, b) => {
@@ -36,7 +36,7 @@ export function getSortedPostsData() {
   })
 }
 
-export function getAllPostIds() {
+export function getAllPostIds () {
   const fileNames = fs.readdirSync(postsDirectory)
   return fileNames.map(fileName => {
     return {
@@ -47,7 +47,7 @@ export function getAllPostIds() {
   })
 }
 
-export async function getPostData(id: string) {
+export async function getPostData (id: string) {
   const fullPath = path.join(postsDirectory, `${id}.md`)
   const fileContents = fs.readFileSync(fullPath, 'utf8')
 
@@ -56,8 +56,8 @@ export async function getPostData(id: string) {
 
   // Use remark to convert markdown into HTML string
   const processedContent = await remark()
-  .use(html)
-  .process(matterResult.content)
+    .use(html)
+    .process(matterResult.content)
   const contentHtml = processedContent.toString()
 
   // Combine the data with the id and contentHtml
@@ -65,5 +65,5 @@ export async function getPostData(id: string) {
     id,
     contentHtml,
     ...(matterResult.data as { date: string; title: string })
-}
+  }
 }

@@ -44,7 +44,7 @@ export function registerGameControlCommands (cli: CommandLineInterface, getOutbr
   function getDebugInfoForEntityId (id: EntityId): void {
     const outbreak = getOutbreak()
     if (outbreak) {
-      const entity = outbreak.entity.get(id)
+      const entity = outbreak.entity.find(id)
       if (entity) {
         debugCoords(outbreak, entity.at)
       }
@@ -61,7 +61,7 @@ export function debugCoords (outbreak: Outbreak, at: Coords): void {
 
   const render = new AsciiMapRenderer()
   const map = render.render(minimap).split('\n')
-  const creatures = outbreak.entity.get(at)
+  const creatures = outbreak.entity.find({ at })
 
   console.log(
     '   ▼\n' +
