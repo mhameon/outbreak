@@ -35,7 +35,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
   readonly resolvers: Array<Resolvable>
 
   private turn = 0 // 0 means not started
-  private players = new Map()
+  private players = new Map<PlayerId, Player>()
 
   constructor (id: GameId, map: WorldMap, option?: OutbreakOptions) {
     super()
@@ -79,12 +79,14 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
     return Outbreak.renderer.render(this)
   }
 
-  joinPlayer (player: Player): void {
+  joinPlayer (player: Player): boolean {
     if (this.turn === 0) {
       this.players.set(player.id, player)
-    } else {
-      // Game is already started
+      return true
     }
+
+    this.log.warn('Game is already started', { playerId: player.id })
+    return false
   }
 
   /**

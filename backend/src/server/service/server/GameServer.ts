@@ -226,16 +226,18 @@ export class GameServer {
           log.debug('join %s', gameId)
         }
 
-        this.leaveRoom(socket, LOBBY)
-        this.joinRoom(socket, gameId)
-
         const party = this.game.get(gameId)
-        party.joinPlayer(connectedPlayer.player)
+        if (party.joinPlayer(connectedPlayer.player)) {
 
-        socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
-        socket.emit('msg', `You joined the game, ${socket.id}`)
+          this.leaveRoom(socket, LOBBY)
+          this.joinRoom(socket, gameId)
+          socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
+          socket.emit('msg', `You joined the game, ${socket.id}`)
 
-        return ack({ gameId })
+          return ack({ gameId })
+        } else {
+          return ack({ gameId: null })
+        }
       })
       .on('player:leave:game', ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
         this.leaveRoom(socket, gameId, (wasLast) => {
