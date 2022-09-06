@@ -1,7 +1,7 @@
 import { WorldMap } from '#engine/map/WorldMap'
 import { Tile, Direction, Tileset, Coords } from '#engine/types'
 
-import * as assert from '../../shared/assert'
+import * as assert from '../../../assert'
 import { InvalidArgumentError } from '#common/Errors'
 import { stringifyTiles } from '#engine/map/WorldMapErrors'
 import { WorldMapEvents } from '#engine/events'
