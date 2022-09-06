@@ -1,6 +1,6 @@
-import { InvalidArgumentError } from '#shared/Errors'
+import { InvalidArgumentError } from '#common/Errors'
 import { WindSettings } from '#engine/types'
-import { validate } from '#shared/validator'
+import { validate } from '#common/validator'
 import { isNumber } from '#engine/guards'
 import { closestDirection } from '#engine/math/geometry'
 

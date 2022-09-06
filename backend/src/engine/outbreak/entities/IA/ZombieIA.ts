@@ -6,9 +6,9 @@ import type { Node } from '#engine/math/pathfinding/index'
 import { matrix, random } from '#engine/math/index'
 import { DirectionInDegree, Direction } from '#engine/types'
 import { closestDirection } from '#engine/math/geometry'
-import { Logger } from '#shared/logger'
+import { Logger } from '#common/logger'
 import { Zombie, Entity, Attitude, EntityType } from '#engine/outbreak/entities/types'
-import { expect } from '#shared/Errors'
+import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 
 export class ZombieIA {

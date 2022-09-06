@@ -1,12 +1,12 @@
 import { WorldMap } from '#engine/map/WorldMap'
 import type { Index, Coords } from '#engine/types'
-import type { OneOrMany } from '#shared/types'
-import { toArray } from '#shared/helpers'
-import { expect } from '#shared/Errors'
+import type { OneOrMany } from '#common/types'
+import { toArray } from '#common/helpers'
+import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { isCoords } from '#engine/guards'
 import { Node } from '#engine/math/pathfinding/index'
-import { getLogger, Logger } from '#shared/logger/index'
+import { getLogger, Logger } from '#common/logger/index'
 
 type DistanceMap = Map<Index, number>
 type SourceMap = Map<Index, Index>

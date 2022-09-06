@@ -47,6 +47,6 @@
   "imports": {
     "#engine/*": "./build/src/engine/*.js",
     "#server/*": "./build/src/server/*.js",
-    "#shared/*": "./build/src/shared/*.js"
+    "#common/*": "./build/src/common/*.js"
   }
 }

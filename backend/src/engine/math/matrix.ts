@@ -1,6 +1,6 @@
 import { isMatrix2d, isNumber } from '#engine/guards'
 import { Coords, Matrix, Matrix2d, Size } from '#engine/types'
-import { validate } from '#shared/validator'
+import { validate } from '#common/validator'
 import chalk from 'chalk'
 import { color, Gradient } from '#engine/math/color'
 

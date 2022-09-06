@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { toArray, toSet } from '#shared/helpers'
+import { toArray, toSet } from '#common/helpers'
 
 describe('shared helpers', function () {
   const num = 12, obj = { obj: true }
@@ -18,6 +18,7 @@ describe('shared helpers', function () {
       assert.deepStrictEqual(toArray(new Set(arrayObj)), arrayObj)
     })
   })
+
   describe('toSet', function () {
     const setNum = new Set(arrayNum), setObj = new Set(arrayObj)
     it('should return Set<T> with T', function () {

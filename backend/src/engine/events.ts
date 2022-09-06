@@ -1,7 +1,7 @@
 import { Entity } from '#engine/outbreak/entities/types'
 import { Coords, GameId, Tile, Tileset } from '#engine/types'
 import { Outbreak } from '#engine/outbreak'
-import { Nullable } from '#shared/types'
+import { Nullable } from '#common/types'
 
 
 //-- Socket.io events --------------------------------------------------------------------------------------------------

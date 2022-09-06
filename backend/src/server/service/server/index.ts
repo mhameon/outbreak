@@ -1,5 +1,5 @@
 import { routes } from '#server/middleware/index'
-import type { Void } from '#shared/types'
+import type { Void } from '#common/types'
 import { GameServer } from './GameServer'
 import { GameManager } from '#engine/game/GameManager'
 

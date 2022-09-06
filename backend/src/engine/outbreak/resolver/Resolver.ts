@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Logger } from '#shared/logger/index'
+import { Logger } from '#common/logger/index'
 import { Outbreak } from '#engine/outbreak/index'
 import { Resolvable } from './index'
-import { Bootable } from '#shared/types'
+import { Bootable } from '#common/types'
 import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 import { WorldMap } from '#engine/map/WorldMap'
 

@@ -12,9 +12,9 @@ import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 import { isGameId } from '#engine/guards'
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from '#engine/events'
-import { Nullable } from '#shared/types'
+import { Nullable } from '#common/types'
 import type { SocketId } from 'socket.io-adapter'
-import { NotFoundError } from '#shared/Errors'
+import { NotFoundError } from '#common/Errors'
 
 
 const LOBBY = 'lobby' as const

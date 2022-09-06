@@ -1,9 +1,9 @@
-import { NotFoundError } from '#shared/Errors'
-import { GameId } from '../types'
-import { Outbreak, OutbreakFactory } from '../outbreak/'
+import { NotFoundError } from '#common/Errors'
+import { GameId } from '#engine/types'
+import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
 import crypto from 'crypto'
-import { getLogger } from '#shared/logger/index'
-import { EventEmitter } from '#shared/TypedEventEmitter'
+import { getLogger } from '#common/logger/index'
+import { EventEmitter } from '#common/TypedEventEmitter'
 import { GameManagerEvents } from '#engine/events'
 
 const log = getLogger('GameManager')

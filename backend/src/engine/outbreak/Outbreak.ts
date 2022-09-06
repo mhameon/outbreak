@@ -1,7 +1,7 @@
 import { WorldMap } from '../map/WorldMap'
 import { Renderers } from '../renderer'
 import { GameId } from '../types'
-import { getLogger, Logger } from '#shared/logger/index'
+import { getLogger, Logger } from '#common/logger/index'
 import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
@@ -9,10 +9,10 @@ import { Wind } from './environment/Wind'
 import { Player, PlayerId } from '#server/service/server/GameServer'
 import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
-import { EventEmitter } from '#shared/TypedEventEmitter'
+import { EventEmitter } from '#common/TypedEventEmitter'
 import { OutbreakEvents } from '#engine/events'
 import assert from 'assert'
-import { NotFoundError } from '#shared/Errors'
+import { NotFoundError } from '#common/Errors'
 
 /**
  * An Outbreak represent a game

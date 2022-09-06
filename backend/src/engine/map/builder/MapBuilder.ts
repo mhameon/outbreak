@@ -1,6 +1,6 @@
 import { Seed, Size } from '#engine/types'
 import { WorldMap } from '../WorldMap'
-import { getLogger } from '#shared/logger/index'
+import { getLogger } from '#common/logger/index'
 import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 
 export type Seeder = { builder: string; seed: Seed }

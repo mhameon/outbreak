@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from '#shared/Errors'
+import { InvalidArgumentError } from '#common/Errors'
 
 export type HexColor = string
 export type Gradient = [ HexColor, HexColor ] | [ HexColor, HexColor, HexColor ]

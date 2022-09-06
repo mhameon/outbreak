@@ -1,7 +1,7 @@
 import { Tile, RenderTile, Tileset } from '#engine/types'
 import { UnknownRenderTile } from '#engine/map/WorldMapErrors'
-import { toSet, toArray } from '#shared/helpers'
-import { OneOrMany } from '#shared/types'
+import { toSet, toArray } from '#common/helpers'
+import { OneOrMany } from '#common/types'
 
 /**
  * Tiles Rules

@@ -1,7 +1,7 @@
 import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
 import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
-import { Nullable } from '#shared/types'
+import { Nullable } from '#common/types'
 import { Outbreak } from '#engine/outbreak/index'
 import { registerGameControlCommands } from '#server/service/cli/command/game-control'
 

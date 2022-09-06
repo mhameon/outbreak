@@ -1,4 +1,4 @@
-import { expect, UnexpectedError, InvalidArgumentError, NotFoundError } from '#shared/Errors'
+import { expect, UnexpectedError, InvalidArgumentError, NotFoundError } from '#common/Errors'
 import assert from 'assert'
 
 describe('Errors', function () {

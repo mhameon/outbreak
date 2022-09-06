@@ -1,4 +1,4 @@
-import { Values } from '#shared/types'
+import { Values } from '#common/types'
 import { GameManager } from '#engine/game/GameManager'
 
 export type Coords = { x: number; y: number }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorldMap } from '#engine/map/WorldMap'
-import { Coords, Matrix2d, Index, GameId } from './types'
-import { isObject } from '#shared/guards'
+import type { Coords, Matrix2d, Index, GameId } from '#engine/types'
+import { isObject } from '#common/guards'
 import { EntityType } from '#engine/outbreak/entities/types'
 import { GameManager } from '#engine/game/GameManager'
 

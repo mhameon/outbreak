@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EventEmitter } from '#shared/TypedEventEmitter'
-import type { EventKey, EventMap } from '#shared/TypedEventEmitter'
+import { EventEmitter } from '#common/TypedEventEmitter'
+import type { EventKey, EventMap } from '#common/TypedEventEmitter'
 import { getLogger } from './logger'
 import util from 'util'
 

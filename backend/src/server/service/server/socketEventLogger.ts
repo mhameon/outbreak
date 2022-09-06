@@ -1,4 +1,4 @@
-import { getLogger } from '#shared/logger/index'
+import { getLogger } from '#common/logger/index'
 import { Socket } from 'socket.io'
 import { isGameId } from '#engine/guards'
 import { GameId } from '#engine/types'

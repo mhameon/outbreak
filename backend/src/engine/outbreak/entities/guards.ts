@@ -1,4 +1,4 @@
-import { isObject } from '#shared/guards'
+import { isObject } from '#common/guards'
 import { isEntityType, isCoords } from '#engine/guards'
 import {
   Zombie,

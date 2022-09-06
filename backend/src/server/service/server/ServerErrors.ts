@@ -1,5 +1,5 @@
-import { CustomError } from '#shared/Errors'
-import type { LogMethod } from '#shared/logger/index'
+import { CustomError } from '#common/Errors'
+import type { LogMethod } from '#common/logger/index'
 
 export class ConnectionRefusedError extends CustomError {
   constructor (reason: string, logErrorWith?: LogMethod) {
