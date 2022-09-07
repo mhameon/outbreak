@@ -1,5 +1,5 @@
 import { NotFoundError } from '#common/Errors'
-import { GameId } from '#engine/types'
+import { GameId, GAME_ID_PREFIX } from '#engine/types'
 import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
 import crypto from 'crypto'
 import { getLogger } from '#common/logger/index'
@@ -25,12 +25,10 @@ type Game = {
  * | `game:deleted` | (gameId: GameId)     |
  */
 export class GameManager extends EventEmitter<GameManagerEvents> {
-  static GAME_ID_PREFIX = 'game_' as const
-
   private readonly games: Map<GameId, Outbreak> = new Map()
 
   private static buildGameId (): GameId {
-    return `${GameManager.GAME_ID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
+    return `${GAME_ID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
   }
 
   create (id?: GameId): GameId {

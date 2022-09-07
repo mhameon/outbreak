@@ -3,7 +3,7 @@ import { WorldMap } from '#engine/map/WorldMap'
 import type { Coords, Matrix2d, Index, GameId } from '#engine/types'
 import { isObject } from '#common/guards'
 import { EntityType } from '#engine/outbreak/entities/types'
-import { GameManager } from '#engine/game/GameManager'
+import { GAME_ID_PREFIX } from '#engine/types'
 
 export function isNumber (arg: any): arg is number {
   return !isNaN(+arg)
@@ -36,7 +36,7 @@ export function isWorldMap (arg: any): arg is WorldMap {
 }
 
 export function isGameId (name: unknown): name is GameId {
-  return typeof name === 'string' && name.startsWith(GameManager.GAME_ID_PREFIX)
+  return typeof name === 'string' && name.startsWith(GAME_ID_PREFIX)
 }
 
 export const isEntityType = isSomeEnum(EntityType)

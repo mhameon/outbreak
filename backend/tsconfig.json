@@ -14,8 +14,9 @@
     "removeComments": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "importHelpers": true,
     "baseUrl": ".",
     "paths": {
@@ -27,6 +28,9 @@
       ],
       "#common/*": [
         "./src/common/*"
+      ],
+      "#shared/*": [
+        "../shared/*"
       ]
     }
   },

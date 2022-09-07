@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "description": "Zombies experiments",
   "author": "Matt",
-  "main": "build/src/index.js",
+  "main": "build/backend/src/index.js",
   "engines": {
     "node": ">=16"
   },
   "scripts": {
-    "start": "node --enable-source-maps build/src",
+    "start": "node --enable-source-maps build/backend/src",
     "exp": "node --enable-source-maps build/src/engine/experiment.js",
     "dev": "tsc-watch --onSuccess 'npm run start'",
     "build": "echo 'Compiling TypeScript' && tsc --version && tsc",
+    "postbuild": "cp ./config/*.json ./build/backend/config",
     "lint": "eslint --cache 'src/**'",
     "lint:fix": "eslint --fix --cache 'src/**'",
     "test": "mocha",
@@ -45,8 +46,8 @@
     "winston": "^3.8.1"
   },
   "imports": {
-    "#engine/*": "./build/src/engine/*.js",
-    "#server/*": "./build/src/server/*.js",
-    "#common/*": "./build/src/common/*.js"
+    "#engine/*": "./build/backend/src/engine/*.js",
+    "#server/*": "./build/backend/src/server/*.js",
+    "#common/*": "./build/backend/src/common/*.js"
   }
 }

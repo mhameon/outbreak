@@ -1,9 +1,9 @@
 import { isWorldMap } from '#engine/guards'
 import { WorldMap } from '../map/WorldMap'
 import { Outbreak } from '#engine/outbreak/index'
-import { GameManager } from '#engine/game/GameManager'
+import { GAME_ID_PREFIX } from '#engine/types'
 
-export const STANDALONE_RENDER = `${GameManager.GAME_ID_PREFIX}StandAloneRendering` as const
+export const STANDALONE_RENDER = `${GAME_ID_PREFIX}StandAloneRendering` as const
 
 export interface Renderable {
   render (world: WorldMap | Outbreak): string

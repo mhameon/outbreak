@@ -11,11 +11,11 @@ import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
 import { ConnectionRefusedError } from './ServerErrors'
 import { isGameId } from '#engine/guards'
-import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from '#engine/events'
+import type { InterServerEvents, SocketData } from '#engine/events'
+import type { ClientToServerEvents, ServerToClientEvents } from '#shared/events'
 import { Nullable } from '#common/types'
 import type { SocketId } from 'socket.io-adapter'
 import { NotFoundError } from '#common/Errors'
-
 
 const LOBBY = 'lobby' as const
 
@@ -53,7 +53,7 @@ export class GameServer {
 
   readonly express: Express
   private readonly http: http.Server
-  private readonly io: Server
+  private readonly io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
 
   readonly game: GameManager
   private readonly rooms = new Set<string>()
@@ -67,7 +67,7 @@ export class GameServer {
 
     this.express = express()
     this.http = http.createServer(this.express)
-    this.io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.http, {
+    this.io = new Server(this.http, {
       // todo check options to use
       cors: {
         origin: [ config.server.http.host ],
@@ -79,21 +79,16 @@ export class GameServer {
 
     this.registerMiddlewares()
     this.registerGameManager()
-
-    this.io.on('connect', (socket: Socket) => {
-      const { 'user-agent': agent, host } = socket.request.headers
+    this.io.on('connection', (socket: Socket) => {
+      const { 'user-agent': agent, host } = socket.handshake.headers
       log.http(
         '🟢 Here come a new challenger! Total %d client(s)', this.connectedClientCounter,
         { socketId: socket.id, host, agent },
       )
 
-      this.registerDisconnectionHandler(socket)
-      this.registerErrorHandler(socket)
-
+      this.registerDisconnectionListeners(socket)
       registerSocketEventLogger(socket)
-
       this.registerPlayerActions(socket)
-
       this.joinRoom(socket, LOBBY)
     })
 
@@ -130,7 +125,7 @@ export class GameServer {
       log.http('Emit `shutdown` to %d client(s)', this.connectedClientCounter)
 
       // Strange bug: this.io.sockets.emit() or this.io.emit() don't always emit (if join a game before)
-      this.io.emit('shutdown')
+      this.io.emit('server:shutdown')
       // Seems to work better. bug in io?
       // for (const [ id, socket ] of this.io.sockets.sockets) { socket.emit('shutdown') }
 
@@ -197,7 +192,7 @@ export class GameServer {
         // socket.on(event.game.join, (args) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
-        //   const game = [ ...socket.rooms ].find(r => r.startsWith(GameManager.GAME_ID_PREFIX))
+        //   const game = [ ...socket.rooms ].find(r => r.startsWith(GAME_ID_PREFIX))
         //   if (game) {
         //     socket.emit('msg', `Already in ${game}`)
         //     // //ack({ gameId: game })
@@ -239,7 +234,8 @@ export class GameServer {
           return ack({ gameId: null })
         }
       })
-      .on('player:leave:game', ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
+      //.on('player:leave:game', ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
+      .on('player:leave:game', (gameId, ack: (data: { ok: boolean }) => void) => {
         this.leaveRoom(socket, gameId, (wasLast) => {
           if (wasLast) {
             this.game.delete(gameId)
@@ -293,7 +289,7 @@ export class GameServer {
     // })
   }
 
-  private registerDisconnectionHandler (socket: Socket): void {
+  private registerDisconnectionListeners (socket: Socket): void {
     socket
       .on('disconnecting', (reason) => {
         const gameRooms = [ ...socket.rooms ].filter(isGameId)
@@ -315,12 +311,6 @@ export class GameServer {
         socket.disconnect(true)
         log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socketId: socket.id })
       })
-  }
-
-  private registerErrorHandler (socket: Socket): void {
-    socket.on('error', (error) => {
-      log.error(error)
-    })
   }
 
   private joinRoom (client: Socket, room: string): boolean {
