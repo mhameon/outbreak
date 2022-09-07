@@ -2,7 +2,7 @@ import { NotFoundError } from '#common/Errors'
 import { GameId, GAME_ID_PREFIX } from '#engine/types'
 import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
 import crypto from 'crypto'
-import { getLogger } from '#common/logger/index'
+import { getLogger } from '#common/logger'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { GameManagerEvents } from '#engine/events'
 

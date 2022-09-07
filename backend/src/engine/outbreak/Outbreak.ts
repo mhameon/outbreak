@@ -1,7 +1,6 @@
-import { WorldMap } from '../map/WorldMap'
 import { Renderers } from '../renderer'
-import { GameId } from '../types'
-import { getLogger, Logger } from '#common/logger/index'
+import type { GameId } from '#shared/types'
+import { getLogger, Logger } from '#common/logger'
 import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
@@ -13,6 +12,7 @@ import { EventEmitter } from '#common/TypedEventEmitter'
 import { OutbreakEvents } from '#engine/events'
 import assert from 'assert'
 import { NotFoundError } from '#common/Errors'
+import { WorldMap } from '#engine/map/WorldMap'
 
 /**
  * An Outbreak represent a game

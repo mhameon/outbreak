@@ -5,8 +5,8 @@ import { toArray } from '#common/helpers'
 import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { isCoords } from '#engine/guards'
-import { Node } from '#engine/math/pathfinding/index'
-import { getLogger, Logger } from '#common/logger/index'
+import { getLogger, Logger } from '#common/logger'
+import { Node } from '#engine/math/pathfinding/types'
 
 type DistanceMap = Map<Index, number>
 type SourceMap = Map<Index, Index>

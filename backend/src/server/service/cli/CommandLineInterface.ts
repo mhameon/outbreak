@@ -1,4 +1,4 @@
-import { getLogger } from '#common/logger/logger'
+import { getLogger } from '#common/logger'
 import readline, { CompleterResult } from 'readline'
 import { InvalidArgumentError } from '#common/Errors'
 import chalk from 'chalk'

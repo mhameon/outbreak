@@ -1,4 +1,4 @@
-import { matrix } from '#engine/math/index'
+import { matrix } from '#engine/math'
 import assert from 'assert'
 
 const testMatrix = [[ -3, -2, -1, 0 ], [ 0, 1, 2, 3 ]]

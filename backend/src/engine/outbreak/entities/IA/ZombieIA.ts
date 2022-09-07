@@ -1,15 +1,17 @@
 import { Outbreak } from '#engine/outbreak'
 import { WorldMap } from '#engine/map/WorldMap'
 import { EntityManager } from '#engine/outbreak/entities/EntityManager'
-import { Dijkstra, byLightWeightFirst } from '#engine/math/pathfinding/index'
-import type { Node } from '#engine/math/pathfinding/index'
-import { matrix, random } from '#engine/math/index'
+import { Dijkstra } from '#engine/math/pathfinding/Dijkstra'
+import { matrix, random } from '#engine/math'
 import { DirectionInDegree, Direction } from '#engine/types'
 import { closestDirection } from '#engine/math/geometry'
 import { Logger } from '#common/logger'
+
 import { Zombie, Entity, Attitude, EntityType } from '#engine/outbreak/entities/types'
 import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
+import { Node } from '#engine/math/pathfinding/types'
+import { byLightWeightFirst } from '#engine/math/pathfinding/utils'
 
 export class ZombieIA {
   readonly log: Logger

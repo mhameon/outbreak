@@ -1,6 +1,6 @@
 import config from 'config'
 import winston, { LogEntry } from 'winston'
-import { DEFAULT_LOG_FILE } from '#common/logger/index'
+import { DEFAULT_LOG_FILE } from '#common/logger'
 import util from 'util'
 
 export type LogMethod = winston.LeveledLogMethod

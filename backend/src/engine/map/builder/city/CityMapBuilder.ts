@@ -1,4 +1,4 @@
-import { matrix, NoiseFactory, random } from '#engine/math/index'
+import { matrix, NoiseFactory, random } from '#engine/math'
 import MapBuilder from '#engine/map/builder/MapBuilder'
 import { WorldMap } from '#engine/map/WorldMap'
 import { Tile, BuildingLevel } from '#engine/types'

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Logger } from '#common/logger/index'
+import { Logger } from '#common/logger'
 import { Outbreak } from '#engine/outbreak/index'
 import { Resolvable } from './index'
 import { Bootable } from '#common/types'

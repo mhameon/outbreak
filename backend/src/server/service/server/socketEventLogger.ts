@@ -1,11 +1,9 @@
-import { getLogger } from '#common/logger/index'
+import { Logger } from '#common/logger'
 import { Socket } from 'socket.io'
 import { isGameId } from '#engine/guards'
 import { GameId } from '#engine/types'
 
-export const log = getLogger('GameServer')
-
-export function registerSocketEventLogger (socket: Socket): void {
+export function registerSocketEventLogger (socket: Socket, log: Logger): void {
   socket.onAny((event, ...args) => {
     log.http(
       '↘️  Receive event `%s`', event,

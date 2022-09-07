@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { matrix } from '#engine/math/index'
+import { matrix } from '#engine/math'
 import { NoiseFactory, MatrixPipeline } from './math/NoiseFactory'
 import { WorldMap } from '#engine/map/WorldMap'
 import { Renderers } from '#engine/renderer'

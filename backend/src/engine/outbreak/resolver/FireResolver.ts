@@ -1,7 +1,7 @@
 import { Coords, Tile, Tileset } from '#engine/types'
 import { calculateDestination } from '#engine/math/geometry'
 import { Resolver } from './Resolver'
-import { random } from '#engine/math/index'
+import { random } from '#engine/math'
 
 interface FlameProps {
   lifetime: number

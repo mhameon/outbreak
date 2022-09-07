@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node --enable-source-maps build/backend/src",
-    "exp": "node --enable-source-maps build/src/engine/experiment.js",
+    "exp": "node --enable-source-maps build/backend/src/engine/experiment.js",
     "dev": "tsc-watch --onSuccess 'npm run start'",
     "build": "echo 'Compiling TypeScript' && tsc --version && tsc",
     "postbuild": "cp ./config/*.json ./build/backend/config",
@@ -47,7 +47,9 @@
   },
   "imports": {
     "#engine/*": "./build/backend/src/engine/*.js",
+    "#engine/math": "./build/backend/src/engine/math/index.js",
     "#server/*": "./build/backend/src/server/*.js",
-    "#common/*": "./build/backend/src/common/*.js"
+    "#common/*": "./build/backend/src/common/*.js",
+    "#common/logger": "./build/backend/src/common/logger/index.js"
   }
 }
