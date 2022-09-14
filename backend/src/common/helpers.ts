@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OneOrMany } from '#common/types'
+import config from 'config'
 
 type Functions = Array<(...args: any[]) => any>
 
@@ -30,3 +31,6 @@ export function deleteInSet<T extends Set<any>> (set: T, without: T): T {
   return result
 }
 
+export function isEnv (env: 'development' | 'production' | 'testing'): boolean {
+  return config.util.getEnv('NODE_ENV') === env
+}

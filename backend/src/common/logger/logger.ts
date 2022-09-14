@@ -12,7 +12,7 @@ export interface Logger {
   info: LogMethod // Normal flow
   http: LogMethod // Network operations
   verbose: LogMethod //
-  debug: LogMethod // debug message
+  debug: LogMethod // Debug message
   silly: LogMethod //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultMeta?: any
@@ -47,6 +47,8 @@ let logger: winston.Logger
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getLogger (label = 'default', metadata: Record<string, any> = {}): Logger {
+  //todo allow option or something to target another log file than DEFAULT_LOG_FILE
+
   if (logger) {
     return logger.child({ label, ...metadata })
   }

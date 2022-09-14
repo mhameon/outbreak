@@ -9,7 +9,7 @@
     }
   },
   "logger": {
-    "level": "silly",
+    "level": "http",
     "exception": true
   }
 }

@@ -1,24 +1,29 @@
-import Welcome from './pages/Welcome'
-import Client from "./Client";
-import { Router, Link } from '@reach/router'
-import React from "react";
+import React from 'react'
+import { NavigationBar } from './component/NavigationBar'
 
-function App (): JSX.Element {
-  return (
-    <div>
-      <nav>
-        <Link to="/">Home</Link>
-        &nbsp;
-        <Link to="client">Client</Link>
-      </nav>
-
-      <Router>
-        <Welcome path="/"/>
-        <Client path="client"/>
-      </Router>
-
-    </div>
-  )
+export interface ApplicationProps {
 }
 
-export default App
+const Application: React.FunctionComponent<ApplicationProps> = () => {
+  return <NavigationBar></NavigationBar>
+  // return <div>
+  //   <Navbar></Navbar>
+  //   <nav>
+  //     <Link to="/">Home</Link>
+  //     &nbsp;
+  //     <Link to="play">Client</Link>
+  //
+  //   </nav>
+  //
+  //   <Routes>
+  //     <Route
+  //       element={<Welcome/>}
+  //       path="/"/>
+  //     <Route
+  //       element={<Client/>}
+  //       path="/play"/>
+  //   </Routes>
+  // </div>
+}
+
+export default Application

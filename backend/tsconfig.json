@@ -18,6 +18,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "importHelpers": true,
+    "noErrorTruncation": true,
     "baseUrl": ".",
     "paths": {
       "#engine/*": [

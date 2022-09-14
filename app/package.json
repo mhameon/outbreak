@@ -1,30 +1,47 @@
 {
-  "name": "outbreak-client",
+  "name": "app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@reach/router": "^1.3.4",
-    "@types/node": "^14.14.33",
-    "@types/reach__router": "^1.3.7",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "^4.0.3",
-    "react-spring": "^8.0.27",
-    "react-three-fiber": "^5.3.19",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.57",
+    "@types/react-dom": "^18.0.6",
+    "axios": "^0.27.2",
+    "bootstrap": "^5.2.1",
+    "eslint": "8.22.0",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.5.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.4.0",
+    "react-scripts": "5.0.1",
     "socket.io-client": "^4.5.2",
-    "typescript": "^4.2.3"
+    "typescript": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.19",
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
+    "eslint": "8.22",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "eslint-plugin-typescript-sort-keys": "^2.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint 'src/**'"
+    "lint": "eslint --cache 'src/**'",
+    "lint:fix": "eslint --fix --cache 'src/**'"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [

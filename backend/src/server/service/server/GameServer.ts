@@ -3,7 +3,7 @@ import assert from 'assert'
 import config from 'config'
 import http from 'http'
 import type { AddressInfo } from 'net'
-import express, { Express } from 'express'
+import type { Express, RequestHandler, Request, Response, NextFunction } from 'express'
 import { Server } from 'socket.io'
 import type { Socket } from 'socket.io'
 import { registerSocketEventLogger } from './socketEventLogger'
@@ -17,6 +17,7 @@ import { Nullable } from '#common/types'
 import type { SocketId } from 'socket.io-adapter'
 import { NotFoundError } from '#common/Errors'
 import { getLogger } from '#common/logger'
+import type { SessionData } from 'express-session'
 
 const LOBBY = 'lobby' as const
 
@@ -53,39 +54,36 @@ export class GameServer {
   static maxShutdownDelayInSeconds = 5
 
   readonly log = getLogger('GameServer')
-  readonly express: Express
   private readonly http: http.Server
   private readonly io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
 
-  readonly game: GameManager
+  readonly game: GameManager // Todo replace with interface and implement it in GameManager
   private readonly rooms = new Set<string>()
   private readonly clients = new Map<SocketId, ConnectedPlayer>()
 
   private isShuttingDown = false
   private startListeningAt?: Date
 
-  constructor (manager: GameManager) {
+  constructor (express: { app: Express; session: RequestHandler }, manager: GameManager) {
+    this.log.info('GameServer is starting...', { env: config.util.getEnv('NODE_ENV') })
     this.game = manager
-
-    this.express = express()
-    this.http = http.createServer(this.express)
+    this.http = http.createServer(express.app)
     this.io = new Server(this.http, {
       // todo check options to use
-      cors: {
-        origin: [ config.server.http.host ],
-        methods: [ 'GET', 'POST' ],
-        //allowedHeaders: [ 'my-custom-header' ],
-        credentials: true,
-      },
+      // cors: {
+      //   origin: [ config.server.http.host ],
+      //   methods: [ 'GET', 'POST' ],
+      //   //allowedHeaders: [ 'my-custom-header' ],
+      //   credentials: true,
+      // },
     })
 
-    this.registerMiddlewares()
+    this.registerMiddlewares(express.session)
     this.registerGameManager()
     this.io.on('connection', (socket: Socket) => {
-      const { 'user-agent': agent, host } = socket.handshake.headers
       this.log.http(
-        '🟢 Here come a new challenger! Total %d client(s)', this.connectedClientCounter,
-        { socketId: socket.id, host, agent },
+        '🟢 Here come a new challenger! %d client(s) connected', this.connectedClientCounter,
+        { socketId: socket.id, handshake: socket.handshake },
       )
 
       this.registerDisconnectionListeners(socket)
@@ -249,7 +247,7 @@ export class GameServer {
       })
   }
 
-  private registerMiddlewares (): void {
+  private registerMiddlewares (session: RequestHandler): void {
     // Reject new connection when server is shutting down
     this.io.use((socket, next) => {
       if (this.isShuttingDown) {
@@ -258,31 +256,63 @@ export class GameServer {
       next()
     })
 
-    // Manage authentification
+    // Handle Express session...
     this.io.use((socket, next) => {
-      // Todo Properly check if clients are authorize to connect (valid session cookie)
-      // Todo Check authentication & find user information
-      const authenticated = true
+      session(socket.request as unknown as Request, {} as Response, next as NextFunction)
+    })
 
-      if (!authenticated) {
+    // ...and only allow authenticated users
+    this.io.use((socket, next) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const session = socket.request.session as SessionData
+      if (session && session.authenticated) {
+
+        // Fixme: identify player and set it here
+        this.clients.set(socket.id, {
+          player: {
+            id: socket.id,
+            name: session.name,
+          },
+          socket: {
+            id: socket.id,
+            room: null,
+            connectedAt: new Date()
+          }
+        })
+
+        next()
+      } else {
         next(new ConnectionRefusedError('Unauthenticated user', this.log.error))
       }
-
-      // Fixme: identify player and set it here
-      this.clients.set(socket.id, {
-        player: {
-          id: socket.id,
-          name: 'Hardcoded name ' + Math.random(),
-        },
-        socket: {
-          id: socket.id,
-          room: null,
-          connectedAt: new Date()
-        }
-      })
-
-      next()
     })
+
+
+    // Manage authentification
+    // this.io.use((socket, next) => {
+    //   // Todo Properly check if clients are authorize to connect (valid session cookie)
+    //   // Todo Check authentication & find user information
+    //   const authenticated = true
+    //
+    //   if (!authenticated) {
+    //     next(new ConnectionRefusedError('Unauthenticated user', this.log.error))
+    //   }
+    //
+    //   // Fixme: identify player and set it here
+    //   this.clients.set(socket.id, {
+    //     player: {
+    //       id: socket.id,
+    //       name: 'Hardcoded name ' + Math.random(),
+    //     },
+    //     socket: {
+    //       id: socket.id,
+    //       room: null,
+    //       connectedAt: new Date()
+    //     }
+    //   })
+    //
+    //   next()
+    // })
 
     // room middleware seems to work
     // this.io.in(LOBBY).use((socket, next) => {
@@ -294,9 +324,9 @@ export class GameServer {
   private registerDisconnectionListeners (socket: Socket): void {
     socket
       .on('disconnecting', (reason) => {
-        const gameRooms = [ ...socket.rooms ].filter(isGameId)
         this.log.http('🟠 Disconnecting (%s)', reason, { socketId: socket.id })
-        if (gameRooms.length === 1) {
+        const gameRooms = [ ...socket.rooms ].filter(isGameId)
+        if (gameRooms.length > 1) {
           const [ gameId ] = gameRooms
 
           this.leaveRoom(socket, gameId, (wasLast) => {
