@@ -4,14 +4,14 @@ import {
   defaultSocketContextState,
   SocketContext,
   SocketReducer,
-  ServerConnectionStatus
+  ServerConnectionStatus,
 } from '../SocketContext'
 import { config } from '../../config'
 
 export const SocketProvider = ({ children }: PropsWithChildren) => {
   const socket = useSocket(config.socket.uri, config.socket.options)
-  const [ loading, setLoading ] = useState(true)
-  const [ socketState, dispatchSocketState ] = useReducer(SocketReducer, defaultSocketContextState)
+  const [loading, setLoading] = useState(true)
+  const [socketState, dispatchSocketState] = useReducer(SocketReducer, defaultSocketContextState)
 
   useEffect(() => {
     registerListeners()
@@ -23,28 +23,27 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
   const registerListeners = () => {
     /** Connection / reconnection listeners */
     socket.io.on('reconnect', (attempt) => {
-      console.info('Reconnected on attempt: ' + attempt)
       dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.connected })
+      console.info(`Reconnected on attempt: ${attempt}`)
     })
 
     socket.io.on('reconnect_attempt', (attempt) => {
-      console.info('Reconnection Attempt: ' + attempt)
       dispatchSocketState({
         action: 'socket:connection:status',
         status: ServerConnectionStatus.connecting,
-        attempt
+        attempt,
       })
+      console.info('Reconnection Attempt: ' + attempt)
     })
 
     // Handles server auth middleware (before connection occurs)
     socket.on('connect_error', (err) => {
-      console.error('io.on(connect_error) ' + err.message) // prints the message associated with the error
       dispatchSocketState({ action: 'server:disconnect' })
+      console.error(`connect_error: ${err.message}`)
     })
 
     socket.io.on('error', (error) => {
-      console.warn(error.message)
-      console.error('io.on("error")', error)
+      console.error(`error: ${error.message}`)
 
       // FIXME
       switch (error.message) {
@@ -55,7 +54,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     })
 
     socket.io.on('reconnect_error', (error) => {
-      console.info('Reconnection error: ' + error)
+      console.info(`reconnect_error ${error}`)
     })
 
     socket.io.on('reconnect_failed', () => {
@@ -67,18 +66,16 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     })
 
     socket.on('connect', () => {
-      console.log(`connect`)
       dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.connected })
+      console.log(`connect`)
     })
 
     socket.on('server:shutdown', () => {
-      console.log('Server shutdown')
       socket.disconnect()
+      console.log('Server shutdown')
     })
 
     socket.on('disconnect', (reason: string) => {
-      console.log(`disconnected (${reason})`)
-      // isConnecting(false)
       // setRequestedGameId('')
       // setConnection({
       //   id: client.id,
@@ -86,12 +83,13 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
       //   isConnected: client.connected,
       // })
       dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
+      console.log(`disconnected (${reason})`)
     })
   }
 
   const value = useMemo(() => {
     return { socketState, dispatchSocketState }
-  }, [ socketState ])
+  }, [socketState])
 
   if (loading) return <p>Loading Server...</p>
 
