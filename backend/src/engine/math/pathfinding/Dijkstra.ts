@@ -30,6 +30,7 @@ export class Dijkstra {
 
   /**
    * @param sources Sources with weight <0 are more attractive, >0 are less
+   * @param detectionArea Detection area size (in Tiles) around sources
    */
   calculateMap (sources: OneOrMany<Node | Coords>, detectionArea = 10): { distance: DistanceMap; predecessors: SourceMap } {
     //todo detectionArea should embedded in sources
