@@ -23,7 +23,7 @@ import { WorldMap } from '#engine/map/WorldMap'
  * | `game:turn:resolved` | ({ gameId: GameId, turn: number }) |
  */
 export class Outbreak extends EventEmitter<OutbreakEvents> {
-  private static renderer: Renderable
+  static #renderer: Renderable
 
   readonly id: GameId
   readonly log: Logger
@@ -34,12 +34,12 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
   readonly entity: EntityManager
   readonly resolvers: Array<Resolvable>
 
-  private turn = 0 // 0 means not started
-  private players = new Map<PlayerId, Player>()
+  #turn = 0 // 0 means not started
+  #players = new Map<PlayerId, Player>()
 
   constructor (id: GameId, map: WorldMap, option?: OutbreakOptions) {
     super()
-    Outbreak.renderer = Renderers.Ascii()
+    Outbreak.#renderer = Renderers.Ascii()
     this.id = id
     this.log = getLogger('Outbreak', { gameId: this.id })
     this.map = map
@@ -59,29 +59,29 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
   }
 
   get currentTurn (): number {
-    return this.turn
+    return this.#turn
   }
 
   resolveTurn (): number {
     this.log.profile('resolveTurn')
-    this.log.debug(`Resolving turn ${this.turn}...`)
+    this.log.debug(`Resolving turn ${this.#turn}...`)
 
     this.resolvers.forEach(resolver => resolver.resolve())
-    this.emit('game:turn:resolved', { gameId: this.id, turn: this.turn })
+    this.emit('game:turn:resolved', { gameId: this.id, turn: this.#turn })
 
-    this.log.profile('resolveTurn', { message: `Turn ${this.turn} resolved`, level: 'info' })
-    this.turn++
+    this.log.profile('resolveTurn', { message: `Turn ${this.#turn} resolved`, level: 'info' })
+    this.#turn++
 
-    return this.turn
+    return this.#turn
   }
 
   render (): string {
-    return Outbreak.renderer.render(this)
+    return Outbreak.#renderer.render(this)
   }
 
   joinPlayer (player: Player): boolean {
-    if (this.turn === 0) {
-      this.players.set(player.id, player)
+    if (this.#turn === 0) {
+      this.#players.set(player.id, player)
       return true
     }
 
@@ -93,7 +93,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
    * Return game state saw by the Player
    */
   getGameState (playerId: PlayerId): any {
-    assert(this.players.has(playerId), new NotFoundError(playerId, 'Player'))
+    assert(this.#players.has(playerId), new NotFoundError(playerId, 'Player'))
 
     // Todo create a gameStateBuilder to build the structure (+share things with clients to allow easier handle)
 

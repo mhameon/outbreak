@@ -9,8 +9,8 @@ export class Wind {
   static readonly maxForce = 10
   static readonly rose = [ '↖', '↑', '↗', '←', '→', '↙', '↓', '↘' ] //[ '↑', '↗', '→', '↘', '↓', '↙', '←', '↖' ]
 
-  private _angle = 45
-  private _force = 5
+  #angle = 45
+  #force = 5
 
   constructor (settings?: Partial<WindSettings>) {
     if (settings?.angle) {
@@ -22,16 +22,16 @@ export class Wind {
   }
 
   get angle (): number {
-    return this._angle
+    return this.#angle
   }
 
   set angle (value: number) {
     validate(value, isNumber)
-    this._angle = value
+    this.#angle = value
   }
 
   get force (): number {
-    return this._force
+    return this.#force
   }
 
   set force (value: number) {
@@ -39,7 +39,7 @@ export class Wind {
     if (value < Wind.minForce || value > Wind.maxForce) {
       throw new InvalidArgumentError(`Wind force must be between ${Wind.minForce} and ${Wind.maxForce}.`)
     }
-    this._force = value
+    this.#force = value
   }
 
   get arrow (): string {

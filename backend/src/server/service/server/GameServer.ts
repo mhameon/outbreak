@@ -54,21 +54,21 @@ export class GameServer {
   static maxShutdownDelayInSeconds = 5
 
   readonly log = getLogger('GameServer')
-  private readonly http: http.Server
-  private readonly io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
+  readonly #http: http.Server
+  readonly #io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
 
   readonly game: GameManager // Todo replace with interface and implement it in GameManager
-  private readonly rooms = new Set<string>()
-  private readonly clients = new Map<SocketId, ConnectedPlayer>()
+  readonly #rooms = new Set<string>()
+  readonly #clients = new Map<SocketId, ConnectedPlayer>()
 
-  private isShuttingDown = false
-  private startListeningAt?: Date
+  #isShuttingDown = false
+  #startListeningAt?: Date
 
   constructor (express: { app: Express; session: RequestHandler }, manager: GameManager) {
     this.log.info('GameServer is starting...', { env: config.util.getEnv('NODE_ENV') })
     this.game = manager
-    this.http = http.createServer(express.app)
-    this.io = new Server(this.http, {
+    this.#http = http.createServer(express.app)
+    this.#io = new Server(this.#http, {
       // todo check options to use
       // cors: {
       //   origin: [ config.server.http.host ],
@@ -80,9 +80,10 @@ export class GameServer {
 
     this.registerMiddlewares(express.session)
     this.registerGameManager()
-    this.io.on('connection', (socket: Socket) => {
+    this.#io.on('connection', (socket: Socket) => {
+      const name = this.#clients.get(socket.id)?.player?.name
       this.log.http(
-        '🟢 Here come a new challenger! %d client(s) connected', this.connectedClientCounter,
+        '🟢 Here come a new challenger! Hello %s! %d client(s) connected', name, this.connectedClientCounter,
         { socketId: socket.id, handshake: socket.handshake },
       )
 
@@ -98,23 +99,23 @@ export class GameServer {
   }
 
   listen (port: number): void {
-    this.isShuttingDown = false
-    if (this.http.listening) {
+    this.#isShuttingDown = false
+    if (this.#http.listening) {
       this.log.warn('Server is already listening')
       return
     }
 
-    this.http.listen(port, () => {
-      this.startListeningAt = new Date()
-      const { address } = this.http.address() as AddressInfo
+    this.#http.listen(port, () => {
+      this.#startListeningAt = new Date()
+      const { address } = this.#http.address() as AddressInfo
       this.log.info('🟩 Server listening, awaiting connections on %s:%s', address === '::' ? 'localhost' : address, port)
       this.log.silly('─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─')
     })
   }
 
   close (reason?: string): void {
-    if (this.http.listening && !this.isShuttingDown) {
-      this.isShuttingDown = true
+    if (this.#http.listening && !this.#isShuttingDown) {
+      this.#isShuttingDown = true
       reason = reason ? `${reason} received` : 'close() called'
       this.log.info('Server shutdown initiated (%s)...', reason)
 
@@ -125,7 +126,7 @@ export class GameServer {
       this.log.http('Emit `shutdown` to %d client(s)', this.connectedClientCounter)
 
       // Strange bug: this.io.sockets.emit() or this.io.emit() don't always emit (if join a game before)
-      this.io.emit('server:shutdown')
+      this.#io.emit('server:shutdown')
       // Seems to work better. bug in io?
       // for (const [ id, socket ] of this.io.sockets.sockets) { socket.emit('shutdown') }
 
@@ -143,13 +144,13 @@ export class GameServer {
   }
 
   get connectedClientCounter (): number {
-    return this.io.engine.clientsCount
+    return this.#io.engine.clientsCount
   }
 
   get status (): ServerStatus {
     const clients = []
-    for (const [ id, socket ] of this.io.sockets.sockets) {
-      const connectedPlayer = this.clients.get(id)
+    for (const [ id, socket ] of this.#io.sockets.sockets) {
+      const connectedPlayer = this.#clients.get(id)
       clients.push({
         id,
         rooms: [ ...socket.rooms ].filter(r => r !== id),
@@ -157,12 +158,12 @@ export class GameServer {
       })
     }
 
-    const uptime = this.http.listening && this.startListeningAt ? (+new Date() - +this.startListeningAt) / 1000 : 0
+    const uptime = this.#http.listening && this.#startListeningAt ? (+new Date() - +this.#startListeningAt) / 1000 : 0
 
     return {
-      started: this.http.listening,
+      started: this.#http.listening,
       uptime: Math.round(+uptime),
-      rooms: [ ...this.rooms.values() ],
+      rooms: [ ...this.#rooms.values() ],
       clients,
     }
   }
@@ -171,11 +172,11 @@ export class GameServer {
     this.game.on('game:created', (outbreak) => {
       outbreak.on('game:turn:resolved', ({ gameId, turn }) => {
         const newTurn = turn + 1
-        this.io.in(gameId).allSockets().then((socketIds) => {
+        this.#io.in(gameId).allSockets().then((socketIds) => {
           for (const socketId of socketIds) {
-            const client = this.clients.get(socketId)
+            const client = this.#clients.get(socketId)
             if (client) {
-              const socket = this.io.to(socketId)
+              const socket = this.#io.to(socketId)
               socket.emit('msg', `Turn ${newTurn} is starting`)
               socket.emit('game:state', outbreak.getGameState(client.player.id))
             }
@@ -200,7 +201,7 @@ export class GameServer {
         //     next(new ConnectionRefusedError(`Already in ${game}`))
         //   }
         // })
-        const connectedPlayer = this.clients.get(socket.id)
+        const connectedPlayer = this.#clients.get(socket.id)
         assert(connectedPlayer, new NotFoundError(socket.id))
 
         // A player can be only in one game at the time
@@ -249,27 +250,27 @@ export class GameServer {
 
   private registerMiddlewares (session: RequestHandler): void {
     // Reject new connection when server is shutting down
-    this.io.use((socket, next) => {
-      if (this.isShuttingDown) {
+    this.#io.use((socket, next) => {
+      if (this.#isShuttingDown) {
         next(new ConnectionRefusedError('Server is shutting down', this.log.info))
       }
       next()
     })
 
     // Handle Express session...
-    this.io.use((socket, next) => {
+    this.#io.use((socket, next) => {
       session(socket.request as unknown as Request, {} as Response, next as NextFunction)
     })
 
     // ...and only allow authenticated users
-    this.io.use((socket, next) => {
+    this.#io.use((socket, next) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const session = socket.request.session as SessionData
       if (session && session.authenticated) {
 
         // Fixme: identify player and set it here
-        this.clients.set(socket.id, {
+        this.#clients.set(socket.id, {
           player: {
             id: socket.id,
             name: session.name,
@@ -339,7 +340,7 @@ export class GameServer {
         }
       })
       .on('disconnect', (reason: string) => {
-        this.clients.delete(socket.id)
+        this.#clients.delete(socket.id)
         socket.disconnect(true)
         this.log.http('🔴 Disconnected (%s), %d client(s) remains', reason, this.connectedClientCounter, { socketId: socket.id })
       })
@@ -348,16 +349,16 @@ export class GameServer {
   private joinRoom (client: Socket, room: string): boolean {
     let isFirst = false
     if (!client.rooms.has(room)) {
-      if (!this.rooms.has(room)) {
-        this.rooms.add(room)
+      if (!this.#rooms.has(room)) {
+        this.#rooms.add(room)
         isFirst = true
       }
       client.join(room)
 
-      const connectedPlayer = this.clients.get(client.id)
+      const connectedPlayer = this.#clients.get(client.id)
       assert(connectedPlayer)
       connectedPlayer.socket.room = room
-      this.clients.set(client.id, connectedPlayer)
+      this.#clients.set(client.id, connectedPlayer)
 
       this.log.info('💚 Join room `%s`', room, { socketId: client.id, room, isFirst })
     }
@@ -368,9 +369,9 @@ export class GameServer {
     let wasLast = false
     if (client.rooms.has(room)) {
       client.leave(room)
-      const socketsInRoom = [ ...this.io.sockets.sockets.values() ].filter(socket => socket.rooms.has(room))
+      const socketsInRoom = [ ...this.#io.sockets.sockets.values() ].filter(socket => socket.rooms.has(room))
       if (socketsInRoom.length === 0) {
-        this.rooms.delete(room)
+        this.#rooms.delete(room)
         wasLast = true
       }
       this.log.info('💔 Leave room `%s`', room, { socketId: client.id, room, wasLast })
@@ -399,13 +400,13 @@ export class GameServer {
 
     if (this.connectedClientCounter > 0) {
       this.log.warn('Still %d client(s) after %ds delay, force close', this.connectedClientCounter, GameServer.maxShutdownDelayInSeconds)
-      for (const [ , socket ] of this.io.sockets.sockets) {
+      for (const [ , socket ] of this.#io.sockets.sockets) {
         socket.disconnect(true)
       }
     }
-    this.http.close((failure?: Error) => {
-      this.isShuttingDown = false
-      this.startListeningAt = undefined
+    this.#http.close((failure?: Error) => {
+      this.#isShuttingDown = false
+      this.#startListeningAt = undefined
       this.log.info('🟥 Server closed')
       if (failure) {
         this.log.error(failure)

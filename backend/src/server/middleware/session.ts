@@ -16,7 +16,7 @@ declare module 'express-session' {
 //   }
 // }
 
-
+// FIXME session options, expiration, persistant storage, security...
 const options: SessionOptions = {
   name: 'outbreak.sid',
   secret: 'changeit',

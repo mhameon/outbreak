@@ -25,7 +25,7 @@ type Game = {
  * | `game:deleted` | (gameId: GameId)     |
  */
 export class GameManager extends EventEmitter<GameManagerEvents> {
-  private readonly games: Map<GameId, Outbreak> = new Map()
+  readonly #games: Map<GameId, Outbreak> = new Map()
 
   private static buildGameId (): GameId {
     return `${GAME_ID_PREFIX}${crypto.randomBytes(12).toString('hex')}`
@@ -35,20 +35,20 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
     log.verbose('Creating outbreak...')
     const gameId = id ?? GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
-    this.games.set(gameId, outbreak)
+    this.#games.set(gameId, outbreak)
     this.emit('game:created', outbreak)
     return gameId
   }
 
   has (gameId: GameId): boolean {
-    return this.games.has(gameId)
+    return this.#games.has(gameId)
   }
 
   /**
    * @throws {NotFoundError}
    */
   get (gameId: GameId): Outbreak {
-    const outbreak = this.games.get(gameId)
+    const outbreak = this.#games.get(gameId)
     if (!outbreak) {
       throw new NotFoundError(gameId, 'GameId', log.error)
     }
@@ -60,14 +60,14 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
    */
   delete (gameId: GameId): void {
     this.get(gameId)
-    this.games.delete(gameId)
+    this.#games.delete(gameId)
     this.emit('game:deleted', gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 
   list (): Array<Game> {
     const list: Game[] = []
-    this.games.forEach((game, gameId) => {
+    this.#games.forEach((game, gameId) => {
       list.push({
         id: gameId,
         name: game.name,
@@ -79,6 +79,6 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
   }
 
   count (): number {
-    return this.games.size
+    return this.#games.size
   }
 }

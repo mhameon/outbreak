@@ -1,9 +1,7 @@
-import { staticRoutes, apiRoutes, session } from '#server/middleware'
+import { staticRoutes, apiRoutes, session, cors } from '#server/middleware'
 import type { Void } from '#common/types'
 import { GameServer } from './GameServer'
 import { GameManager } from '#engine/game/GameManager'
-import cors from 'cors'
-import config from 'config'
 import type { Express } from 'express'
 import express from 'express'
 
@@ -17,22 +15,9 @@ export function createGameServer (): GameServer {
   }
 
   const app: Express = express()
-  // FIXME proxy & CORS & Session storage & Security stuff
   app
-    .set('trust proxy', 1) // trust first proxy
-    .use(cors({
-      credentials: true,
-      origin: (origin, callback) => { // allow requests with no origin
-        // (like mobile apps or curl requests)
-        if (!origin) return callback(null, true)
-
-        if ([ config.server.http.host ].indexOf(origin) === -1) {
-          const message = 'The CORS policy for this site does not allow access from the specified Origin.'
-          return callback(new Error(message), false)
-        }
-        return callback(null, true)
-      }
-    }))
+    .set('trust proxy', 1) // fixme trust first proxy, don't keep like that in prod
+    .use(cors)
     .use(express.json())
     .use(session)
     .use(staticRoutes)

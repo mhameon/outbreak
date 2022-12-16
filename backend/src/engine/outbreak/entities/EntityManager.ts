@@ -39,15 +39,15 @@ import { EntityManagerEvents } from '#engine/events'
 export class EntityManager extends EventEmitter<EntityManagerEvents> {
   readonly log: Logger
   readonly outbreak: Outbreak
-  private readonly entities = new Map<EntityId, Entity>()
-  private readonly entitiesByAttribute = new Map<QueryableEntityAttribute, Map<QueryableEntityAttributeSanitizedType, Set<EntityId>>>()
+  readonly #entities = new Map<EntityId, Entity>()
+  readonly #entitiesByAttribute = new Map<QueryableEntityAttribute, Map<QueryableEntityAttributeSanitizedType, Set<EntityId>>>()
 
   constructor (outbreak: Outbreak) {
     super()
     this.log = outbreak.log.child({ label: this.constructor.name })
     this.outbreak = outbreak
     QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
-      this.entitiesByAttribute.set(attribute, new Map())
+      this.#entitiesByAttribute.set(attribute, new Map())
     })
   }
 
@@ -93,14 +93,14 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   ): Array<AnEntity> | Nullable<AnEntity> | Entity {
     if (isEntityId(p1)) {
       // find( EntityId )
-      return this.entities.get(p1) ?? null
+      return this.#entities.get(p1) ?? null
     }
 
     if (isEntityQuery(p1)) {
       // find(query: EntityQuery, filter?: EntityQueryFilters)
       const parameters = Object.entries(p1)
       const [[ attribute, value ]] = parameters.splice(0)
-      const attributeMap = this.entitiesByAttribute.get(attribute as QueryableEntityAttribute)
+      const attributeMap = this.#entitiesByAttribute.get(attribute as QueryableEntityAttribute)
       const entityIds = attributeMap?.get(isCoords(value) ? WorldMap.index(value) : value)
       if (!entityIds?.size) {
         return []
@@ -180,14 +180,14 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   }
 
   private add (entity: Entity): Entity {
-    this.entities.set(entity.id, entity)
+    this.#entities.set(entity.id, entity)
     QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
       if (attribute in entity) {
-        const attributeMap = this.entitiesByAttribute.get(attribute)
+        const attributeMap = this.#entitiesByAttribute.get(attribute)
         assert(attributeMap, `entitiesByAttribute must exists for "${attribute}"`)
         const attributeValue = this.getSanitizedAttribute(entity[attribute])
         const entities = attributeMap?.get(attributeValue)
-        this.entitiesByAttribute.set(
+        this.#entitiesByAttribute.set(
           attribute,
           attributeMap.set(
             attributeValue,
@@ -201,23 +201,23 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   }
 
   private delete (entity: Entity): void {
-    this.entities.delete(entity.id)
+    this.#entities.delete(entity.id)
     QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
       if (attribute in entity) {
-        const attributeMap = this.entitiesByAttribute.get(attribute)
+        const attributeMap = this.#entitiesByAttribute.get(attribute)
         assert(attributeMap, `entitiesByAttribute must exists for "${attribute}"`)
         const attributeValue = this.getSanitizedAttribute(entity[attribute])
         const entities = attributeMap?.get(attributeValue)
         if (entities) {
           entities.delete(entity.id)
           if (entities.size) {
-            this.entitiesByAttribute.set(
+            this.#entitiesByAttribute.set(
               attribute,
               attributeMap.set(attributeValue, entities)
             )
           } else {
             attributeMap.delete(attributeValue)
-            this.entitiesByAttribute.set(attribute, attributeMap)
+            this.#entitiesByAttribute.set(attribute, attributeMap)
           }
         }
       }

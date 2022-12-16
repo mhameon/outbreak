@@ -23,13 +23,15 @@ apiRoutes.post('/login', (req, res, next) => {
     }
   })
 
-  req.session.name = req.body.login
+  const name = `${req.body.login} :)`
+
+  req.session.name = name
   req.session.authenticated = true
 
   req.session.save((err) => {
     if (err) return next(err)
 
-    return res.status(200).json({})
+    return res.status(200).json({ name })
     //return res.redirect('http://localhost:3000/play')
   })
 })

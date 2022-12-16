@@ -15,12 +15,12 @@ export interface CommandDescriptor {
 }
 
 export class CommandLineInterface {
-  private readonly registeredCommands = new Map<string, CommandDescriptor>()
-  private readonly cli: readline.Interface
-  private executeNextCommandSilently = false
+  readonly #registeredCommands = new Map<string, CommandDescriptor>()
+  readonly #cli: readline.Interface
+  #executeNextCommandSilently = false
 
   constructor () {
-    this.cli = readline
+    this.#cli = readline
       .createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -33,17 +33,17 @@ export class CommandLineInterface {
         if (args.length >= 1) {
           const instruction = (args.shift() as string).toLowerCase()
           if (instruction) {
-            if (this.registeredCommands.has(instruction)) {
-              if (this.executeNextCommandSilently) {
+            if (this.#registeredCommands.has(instruction)) {
+              if (this.#executeNextCommandSilently) {
                 readline.moveCursor(process.stdout, 0, -1)
                 readline.cursorTo(process.stdout, 0)
                 process.stdout.clearLine(0)
               } else {
                 log.verbose('💻 "%s"', input)
-                this.executeNextCommandSilently = false
+                this.#executeNextCommandSilently = false
               }
               try {
-                const command = this.registeredCommands.get(instruction) as CommandDescriptor
+                const command = this.#registeredCommands.get(instruction) as CommandDescriptor
                 await command.execute(...args)
               } catch (error) {
                 this.print(error)
@@ -63,14 +63,14 @@ export class CommandLineInterface {
   }
 
   executeCommand (command: string, ...parameters: string[]): void {
-    if (this.registeredCommands.has(command)) {
-      this.executeNextCommandSilently = true
-      this.cli.write(`${command}${parameters.length ? ' ' + parameters.join(' ') : ''}\r`)
+    if (this.#registeredCommands.has(command)) {
+      this.#executeNextCommandSilently = true
+      this.#cli.write(`${command}${parameters.length ? ' ' + parameters.join(' ') : ''}\r`)
     }
   }
 
   createAlias (alias: string, command: string): CommandLineInterface {
-    const original = this.registeredCommands.get(command)
+    const original = this.#registeredCommands.get(command)
     if (original) {
       return this.registerCommand(alias, `Alias for ${command}`, (...args) => original.execute(...args))
     }
@@ -79,21 +79,21 @@ export class CommandLineInterface {
 
   registerCommand (name: string, description: string, command: Command): CommandLineInterface {
     name = name.toLowerCase()
-    if (this.registeredCommands.has(name)) {
+    if (this.#registeredCommands.has(name)) {
       throw Error(`A command "${name}" is already registered`)
     }
-    this.registeredCommands.set(name, { execute: command, description })
+    this.#registeredCommands.set(name, { execute: command, description })
     return this
   }
 
   private registerDefaultCommands (): void {
     this
       .registerCommand('exit', 'Send SIGINT signal', () => {
-        this.cli.close()
+        this.#cli.close()
       })
       .registerCommand('help', 'Show registered commands', (prefix = '') => {
         console.log('')
-        for (const [ name, command ] of this.registeredCommands.entries()) {
+        for (const [ name, command ] of this.#registeredCommands.entries()) {
           if (prefix === '' || name.startsWith(prefix)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const args: string[] = (command.execute as any).toString()
@@ -118,7 +118,7 @@ export class CommandLineInterface {
   }
 
   private autocomplete (input: string): CompleterResult {
-    const registeredCommandNames = [ ...this.registeredCommands.keys() ]
+    const registeredCommandNames = [ ...this.#registeredCommands.keys() ]
     const hits = registeredCommandNames.filter((command) => command.startsWith(input))
 
     // Show all availableCommands if none found
