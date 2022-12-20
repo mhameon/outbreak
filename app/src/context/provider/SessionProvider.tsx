@@ -7,8 +7,13 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
 
   const userSession: SessionContextProps = {
     session: { ...session },
-    setSession: (session: Session) => {
-      setSession({ session })
+    setSession: (session: Session | void) => {
+      if (session) {
+        session.isAuthenticated = true
+        setSession({ session })
+        return
+      }
+      setSession(defaultSessionContextState)
     }
   }
 

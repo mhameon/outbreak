@@ -3,7 +3,7 @@ import type { Socket } from 'socket.io-client'
 import logo from '../logo.svg'
 
 import '../App.css'
-import { useSocket } from '../hooks/useSocket'
+import { useSocket } from '../hook/useSocket'
 
 const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`

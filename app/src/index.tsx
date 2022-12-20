@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
-import { BrowserRouter } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { RouterProvider } from 'react-router-dom'
 import { SessionProvider } from './context/provider/SessionProvider'
+import { router } from './router'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -11,9 +11,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <SessionProvider>
-      <BrowserRouter>
-        <App/>
-      </BrowserRouter>
+      <RouterProvider router={router}/>
     </SessionProvider>
   </React.StrictMode>
 )

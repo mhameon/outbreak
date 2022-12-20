@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useReducer, useState, useMemo } from 'react'
-import { useSocket } from '../../hooks/useSocket'
+import { useSocket } from '../../hook/useSocket'
 import {
   defaultSocketContextState,
   SocketContext,
@@ -10,12 +10,12 @@ import { config } from '../../config'
 
 export const SocketProvider = ({ children }: PropsWithChildren) => {
   const socket = useSocket(config.socket.uri, config.socket.options)
-  const [loading, setLoading] = useState(true)
-  const [socketState, dispatchSocketState] = useReducer(SocketReducer, defaultSocketContextState)
+  const [ loading, setLoading ] = useState(true)
+  const [ socketState, dispatchSocketState ] = useReducer(SocketReducer, defaultSocketContextState)
 
   useEffect(() => {
-    registerListeners()
     dispatchSocketState({ action: 'init:socket', socket })
+    registerListeners()
     setLoading(false)
     // eslint-disable-next-line
   }, [])
@@ -89,7 +89,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
 
   const value = useMemo(() => {
     return { socketState, dispatchSocketState }
-  }, [socketState])
+  }, [ socketState ])
 
   if (loading) return <p>Loading Server...</p>
 

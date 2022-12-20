@@ -9,6 +9,7 @@ export interface ClientProps {
 export function Client (props: ClientProps) {
 
   return <SocketProvider>
+    <h1>Gaming client</h1>
     <SocketInfos/>
     <ConnectionButton/>
   </SocketProvider>

@@ -2,7 +2,7 @@ import { createContext } from 'react'
 
 export type Session = {
   name: string
-  isAuthenticated: boolean
+  isAuthenticated?: boolean
 }
 
 export interface SessionContextProps {

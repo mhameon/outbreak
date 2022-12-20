@@ -1,8 +1,7 @@
-import React, { useState, useContext } from 'react'
+import React, { useContext } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { config } from '../config'
-import axios from 'axios'
 import { SessionContext } from '../context/SessionContext'
+import { useApi } from '../hook/useApi'
 
 const zombieHeroes = [
   'Rick Grimes', 'Michonne', 'Glenn', 'Negan', // The Walking Dead
@@ -14,59 +13,41 @@ const zombieHeroes = [
 ]
 const randomZombieHero = zombieHeroes[Math.floor(Math.random() * zombieHeroes.length)]
 
-const defaultFormValue = {
-  login: '',
-}
-
 export function Login () {
+  const api = useApi()
   const { session, setSession } = useContext(SessionContext)
-  const [ formData, setFormData ] = useState(defaultFormValue)
   const navigate = useNavigate()
   const location = useLocation()
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    // const data = new FormData(event.target as any)
-    // console.log(data)
-    // console.log(Object.fromEntries(data))
+    const data: { login: string } = Object.fromEntries(
+      new FormData(event.currentTarget) as Iterable<[ string ]>
+    )
+    console.log(data)
 
-    axios.post(config.server.host + '/login', formData, { withCredentials: true })
-      .then(res => {
-        console.log(res)
-
-        setSession!({ name: formData.login, isAuthenticated: true })
-
-        navigate('/play')
-        setFormData(defaultFormValue)
-      })
-      .catch(err => console.warn(err))
+    try {
+      const res = await api.post<{ name: string }>('/login', data)
+      setSession!({ name: res.name })
+      //navigate('/play')
+    } catch (e) {
+      console.warn(e)
+    }
   }
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = event.target
-    const isCheckbox = type === 'checkbox'
-
-    setFormData({
-      ...formData,
-      [name]: isCheckbox ? event.target.checked : value,
-    })
-  }
-
-  return (
-    <form onSubmit={onSubmit}>
-      <pre>{JSON.stringify(location)}</pre>
-      <fieldset>
-        Nom
-        <input
-          name="login"
-          placeholder={randomZombieHero}
-          type="text"
-          value={formData.login}
-          onChange={handleChange}
-        />
-        <button type="submit">Submit</button>
-      </fieldset>
-    </form>
-  )
+  return <form onSubmit={onSubmit}>
+    {api.loading ? 'Loading....' : ''}
+    <pre>{JSON.stringify(location)}</pre>
+    <fieldset>
+      Nom
+      <input
+        name="login"
+        placeholder={randomZombieHero}
+        type="text"
+        // value={formData.login}
+        // onChange={handleChange}
+      />
+      <button type="submit">Submit</button>
+    </fieldset>
+  </form>
 }
