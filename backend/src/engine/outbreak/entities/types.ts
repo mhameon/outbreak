@@ -11,10 +11,12 @@ export enum EntityType {
 }
 
 export enum Attitude {
-  /** (Default) Walks straight ahead, randomly changes direction (45° steps) when encountering an obstacle or stimulus */
+  /** (Default) Walks straight ahead, randomly changes direction (45° steps) when encountering an obstacle */
   'Wandering',
+
   /** Has a target in line of sight and tries to reach it to attack it. Emit a sound (growl) when detecting it */
   'Tracking',
+
   /** Following a target detected by his scent */
   'Sniffing',
 }
