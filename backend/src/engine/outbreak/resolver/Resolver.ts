@@ -30,7 +30,7 @@ export abstract class Resolver implements Bootable, Resolvable {
 
   boot (): any {
     // boot() is called right after the class instantiation.
-    // Does nothing by default but feel free to override.
+    // Do nothing by default but feel free to override.
   }
 
   abstract resolve (): void

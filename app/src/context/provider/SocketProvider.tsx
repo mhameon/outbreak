@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
   const [ socketState, dispatchSocketState ] = useReducer(SocketReducer, defaultSocketContextState)
 
   useEffect(() => {
-    dispatchSocketState({ action: 'init:socket', socket })
+    dispatchSocketState({ type: 'init:socket', socket })
     registerListeners()
     setLoading(false)
     // eslint-disable-next-line
@@ -23,13 +23,13 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
   const registerListeners = () => {
     /** Connection / reconnection listeners */
     socket.io.on('reconnect', (attempt) => {
-      dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.connected })
+      dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.connected })
       console.info(`Reconnected on attempt: ${attempt}`)
     })
 
     socket.io.on('reconnect_attempt', (attempt) => {
       dispatchSocketState({
-        action: 'socket:connection:status',
+        type: 'socket:connection:status',
         status: ServerConnectionStatus.connecting,
         attempt,
       })
@@ -38,7 +38,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
 
     // Handles server auth middleware (before connection occurs)
     socket.on('connect_error', (err) => {
-      dispatchSocketState({ action: 'server:disconnect' })
+      dispatchSocketState({ type: 'server:disconnect' })
       console.error(`connect_error: ${err.message}`)
     })
 
@@ -59,14 +59,14 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
 
     socket.io.on('reconnect_failed', () => {
       console.info('Reconnection failure.')
-      dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
+      dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
 
       // FIXME
       alert('We are unable to connect you to the chat service.  Please make sure your internet connection is stable or try again later.')
     })
 
     socket.on('connect', () => {
-      dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.connected })
+      dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.connected })
       console.log(`connect`)
     })
 
@@ -82,7 +82,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
       //   gameId: null,
       //   isConnected: client.connected,
       // })
-      dispatchSocketState({ action: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
+      dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
       console.log(`disconnected (${reason})`)
     })
   }

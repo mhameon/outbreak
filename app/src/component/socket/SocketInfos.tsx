@@ -18,6 +18,11 @@ export function SocketInfos (props: SocketInfosProps) {
       Socket
       ID: <strong>{socket?.id}</strong>
       <br/>
+      {
+        connection.status === ServerConnectionStatus.connected && <>
+          <button onClick={() => dispatchSocketState({ type: 'player:join:game' })}>Join</button>
+        </>
+      }
     </p>
   </>
 }

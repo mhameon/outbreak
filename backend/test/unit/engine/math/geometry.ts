@@ -1,5 +1,11 @@
-import { calculateDestination, calculateAngleInDegrees, calculateDirection } from '#engine/math/geometry'
-import assert from 'assert'
+import {
+  calculateDestination,
+  calculateAngleInDegrees,
+  calculateDirection,
+  isAdjacent,
+  groupAdjacent
+} from '#engine/math/geometry'
+import assert, { strictEqual } from 'assert'
 import { Direction } from '#engine/types'
 
 describe('geometry', function () {
@@ -54,6 +60,61 @@ describe('geometry', function () {
     assert.deepStrictEqual(calculateDirection(origin, { x: -1, y: -1 }), Direction.NorthWest)
     assert.deepStrictEqual(calculateDirection(origin, { x: -10, y: -5 }), Direction.NorthWest)
   })
+
+  it('isAdjacent', function () {
+    assert.strictEqual(isAdjacent({ x: -1, y: -1 }, { x: 0, y: 0 }), true)
+
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 0, y: 0 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 1, y: 0 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 2, y: 0 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 0, y: 1 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 1, y: 1 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 2, y: 1 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 0, y: 2 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 1, y: 2 }), true)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 2, y: 2 }), true)
+
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 3, y: 0 }), false)
+    assert.strictEqual(isAdjacent({ x: 1, y: 1 }, { x: 1, y: 3 }), false)
+  })
+
+  it('groupAdjacent', function () {
+    /***************
+     * X X . . . X *
+     * X . . . . X *
+     * . . . X . X *
+     * . . X X . . *
+     * X . . X . . *
+     * X X . . . X *
+     ***************/
+    const coords = [
+      { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 },
+      { x: 5, y: 0 }, { x: 5, y: 1 }, { x: 5, y: 2 },
+      { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 5 },
+      { x: 3, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 3, y: 4 },
+      { x: 5, y: 5 }
+    ]
+
+    const grouped = [
+      [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
+      [{ x: 5, y: 0 }, { x: 5, y: 1 }, { x: 5, y: 2 }],
+      [{ x: 0, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 5 }],
+      [{ x: 3, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 3, y: 4 }],
+      [{ x: 5, y: 5 }]
+    ]
+    assert.deepStrictEqual(groupAdjacent(coords), grouped)
+
+    // same coords, different order
+    const coords2 = [
+      { x: 2, y: 3 }, { x: 1, y: 0 }, { x: 0, y: 1 },
+      { x: 5, y: 1 }, { x: 3, y: 2 }, { x: 5, y: 2 },
+      { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 0, y: 0 }, { x: 1, y: 5 },
+      { x: 3, y: 3 }, { x: 3, y: 4 },
+      { x: 5, y: 5 }, { x: 5, y: 0 }
+    ]
+    assert.strictEqual(groupAdjacent(coords2).length, 5)
+  })
+
   // it.only('experiment', function () {
   //   const wind = 45
   //   const angle = 45

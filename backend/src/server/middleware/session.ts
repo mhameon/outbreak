@@ -22,7 +22,10 @@ const options: SessionOptions = {
   secret: 'changeit',
   resave: false,
   saveUninitialized: false,
-  //cookie: { secure: false }
+  cookie: {
+    //expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+    //secure: false
+  },
   //maxAge: ms
 }
 

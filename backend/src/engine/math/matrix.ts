@@ -1,12 +1,15 @@
-import { isMatrix2d, isNumber } from '#engine/guards'
-import { Coords, Matrix, Matrix2d, Size } from '#engine/types'
+import { isMatrix2d } from '#engine/guards'
+import { Coords, Matrix, Matrix2d } from '#engine/types'
 import { validate } from '#common/validator'
 import chalk from 'chalk'
 import { color, Gradient } from '#engine/math/color'
+import { Size } from '#shared/types'
+import { isNumber } from '#common/guards'
 
 type MatrixEntry = Matrix | number
 
 type MatrixDebuggingOptions = {
+  name?: string
   colorize?: Condition
   display?: (value: number) => number | string
   heatmap?: {
@@ -130,18 +133,19 @@ export const matrix = {
   debug: (array: Matrix | Matrix2d, options: MatrixDebuggingOptions = {}): string => {
     validate(array, isMatrix2d)
 
-    let min = 0, max = 0, delta = 0
+    let min = Infinity, max = -Infinity, delta = 0
     const height = array.length
     const width = array[0] ? (array[0] as number[]).length : 0
 
-    if (options.heatmap) {
-      min = matrix.min(array, options.heatmap.ignore ?? [])
-      max = matrix.max(array, options.heatmap.ignore ?? [])
-      delta = max - min
-    }
+    min = matrix.min(array, options.heatmap?.ignore ?? [])
+    max = matrix.max(array, options.heatmap?.ignore ?? [])
+    delta = max - min
 
-    let output = `${width}x${height}`
-    output += ` (min=${min}, max=${max}${options?.heatmap?.ignore ? `, ignored=${options?.heatmap?.ignore}` : ''})`
+    let output = [
+      `${options.name ?? ''}`,
+      `${width}x${height}`,
+      `(min=${min}, max=${max}${options?.heatmap?.ignore ? `, ignored=${options?.heatmap?.ignore}` : ''})`,
+    ].filter(Boolean).join(' ')
 
     let needColorization = (_value: number): boolean => false
     if (options.colorize) {
@@ -153,14 +157,14 @@ export const matrix = {
         gte: (v: number) => v >= value,
         lt: (v: number) => v < value,
         lte: (v: number) => v <= value,
-      }
+      } as const
       const symbols = {
         eq: '=',
         gt: '>',
         gte: '≥',
         lt: '<',
         lte: '≤',
-      }
+      } as const
       needColorization = (value: number): boolean => checker[comparator](value)
 
       output += chalk.red(` ${symbols[comparator]}${value}`)

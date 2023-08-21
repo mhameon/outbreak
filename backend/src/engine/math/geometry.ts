@@ -1,4 +1,5 @@
 import { Coords, Direction, DirectionClockwise } from '#engine/types'
+import { Nullable } from '#shared/types'
 
 /**
  * @param origin Coords
@@ -21,8 +22,27 @@ export function calculateAngleInDegrees (origin: Coords, to: Coords): number {
   return (angleInRadians >= 0 ? angleInRadians : (2 * Math.PI + angleInRadians)) * 180 / Math.PI
 }
 
+/**
+ * @return Closest `Direction` angle
+ */
 export function calculateDirection (origin: Coords, to: Coords): Direction {
   return closestDirection(calculateAngleInDegrees(origin, to))
+}
+
+export function calculateCentroid (coords: Array<Coords>): Coords {
+  const size = coords.length
+  const sum = coords.reduce(
+    (sum, { x, y }) => ({
+      x: sum.x + x,
+      y: sum.y + y,
+    }),
+    { x: 0, y: 0 }
+  )
+
+  return {
+    x: Math.floor(sum.x / size),
+    y: Math.floor(sum.y / size)
+  }
 }
 
 export function closestDirection (degrees: number): Direction {
@@ -30,6 +50,84 @@ export function closestDirection (degrees: number): Direction {
   return DirectionClockwise[direction >= 8 ? 0 : direction]
 }
 
+/**
+ * note: identical coords are considered as adjacent
+ */
+export function isAdjacent (coord1: Coords, coord2: Coords): boolean {
+  return Math.abs(coord1.x - coord2.x) <= 1 && Math.abs(coord1.y - coord2.y) <= 1
+}
+
+/**
+ * @return Group adjacents (touching) coordinates
+ */
+export function groupAdjacent (coords: Array<Coords>): Array<Array<Coords>> {
+  const source = [ ...coords ] // We won't alter original coords array
+  const groups = []
+  while (source.length > 0) {
+    const group = [ source[0] ]
+    for (let i = 0; i < group.length; i++) {
+      for (let j = 1; j < source.length; j++) {
+        if (isAdjacent(group[i], source[j])) {
+          group.push(source[j])
+          source.splice(j, 1)
+          j--
+        }
+      }
+    }
+    groups.push(group)
+    source.shift()
+  }
+  return groups
+}
+
+/**
+ * Prim's algorithm: starting from the first `coords`
+ * @see https://en.wikipedia.org/wiki/Prim%27s_algorithm
+ */
+export function prim (coords: Array<Coords>): Array<Coords> {
+  const vertices = [ ...coords ]
+  // Initialize the minimum spanning tree with the first vertex
+  const mst = [ vertices[0] ]
+  // Initialize the set of vertices not yet in the minimum spanning tree
+  const remainingVertices = new Set(vertices.slice(1))
+
+  // Keep looping while there are vertices not yet in the minimum spanning tree
+  while (remainingVertices.size > 0) {
+    let minWeight = Infinity
+    let closestVertex: Nullable<Coords> = null
+    let closestVertexIndex = -1
+
+    // Find the vertex in remainingVertices that is closest to the minimum spanning tree
+    for (let i = 0; i < mst.length; i++) {
+      const vertex = mst[i]
+      remainingVertices.forEach((remainingVertex) => {
+        const weight = getWeight(vertex, remainingVertex)
+        if (weight < minWeight) {
+          minWeight = weight
+          closestVertex = remainingVertex
+          closestVertexIndex = i
+        }
+      })
+    }
+
+    if (closestVertex) {
+      // Add the closest vertex to the minimum spanning tree
+      mst.splice(closestVertexIndex + 1, 0, closestVertex)
+      // Remove the closest vertex from the set of remaining vertices
+      remainingVertices.delete(closestVertex)
+    }
+  }
+
+  return mst
+}
+
+// Helper function to calculate the weight (distance) between two vertices
+function getWeight (from: Coords, to: Coords): number {
+  const dx = from.x - to.x
+  const dy = from.y - to.y
+  //return dx - dy // Manhattan distance
+  return Math.sqrt(dx * dx + dy * dy) // Euclidean distance
+}
 
 // http://members.chello.at/~easyfilter/bresenham.html
 function lineWidth (from: Coords, to: Coords, width: number): Array<Coords> {

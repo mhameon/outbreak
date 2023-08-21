@@ -1,4 +1,5 @@
-import { Size, WindSettings } from '#engine/types'
+import { WindSettings } from '#engine/types'
+import { Size } from '#shared/types'
 
 export { OutbreakFactory } from './OutbreakFactory'
 export { Outbreak } from './Outbreak'

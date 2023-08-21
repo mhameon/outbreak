@@ -1,5 +1,6 @@
 import React, { createContext } from 'react'
 import { Socket } from 'socket.io-client'
+import { GameId, Nullable } from '../../../shared/types'
 
 export enum ServerConnectionStatus {
   disconnected,
@@ -26,16 +27,18 @@ export const defaultSocketContextState: SocketContextState = {
 }
 
 type SocketContextAction =
-  | { action: 'init:socket', socket: Socket }
-  | { action: 'server:connect' }
-  | { action: 'server:disconnect' }
-  | { action: 'socket:connection:status' } & ConnectionStatus
+  | { type: 'init:socket', socket: Socket }
+  | { type: 'server:connect' }
+  | { type: 'server:disconnect' }
+  | { type: 'socket:connection:status' } & ConnectionStatus
+  | { type: 'player:join:game' }
+  | { type: 'player:leave:game' }
 
 export const SocketReducer = (state: SocketContextState, payload: SocketContextAction): SocketContextState => {
-  const { action, ...args } = payload
-  console.log('Message received - Action: ' + payload.action + ' - Payload: ', args)
+  const { type, ...args } = payload
+  console.log('Message received - Action: ' + payload.type + ' - Payload: ', args)
 
-  switch (action) {
+  switch (type) {
     case 'init:socket':
       return { ...state, socket: payload.socket }
 
@@ -55,6 +58,16 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
 
     case 'socket:connection:status':
       return { ...state, connection: { status: payload.status, attempt: payload.attempt } }
+
+    case 'player:join:game':
+      if (state.connection.status === ServerConnectionStatus.connected) {
+        state.socket?.emit(
+          'player:join:game',
+          undefined,
+          ({ gameId }: { gameId: Nullable<GameId> }) => console.log(gameId)
+        )
+      }
+      break
   }
   return state
 }

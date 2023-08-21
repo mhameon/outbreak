@@ -1,4 +1,4 @@
-import { Size, Coords, Tile, Index, Tileset, Around, InMapTileset, Direction, DirectionInDegree } from '../types'
+import { Coords, Tile, Index, Tileset, Around, InMapTileset, Direction, DirectionInDegree } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoords, isIndex } from '../guards'
 import { Seeder } from '#engine/map/builder/MapBuilder'
@@ -9,6 +9,7 @@ import { deleteInSet, toArray } from '#common/helpers'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { calculateDestination } from '#engine/math/geometry'
 import { WorldMapEvents } from '#engine/events'
+import { Size } from '#shared/types'
 
 /**
  * A 2D map structure describing the game board
@@ -27,11 +28,10 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
   readonly seeder?: Seeder
   readonly name: string
 
-  private readonly tiles: Map<Index, Tileset>
+  private readonly tiles = new Map<Index, Tileset>()
 
   constructor (size: Size, seeder?: Seeder) {
     super()
-    this.tiles = new Map()
     this.size = size
     this.seeder = seeder
     this.name = 'Unnamed map'

@@ -37,10 +37,10 @@ export function ConnectionButton (props: ConnectionButtonProps) {
   }
 
   function connect () {
-    dispatchSocketState({ action: 'server:connect' })
+    dispatchSocketState({ type: 'server:connect' })
   }
 
   function disconnect () {
-    dispatchSocketState({ action: 'server:disconnect' })
+    dispatchSocketState({ type: 'server:disconnect' })
   }
 }

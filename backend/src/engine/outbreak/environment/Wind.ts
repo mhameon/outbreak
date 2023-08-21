@@ -1,8 +1,8 @@
 import { InvalidArgumentError } from '#common/Errors'
 import { WindSettings } from '#engine/types'
 import { validate } from '#common/validator'
-import { isNumber } from '#engine/guards'
 import { closestDirection } from '#engine/math/geometry'
+import { isNumber } from '#common/guards'
 
 export class Wind {
   static readonly minForce = 0

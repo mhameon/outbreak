@@ -6,6 +6,7 @@ import { NotFoundError } from '#common/Errors'
 import { Direction, Coords, Tile } from '#engine/types'
 import { Entity, EntityType } from '#engine/outbreak/entities/types'
 import { EntityManagerEvents } from '#engine/events'
+import { clone } from 'lodash'
 
 function assertCreatureEqual (actual: Entity | null, expected: Entity): void {
   assert.ok(actual)
@@ -69,60 +70,89 @@ describe('EntityManager class', function () {
   })
 
   describe('find', function () {
-    it('find(EntityId)', function () {
-      assertCreatureEqual(outbreak.entity.find(zombie.id), zombie)
-      assert.strictEqual(outbreak.entity.find('unknown'), null)
-    })
-    it('find(Array<EntityId>)', function () {
-      const z = outbreak.entity.find([ zombie.id, survivor.id ])
-      assert.strictEqual(z.length, 2)
-      assertCreatureEqual(z[0], zombie)
-      assertCreatureEqual(z[1], survivor)
+    describe('find by `EntityId`', function () {
+      describe('find(EntityId)', function () {
+        it('should find an Entity with correct EntityId', function () {
+          assertCreatureEqual(outbreak.entity.find(zombie.id), zombie)
+        })
+        it('should find nothing with inexistant EntityId', function () {
+          assert.strictEqual(outbreak.entity.find('unknown'), null)
+        })
+      })
 
-      assert.deepStrictEqual(outbreak.entity.find([ 'unknown' ]), [])
+      describe('find(Array<EntityId>)', function () {
+        it('should find 2 Entity with correct [EntityId, EntityId]', function () {
+          const z = outbreak.entity.find([ zombie.id, survivor.id ])
+          assert.strictEqual(z.length, 2)
+          assertCreatureEqual(z[0], zombie)
+          assertCreatureEqual(z[1], survivor)
+        })
+        it('should find nothing with incorrect [EntityId]', function () {
+          assert.deepStrictEqual(outbreak.entity.find([ 'unknown' ]), [])
+        })
+      })
     })
-    it('find({ at: Coords })', function () {
-      const z = outbreak.entity.find({ at: pos1 })
-      assertCreatureEqual(z[0], zombie2)
-      assertCreatureEqual(z[1], survivor)
 
-      assert.deepStrictEqual(outbreak.entity.find({ at: { x: 0, y: 3 } }), [])
-    })
-    it('find(Coords, EntityType)', function () {
-      const z = outbreak.entity.find({ at: pos1 }, { type: EntityType.Human })
-      assert.strictEqual(z.length, 1)
-      assertCreatureEqual(z[0], survivor)
-    })
-    it('find(Coords, Array<EntityType>)', function () {
-      let z = outbreak.entity.find({ at: pos1 }, { type: [ EntityType.Human ] })
-      assert.strictEqual(z.length, 1)
-      assertCreatureEqual(z[0], survivor)
+    describe('find by `query`', function () {
+      it('find({ at: Coords })', function () {
+        const z = outbreak.entity.find({ at: pos1 })
+        assertCreatureEqual(z[0], zombie2)
+        assertCreatureEqual(z[1], survivor)
 
-      z = outbreak.entity.find({ at: pos1 }, { type: [ EntityType.Human, EntityType.Zombie ] })
-      assert.strictEqual(z.length, 2)
-      assertCreatureEqual(z[0], zombie2)
-      assertCreatureEqual(z[1], survivor)
+        assert.deepStrictEqual(outbreak.entity.find({ at: { x: 0, y: 3 } }), [])
+      })
+      it('find({ type: EntityType })', function () {
+        const z = outbreak.entity.find({ type: EntityType.Zombie })
+        assert.strictEqual(z.length, 2)
+        assertCreatureEqual(z[0], zombie)
+        assertCreatureEqual(z[1], zombie2)
+      })
     })
-    it('find({ type: EntityType })', function () {
-      const z = outbreak.entity.find({ type: EntityType.Zombie })
-      assert.strictEqual(z.length, 2)
-      assertCreatureEqual(z[0], zombie)
-      assertCreatureEqual(z[1], zombie2)
-    })
-    it('find(EntityType, Coords)', function () {
-      const z = outbreak.entity.find({ type: EntityType.Zombie }, { at: pos1 })
-      assert.strictEqual(z.length, 1)
-      assertCreatureEqual(z[0], zombie2)
-    })
-    it('find(EntityType, Array<Coords>)', function () {
-      let z = outbreak.entity.find({ type: EntityType.Zombie }, { at: [ pos1 ] })
-      assert.strictEqual(z.length, 1)
-      assertCreatureEqual(z[0], zombie2)
 
-      z = outbreak.entity.find({ type: EntityType.Zombie }, { at: [ pos1, origin ] })
-      assert.strictEqual(z.length, 2)
-      assertCreatureEqual(z[0], zombie)
-      assertCreatureEqual(z[1], zombie2)
+    describe('find by `query` and `filter`)', function () {
+      it('should find nothing when filtering inexistant property', function () {
+        const z = outbreak.entity.find({ type: EntityType.Zombie }, { volume: 12 })
+        assert.strictEqual(z.length, 0)
+      })
+      it('find({ at: Coords }, EntityType)', function () {
+        const z = outbreak.entity.find({ at: pos1 }, { type: EntityType.Human })
+        assert.strictEqual(z.length, 1)
+        assertCreatureEqual(z[0], survivor)
+      })
+      it('find({ at: Coords }, Array<EntityType>)', function () {
+        let z = outbreak.entity.find({ at: pos1 }, { type: [ EntityType.Human ] })
+        assert.strictEqual(z.length, 1)
+        assertCreatureEqual(z[0], survivor)
+
+        z = outbreak.entity.find({ at: pos1 }, { type: [ EntityType.Human, EntityType.Zombie ] })
+        assert.strictEqual(z.length, 2)
+        assertCreatureEqual(z[0], zombie2)
+        assertCreatureEqual(z[1], survivor)
+      })
+      describe('find(EntityType, Coords)', function () {
+        it('should find 1 zombie at (1,0)', function () {
+          const z = outbreak.entity.find({ type: EntityType.Zombie }, { at: clone(pos1) })
+          assert.strictEqual(z.length, 1)
+          assertCreatureEqual(z[0], zombie2)
+        })
+      })
+      describe('find(EntityType, Array<Coords>)', function () {
+        it('shouldn\'t find any zombie at [(2,0)]', function () {
+          const z = outbreak.entity.find({ type: EntityType.Zombie }, { at: [{ x: 2, y: 0 }] })
+          assert.strictEqual(z.length, 0)
+        })
+        it('should find 1 zombie at [(1,0)]', function () {
+          const z = outbreak.entity.find({ type: EntityType.Zombie }, { at: [ clone(pos1) ] })
+          assert.strictEqual(z.length, 1)
+          assertCreatureEqual(z[0], zombie2)
+        })
+        it('should find 2 zombies at [(1,0), (0,0)]', function () {
+          const z = outbreak.entity.find({ type: EntityType.Zombie }, { at: [ clone(pos1), clone(origin) ] })
+          assert.strictEqual(z.length, 2)
+          assertCreatureEqual(z[0], zombie)
+          assertCreatureEqual(z[1], zombie2)
+        })
+      })
     })
   })
 

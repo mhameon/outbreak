@@ -13,11 +13,11 @@ import { ConnectionRefusedError } from './ServerErrors'
 import { isGameId } from '#engine/guards'
 import type { InterServerEvents, SocketData } from '#engine/events'
 import type { ClientToServerEvents, ServerToClientEvents } from '#shared/events'
-import { Nullable } from '#common/types'
 import type { SocketId } from 'socket.io-adapter'
 import { NotFoundError } from '#common/Errors'
 import { getLogger } from '#common/logger'
 import type { SessionData } from 'express-session'
+import { Nullable } from '#shared/types'
 
 const LOBBY = 'lobby' as const
 
@@ -159,7 +159,6 @@ export class GameServer {
     }
 
     const uptime = this.#http.listening && this.#startListeningAt ? (+new Date() - +this.#startListeningAt) / 1000 : 0
-
     return {
       started: this.#http.listening,
       uptime: Math.round(+uptime),
@@ -172,11 +171,10 @@ export class GameServer {
     this.game.on('game:created', (outbreak) => {
       outbreak.on('game:turn:resolved', ({ gameId, turn }) => {
         const newTurn = turn + 1
-        this.#io.in(gameId).allSockets().then((socketIds) => {
-          for (const socketId of socketIds) {
-            const client = this.#clients.get(socketId)
+        this.#io.in(gameId).fetchSockets().then((sockets) => {
+          for (const socket of sockets) {
+            const client = this.#clients.get(socket.id)
             if (client) {
-              const socket = this.#io.to(socketId)
               socket.emit('msg', `Turn ${newTurn} is starting`)
               socket.emit('game:state', outbreak.getGameState(client.player.id))
             }
@@ -189,7 +187,7 @@ export class GameServer {
 
   private registerPlayerActions (socket: Socket): void {
     socket
-      .on('player:join:game', ({ requestedGameId }: { requestedGameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
+      .on('player:join:game', (join: { requestedGameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
         // socket.on(event.game.join, (args) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
@@ -212,10 +210,10 @@ export class GameServer {
           return
         }
 
-        if (!requestedGameId) {
+        if (!join?.requestedGameId) {
           gameId = this.game.create()
         } else {
-          gameId = requestedGameId
+          gameId = join.requestedGameId
           if (!this.game.has(gameId)) {
             return ack({ gameId: null })
           }
@@ -227,15 +225,14 @@ export class GameServer {
 
           this.leaveRoom(socket, LOBBY)
           this.joinRoom(socket, gameId)
-          socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
           socket.emit('msg', `You joined the game, ${socket.id}`)
+          socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game`)
 
           return ack({ gameId })
         } else {
           return ack({ gameId: null })
         }
       })
-      //.on('player:leave:game', ({ gameId }: { gameId: GameId }, ack: (data: { ok: boolean }) => void) => {
       .on('player:leave:game', (gameId, ack: (data: { ok: boolean }) => void) => {
         this.leaveRoom(socket, gameId, (wasLast) => {
           if (wasLast) {
@@ -261,6 +258,8 @@ export class GameServer {
     this.#io.use((socket, next) => {
       session(socket.request as unknown as Request, {} as Response, next as NextFunction)
     })
+
+    //FIXME: Avoid multi connection! 2 tabs with same (session cookie) give 2 differents socket id
 
     // ...and only allow authenticated users
     this.#io.use((socket, next) => {
@@ -327,7 +326,7 @@ export class GameServer {
       .on('disconnecting', (reason) => {
         this.log.http('🟠 Disconnecting (%s)', reason, { socketId: socket.id })
         const gameRooms = [ ...socket.rooms ].filter(isGameId)
-        if (gameRooms.length > 1) {
+        if (gameRooms.length === 1) {
           const [ gameId ] = gameRooms
 
           this.leaveRoom(socket, gameId, (wasLast) => {

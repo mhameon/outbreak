@@ -6,13 +6,18 @@ import { Outbreak } from '#engine/outbreak/index'
 import { random } from '#engine/math'
 import { WorldMap } from '#engine/map/WorldMap'
 import { isCoords } from '#engine/guards'
-import { Nullable } from '#common/types'
 import { toArray } from '#common/helpers'
 import { expect, NotFoundError } from '#common/Errors'
 import { calculateDestination, calculateDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import assert from 'assert'
-import { hasAttitudeProperty, hasFacingProperty, isEntityId, isEntityQuery } from '#engine/outbreak/entities/guards'
+import {
+  hasAttitudeProperty,
+  hasFacingProperty,
+  isEntityId,
+  isEntityQuery,
+  isEntityIdArray
+} from '#engine/outbreak/entities/guards'
 import {
   Entity,
   EntityProperties,
@@ -25,6 +30,8 @@ import {
   QUERYABLE_ENTITY_ATTRIBUTES, EntityQueryFilters, QueryableEntityAttributeType
 } from '#engine/outbreak/entities/types'
 import { EntityManagerEvents } from '#engine/events'
+import { Nullable } from '#shared/types'
+import { isEqual } from 'lodash'
 
 /**
  * Handle entities in an Outbreak and apply map constraints, lifecycle, etc.
@@ -84,9 +91,24 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return entity
   }
 
-  find<AnEntity extends Entity = Entity> (id: Array<EntityId>): Array<AnEntity>
+  /**
+   * Find an Entity by his `EntityId`
+   */
   find<AnEntity extends Entity = Entity> (id: EntityId): Nullable<AnEntity>
-  find<AnEntity extends Entity = Entity> (query: EntityQuery, filter?: EntityQueryFilters): Array<AnEntity>
+  /**
+   * Find entities by an array of `EntityId`
+   */
+  find<AnEntity extends Entity = Entity> (id: Array<EntityId>): Array<AnEntity>
+  /**
+   * Find entities by querying "indexed" attributes
+   * @see QueryableEntityAttribute
+   */
+  find<AnEntity extends Entity = Entity> (query: EntityQuery): Array<AnEntity>
+  /**
+   * Find entities by querying "indexed" attributes then applying additional filtering
+   * @see QueryableEntityAttribute
+   */
+  find<AnEntity extends Entity = Entity> (query: EntityQuery, filter: EntityQueryFilters): Array<AnEntity>
   find<AnEntity extends Entity = Entity> (
     p1: EntityId | Array<EntityId> | EntityQuery,
     filters?: EntityQueryFilters
@@ -94,6 +116,11 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     if (isEntityId(p1)) {
       // find( EntityId )
       return this.#entities.get(p1) ?? null
+    }
+
+    if (isEntityIdArray(p1)) {
+      // find( Array<EntityId> )
+      return p1.flatMap(id => this.find<AnEntity>(id) ?? [])
     }
 
     if (isEntityQuery(p1)) {
@@ -105,30 +132,28 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
       if (!entityIds?.size) {
         return []
       }
-      const entities = this.find<AnEntity>(toArray(entityIds))
 
+      // find(query: EntityQuery)
+      const entities = this.find<AnEntity>(toArray(entityIds))
       if (!filters) {
         return entities
       }
 
+      // find(query: EntityQuery, filter: EntityQueryFilters)
+      const entries = Object.entries(filters)
+      // Todo: perf: if `filters` has same keys than `query` keys, remove them from `entries` to avoid useless filtering
       return entities.filter(entity => {
-        return Object.entries(filters).reduce((keep, [ attribute, value ]) => {
-          if (!(attribute in entity)) {
-            return false
+        return entries.reduce((keep, [ property, value ]) => {
+          if (property in entity) {
+            return keep && toArray(value).some((v) => isEqual(v, entity[property as keyof Entity]))
           }
-          const entityAttribute = entity[attribute as QueryableEntityAttribute]
-          return keep && (Array.isArray(value) ? value : [ value ]).includes(entityAttribute)
+          return false
         }, true)
       })
     }
 
-    if (p1?.length > 0 && isEntityId(p1[0])) {
-      // find( Array<EntityId> )
-      return p1.flatMap(id => this.find<AnEntity>(id) ?? [])
-    }
-
-    this.log.error('WTF?! find(%j)', p1)
-    return null
+    this.log.error('WTF?! find(%j)', { p1, filters })
+    return []
   }
 
   move<AnEntity extends Entity = Entity> (id: EntityId, to: Direction | Coords): AnEntity {

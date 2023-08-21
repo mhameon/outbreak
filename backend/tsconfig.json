@@ -10,6 +10,7 @@
     "strict": true,
     "outDir": "./build",
     "sourceMap": true,
+    "skipLibCheck": true,
     "incremental": true,
     "removeComments": true,
     "experimentalDecorators": true,
@@ -38,6 +39,7 @@
   "include": [
     "src",
     "test",
-    "config"
+    "config",
+    "../shared"
   ]
 }

@@ -8,7 +8,7 @@ import { useSocket } from '../hook/useSocket'
 const { protocol, hostname } = window.location
 const uri = `${protocol}//${hostname}:8080`
 
-function Client (): JSX.Element {
+function DEPRECATED_Client (): JSX.Element {
   //const [ client, initClient ] = useState<SocketProvider | null>(null)
   const client = useSocket(uri)
 
@@ -80,11 +80,6 @@ function Client (): JSX.Element {
   }
 
   useEffect(() => {
-    // const client = io(uri, {
-    //   transports: [ 'websocket' ],
-    //   withCredentials: true,
-    // })
-
     client
       .on('msg', (message: string) => {
         console.log(`[msg] ${message}`)
@@ -186,4 +181,4 @@ function Client (): JSX.Element {
   )
 }
 
-export default Client
+export default DEPRECATED_Client

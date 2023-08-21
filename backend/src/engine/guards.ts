@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorldMap } from '#engine/map/WorldMap'
 import type { Coords, Matrix2d, Index, GameId } from '#engine/types'
-import { isObject } from '#common/guards'
-import { EntityType } from '#engine/outbreak/entities/types'
 import { GAME_ID_PREFIX } from '#engine/types'
-
-export function isNumber (arg: any): arg is number {
-  return !isNaN(+arg)
-}
+import { isObject, isNumber } from '#common/guards'
+import { EntityType } from '#engine/outbreak/entities/types'
 
 const isSomeEnum = <T extends { [n: number | string]: unknown }> (enumType: T) => (token: unknown): token is T[keyof T] => Object.values(enumType).includes(token as T[keyof T])
 

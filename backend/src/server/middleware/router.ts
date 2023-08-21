@@ -11,7 +11,7 @@ staticRoutes.use('/', express.static(path.join(root, '../app/build')))
 staticRoutes.use('/static', express.static(path.join(root, '../app/build/static')))
 
 // Backend API
-const log = getLogger('api')
+const log = getLogger('Express')
 const apiRoutes = express.Router()
 apiRoutes.post('/login', (req, res, next) => {
   log.http(`${req.method} ${req.url}`, {

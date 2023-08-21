@@ -1,5 +1,5 @@
 import { Renderers } from '../renderer'
-import type { GameId } from '#shared/types'
+import type { GameId, GameState } from '#shared/types'
 import { getLogger, Logger } from '#common/logger'
 import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
@@ -92,7 +92,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
   /**
    * Return game state saw by the Player
    */
-  getGameState (playerId: PlayerId): any {
+  getGameState (playerId: PlayerId): GameState {
     assert(this.#players.has(playerId), new NotFoundError(playerId, 'Player'))
 
     // Todo create a gameStateBuilder to build the structure (+share things with clients to allow easier handle)

@@ -4,7 +4,10 @@ import { Outbreak } from '#engine/outbreak'
 
 //-- Socket.io events --------------------------------------------------------------------------------------------------
 
-/** @see /Outbreak/shared/events.ts */
+/**
+ * @see ClientToServerEvents
+ * @see ServerToClientEvents
+ */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InterServerEvents {
@@ -24,14 +27,15 @@ export type OutbreakEvents = {
   'game:turn:resolved': { gameId: GameId; turn: number }
 }
 
-export type WorldMapEvents = {
-  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
-} & {
+type TileAddedEvent = {
   [key in `tile:${Tile}:added`]: { at: Coords; originalTileset: Tileset }
+}
+
+export type WorldMapEvents = TileAddedEvent & {
+  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
 }
 
 export type EntityManagerEvents = {
   'entity:spawned': Entity
   'entity:moved': { entity: Entity; from: Coords }
 }
-

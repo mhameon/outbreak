@@ -4,7 +4,7 @@ export type Coords = { x: number; y: number }
 
 /**
  * ```
- *  315°      0°     45°
+ *   315°     0°     45°
  *      NW    N    NE
  *        ↖   ↑   ↗
  *          0 1 2
@@ -12,7 +12,7 @@ export type Coords = { x: number; y: number }
  *          5 6 7
  *        ↙   ↓   ↘
  *      SW    S    SE
- *  225°     180°    135°
+ *   225°    180°    135°
  * ```
  */
 export enum Direction {
@@ -26,16 +26,20 @@ export enum Direction {
   SouthEast
 }
 
-/** DirectionInDegree[Direction.NorthEast] will give you 45° */
+/**
+ * Use this dictionary to convert a `Direction` in degrees
+ * @example
+ * DirectionInDegree[Direction.NorthEast] // will give you 45°
+ * */
 export const DirectionInDegree = [ 315, 0, 45, 270, 90, 225, 180, 135 ] as const
 
-/** DirectionClockwise[0] will give you Direction.North */
+/**
+ * Use this dictionary to convert a clockwise pos to `Direction`
+ * @example
+ * DirectionClockwise[0] // will give you Direction.North
+ * @see Direction
+ */
 export const DirectionClockwise = [ 1, 2, 4, 7, 6, 5, 3, 0 ] as const
-
-export type Size = {
-  width: number
-  height: number
-}
 
 export type BuildingLevel = 'Level1' | 'Level2' | 'Level3' | 'Level4' | 'Level5'
 
@@ -110,8 +114,8 @@ export type Around = Map<Values<typeof Direction>, Tileset>
 
 // export const GAME_ID_PREFIX = 'game_'
 // export type GameId = `${typeof GAME_ID_PREFIX}${string}`
-export { GAME_ID_PREFIX } from '../../../shared/types'
-export type { GameId } from '../../../shared/types'
+export { GAME_ID_PREFIX } from '#shared/types'
+export type { GameId } from '#shared/types'
 
 export type Seed = number | string
 

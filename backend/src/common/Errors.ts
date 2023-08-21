@@ -11,6 +11,7 @@ if (config.get('logger.exception')) {
 }
 
 /**
+ * Ensure error is one of the expected. Typically used in `catch` block.
  * @throws {UnexpectedError} if `error` isn't in `toBeInstanceOf`
  */
 export function expect (error: unknown, toBeInstanceOf: OneOrMany<Error | unknown>): void {
@@ -45,6 +46,6 @@ export class NotFoundError extends CustomError {
 export class UnexpectedError extends CustomError {
   constructor (error: unknown) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super((error as any)?.message ?? 'UnexpectedError: WTF, isn\'t that supposed to happen ?!')
+    super((error as any)?.message ?? 'UnexpectedError: WTF, it\'s not supposed to happen ?!')
   }
 }
