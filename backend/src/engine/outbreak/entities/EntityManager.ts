@@ -77,11 +77,12 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   }
 
   private buildWithDefaultValues (entity: Entity): Entity {
+    if (!hasFacingProperty(entity)) {
+      entity.facing = random.direction()
+    }
+
     switch (entity.type) {
       case EntityType.Zombie:
-        if (!hasFacingProperty(entity)) {
-          entity.facing = random.direction()
-        }
         if (!hasAttitudeProperty(entity)) {
           entity.attitude = Attitude.Wandering
         }
@@ -110,22 +111,22 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
    */
   find<AnEntity extends Entity = Entity> (query: EntityQuery, filter: EntityQueryFilters): Array<AnEntity>
   find<AnEntity extends Entity = Entity> (
-    p1: EntityId | Array<EntityId> | EntityQuery,
+    query: EntityId | Array<EntityId> | EntityQuery,
     filters?: EntityQueryFilters
   ): Array<AnEntity> | Nullable<AnEntity> | Entity {
-    if (isEntityId(p1)) {
+    if (isEntityId(query)) {
       // find( EntityId )
-      return this.#entities.get(p1) ?? null
+      return this.#entities.get(query) ?? null
     }
 
-    if (isEntityIdArray(p1)) {
+    if (isEntityIdArray(query)) {
       // find( Array<EntityId> )
-      return p1.flatMap(id => this.find<AnEntity>(id) ?? [])
+      return query.flatMap(id => this.find<AnEntity>(id) ?? [])
     }
 
-    if (isEntityQuery(p1)) {
+    if (isEntityQuery(query)) {
       // find(query: EntityQuery, filter?: EntityQueryFilters)
-      const parameters = Object.entries(p1)
+      const parameters = Object.entries(query)
       const [[ attribute, value ]] = parameters.splice(0)
       const attributeMap = this.#entitiesByAttribute.get(attribute as QueryableEntityAttribute)
       const entityIds = attributeMap?.get(isCoords(value) ? WorldMap.index(value) : value)
@@ -152,7 +153,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
       })
     }
 
-    this.log.error('WTF?! find(%j)', { p1, filters })
+    this.log.error('WTF?! find(%j)', { query, filters })
     return []
   }
 

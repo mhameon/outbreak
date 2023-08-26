@@ -189,6 +189,7 @@ describe('EntityManager class', function () {
 
       assert.deepStrictEqual(outbreak.entity.find({ at: pos1 }), [ zombie2 ])
       assert.deepStrictEqual(survivor.at, { x: 2, y: 0 })
+      assert.deepStrictEqual(survivor.facing, Direction.East)
       assert.deepStrictEqual(outbreak.entity.find({ at: { x: 2, y: 0 } }), [ survivor ])
       assert.deepStrictEqual(outbreak.entity.find(survivor.id), survivor)
 

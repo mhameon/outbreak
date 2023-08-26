@@ -64,7 +64,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
 
   resolveTurn (): number {
     this.log.profile('resolveTurn')
-    this.log.debug(`Resolving turn ${this.#turn}...`)
+    this.log.info(`Resolving turn ${this.#turn}...`)
 
     this.resolvers.forEach(resolver => resolver.resolve())
     this.emit('game:turn:resolved', { gameId: this.id, turn: this.#turn })

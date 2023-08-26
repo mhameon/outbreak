@@ -1,5 +1,12 @@
 import assert from 'assert'
-import { isEntity, isEntityIdArray, hasVolumeProperty, isZombie, isEntityId } from '#engine/outbreak/entities/guards'
+import {
+  isEntity,
+  isEntityIdArray,
+  hasVolumeProperty,
+  isZombie,
+  isEntityId,
+  hasAttitudeProperty
+} from '#engine/outbreak/entities/guards'
 import { EntityType, Attitude } from '#engine/outbreak/entities/types'
 import { Direction } from '#engine/types'
 
@@ -32,10 +39,10 @@ describe('Entity type guards', function () {
       assert.ok({ facing: Direction.North })
     })
     it('hasAttitudeProperty', function () {
-      assert.ok({ attitude: Attitude.Tracking })
+      assert.ok(hasAttitudeProperty({ attitude: Attitude.Tracking }))
     })
     it('hasVolumeProperty', function () {
-      assert.ok({ volume: 42 })
+      assert.ok(hasVolumeProperty({ volume: 42 }))
     })
   })
 })
