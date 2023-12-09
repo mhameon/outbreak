@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OneOrMany } from '#common/types'
 import config from 'config'
+import { Direction, DirectionClockwise, DirectionInDegree } from '#engine/types'
+import { InvalidArgumentError } from '#common/Errors'
 
 type Functions = Array<(...args: any[]) => any>
 
@@ -20,6 +22,25 @@ export function toArray<T> (item: OneOrMany<T>): Array<T> {
  */
 export function toSet<T> (item: OneOrMany<T>): Set<T> {
   return new Set(item instanceof Set ? item : toArray<T>(item))
+}
+
+/**
+ * Convert a "clockwise index" to a `Direction`
+ * @see Direction
+ */
+export function toDirection (clockwiseIndex: number): Direction {
+  if (clockwiseIndex < 0 && clockwiseIndex > 7) {
+    throw new InvalidArgumentError('clockwiseIndex must be a number in [0, 7]')
+  }
+  return DirectionClockwise[clockwiseIndex]
+}
+
+/**
+ * Convert a `Direction` to his value in degrees
+ * @see Direction
+ */
+export function toDegrees (facing: Direction): number {
+  return DirectionInDegree[facing]
 }
 
 /**

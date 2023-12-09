@@ -1,12 +1,13 @@
 import {
   calculateDestination,
   calculateAngleInDegrees,
-  calculateDirection,
   isAdjacent,
-  groupAdjacent
+  groupAdjacent,
+  closestDirection
 } from '#engine/math/geometry'
-import assert, { strictEqual } from 'assert'
+import assert from 'node:assert'
 import { Direction } from '#engine/types'
+import { random } from '#engine/math'
 
 describe('geometry', function () {
   const origin = { x: 0, y: 0 }
@@ -43,22 +44,30 @@ describe('geometry', function () {
     assert.deepStrictEqual(calculateAngleInDegrees(origin, { x: -1, y: -1 }), 315)
   })
 
-  it('calculateDirection', function () {
-    assert.deepStrictEqual(calculateDirection(origin, { x: 0, y: -1 }), Direction.North)
-    assert.deepStrictEqual(calculateDirection(origin, { x: 2, y: -10 }), Direction.North)
+  describe('closestDirection', function () {
+    it('with angle', function () {
+      assert.strictEqual(closestDirection(-10), Direction.North)
+      assert.strictEqual(closestDirection(0), Direction.North)
+      assert.strictEqual(closestDirection(15), Direction.North)
+      assert.strictEqual(closestDirection(40), Direction.NorthEast)
+    })
+    it('with Coords', function () {
+      assert.strictEqual(closestDirection(origin, { x: 0, y: -1 }), Direction.North)
+      assert.strictEqual(closestDirection(origin, { x: 2, y: -10 }), Direction.North)
 
-    assert.deepStrictEqual(calculateDirection(origin, { x: 1, y: -1 }), Direction.NorthEast)
-    assert.deepStrictEqual(calculateDirection(origin, { x: 1, y: 0 }), Direction.East)
-    assert.deepStrictEqual(calculateDirection(origin, { x: 1, y: 1 }), Direction.SouthEast)
+      assert.strictEqual(closestDirection(origin, { x: 1, y: -1 }), Direction.NorthEast)
+      assert.strictEqual(closestDirection(origin, { x: 1, y: 0 }), Direction.East)
+      assert.strictEqual(closestDirection(origin, { x: 1, y: 1 }), Direction.SouthEast)
 
-    assert.deepStrictEqual(calculateDirection(origin, { x: 0, y: 1 }), Direction.South)
-    assert.deepStrictEqual(calculateDirection({ x: 6, y: 5 }, { x: 6, y: 6 }), Direction.South)
+      assert.strictEqual(closestDirection(origin, { x: 0, y: 1 }), Direction.South)
+      assert.strictEqual(closestDirection({ x: 6, y: 5 }, { x: 6, y: 6 }), Direction.South)
 
-    assert.deepStrictEqual(calculateDirection(origin, { x: -1, y: 1 }), Direction.SouthWest)
-    assert.deepStrictEqual(calculateDirection(origin, { x: -1, y: 0 }), Direction.West)
+      assert.strictEqual(closestDirection(origin, { x: -1, y: 1 }), Direction.SouthWest)
+      assert.strictEqual(closestDirection(origin, { x: -1, y: 0 }), Direction.West)
 
-    assert.deepStrictEqual(calculateDirection(origin, { x: -1, y: -1 }), Direction.NorthWest)
-    assert.deepStrictEqual(calculateDirection(origin, { x: -10, y: -5 }), Direction.NorthWest)
+      assert.strictEqual(closestDirection(origin, { x: -1, y: -1 }), Direction.NorthWest)
+      assert.strictEqual(closestDirection(origin, { x: -10, y: -5 }), Direction.NorthWest)
+    })
   })
 
   it('isAdjacent', function () {
@@ -104,15 +113,17 @@ describe('geometry', function () {
     ]
     assert.deepStrictEqual(groupAdjacent(coords), grouped)
 
-    // same coords, different order
-    const coords2 = [
+    // Same coords, different order.
+    const randomizedCoords = random.shuffle([
       { x: 2, y: 3 }, { x: 1, y: 0 }, { x: 0, y: 1 },
       { x: 5, y: 1 }, { x: 3, y: 2 }, { x: 5, y: 2 },
       { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 0, y: 0 }, { x: 1, y: 5 },
       { x: 3, y: 3 }, { x: 3, y: 4 },
       { x: 5, y: 5 }, { x: 5, y: 0 }
-    ]
-    assert.strictEqual(groupAdjacent(coords2).length, 5)
+    ])
+    assert.strictEqual(groupAdjacent(randomizedCoords).length, 5)
+
+    // We have to reorder groups to test their content
   })
 
   // it.only('experiment', function () {

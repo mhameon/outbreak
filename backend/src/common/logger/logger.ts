@@ -2,6 +2,7 @@ import config from 'config'
 import winston, { LogEntry } from 'winston'
 import { DEFAULT_LOG_FILE } from '#common/logger'
 import util from 'util'
+import { isEnv } from '#common/helpers'
 
 export type LogMethod = winston.LeveledLogMethod
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
@@ -69,7 +70,7 @@ export function getLogger (label = 'default', metadata: Record<string, any> = {}
     ],
   })
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isEnv('production')) {
     logger.add(new winston.transports.Console({
       stderrLevels: [],
       format: combine(

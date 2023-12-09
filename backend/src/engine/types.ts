@@ -4,11 +4,11 @@ export type Coords = { x: number; y: number }
 
 /**
  * ```
- *   315°     0°     45°
- *      NW    N    NE
+ *   315°     0°     45°  ⋅⋅⋅⋅⋅ Angles (degrees)
+ *      NW    N    NE  ⋅⋅⋅⋅⋅⋅⋅⋅ Directions
  *        ↖   ↑   ↗
- *          0 1 2
- * 270° W ← 3 · 4 → E 90°
+ *          0 1 2  ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ Clockwise indexes
+ * 270° W ← 3   4 → E 90°
  *          5 6 7
  *        ↙   ↓   ↘
  *      SW    S    SE
@@ -27,17 +27,16 @@ export enum Direction {
 }
 
 /**
- * Use this dictionary to convert a `Direction` in degrees
- * @example
- * DirectionInDegree[Direction.NorthEast] // will give you 45°
+ * Dictionary to convert a `Direction` to degrees
+ * @example DirectionInDegree[Direction.NorthEast] // will give you 45°
+ * @see toDegrees
  * */
 export const DirectionInDegree = [ 315, 0, 45, 270, 90, 225, 180, 135 ] as const
 
 /**
- * Use this dictionary to convert a clockwise pos to `Direction`
- * @example
- * DirectionClockwise[0] // will give you Direction.North
- * @see Direction
+ * Dictionary to convert a clockwise index to `Direction`
+ * @example DirectionClockwise[0] // will give you Direction.North
+ * @see toDirection
  */
 export const DirectionClockwise = [ 1, 2, 4, 7, 6, 5, 3, 0 ] as const
 

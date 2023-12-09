@@ -1,11 +1,11 @@
-import { Coords, Tile, Index, Tileset, Around, InMapTileset, Direction, DirectionInDegree } from '../types'
+import { Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoords, isIndex } from '../guards'
 import { Seeder } from '#engine/map/builder/MapBuilder'
 import { InvalidArgumentError, expect } from '#common/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
 import { Values, OneOrMany } from '#common/types'
-import { deleteInSet, toArray } from '#common/helpers'
+import { deleteInSet, toArray, toDegrees } from '#common/helpers'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { calculateDestination } from '#engine/math/geometry'
 import { WorldMapEvents } from '#engine/events'
@@ -168,7 +168,7 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
       try {
         around.set(
           direction as Values<typeof Direction>,
-          this.get(calculateDestination(at, DirectionInDegree[direction], 1))
+          this.get(calculateDestination(at, toDegrees(direction), 1))
         )
       } catch (e) {
         // Do nothing

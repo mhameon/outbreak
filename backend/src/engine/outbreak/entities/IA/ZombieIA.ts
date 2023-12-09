@@ -3,7 +3,7 @@ import { WorldMap } from '#engine/map/WorldMap'
 import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 import { Dijkstra } from '#engine/math/pathfinding/Dijkstra'
 import { matrix, random } from '#engine/math'
-import { DirectionInDegree, Direction } from '#engine/types'
+import { Direction } from '#engine/types'
 import { closestDirection } from '#engine/math/geometry'
 import { Logger } from '#common/logger'
 
@@ -12,6 +12,7 @@ import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { Node } from '#engine/math/pathfinding/types'
 import { byLightWeightFirst } from '#engine/math/pathfinding/utils'
+import { toDegrees } from '#common/helpers'
 
 export class ZombieIA {
   readonly log: Logger
@@ -116,7 +117,7 @@ export class ZombieIA {
     let attempt = 1
     while (attempt <= 4 && !this.entity.canMove(zombie, destination)) {
       // Attempt on the left
-      angle = DirectionInDegree[zombie.facing] - attempt * 45
+      angle = toDegrees(zombie.facing) - attempt * 45
       if (angle < 0) {
         angle = 360 + angle
       }
@@ -124,7 +125,7 @@ export class ZombieIA {
 
       // Attempt on the right
       if (!this.entity.canMove(zombie, destination)) {
-        angle = DirectionInDegree[zombie.facing] + attempt * 45
+        angle = toDegrees(zombie.facing) + attempt * 45
         if (angle >= 360) {
           angle = angle - 360
         }

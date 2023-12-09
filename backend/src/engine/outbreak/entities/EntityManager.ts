@@ -1,14 +1,14 @@
 import { EventEmitter } from '#common/TypedEventEmitter'
 import type { Coords } from '#engine/types'
-import { Direction, DirectionInDegree } from '#engine/types'
+import { Direction } from '#engine/types'
 import type { Logger } from '#common/logger'
 import { Outbreak } from '#engine/outbreak/index'
 import { random } from '#engine/math'
 import { WorldMap } from '#engine/map/WorldMap'
 import { isCoords } from '#engine/guards'
-import { toArray } from '#common/helpers'
+import { toArray, toDegrees } from '#common/helpers'
 import { expect, NotFoundError } from '#common/Errors'
-import { calculateDestination, calculateDirection } from '#engine/math/geometry'
+import { calculateDestination, closestDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import assert from 'assert'
 import {
@@ -170,9 +170,9 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     let facing: Direction
     if (isCoords(to)) {
       destination = to
-      facing = calculateDirection(entity.at, to)
+      facing = closestDirection(entity.at, to)
     } else {
-      destination = calculateDestination(entity.at, DirectionInDegree[to], 1)
+      destination = calculateDestination(entity.at, toDegrees(to), 1)
       facing = to
     }
     this.delete(entity)
@@ -193,7 +193,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     if (isCoords(to)) { // Todo check distance?
       destination = to
     } else {
-      destination = calculateDestination(creature.at, DirectionInDegree[to], 1)
+      destination = calculateDestination(creature.at, toDegrees(to), 1)
     }
 
     try {

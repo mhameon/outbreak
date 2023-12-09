@@ -1,5 +1,9 @@
-import { Coords, Direction, DirectionClockwise } from '#engine/types'
+import { Coords, Direction } from '#engine/types'
 import { Nullable } from '#shared/types'
+import { isNumber } from '#common/guards'
+import { isCoords } from '#engine/guards'
+import { InvalidArgumentError } from '#common/Errors'
+import { toDirection } from '#common/helpers'
 
 /**
  * @param origin Coords
@@ -15,18 +19,11 @@ export function calculateDestination (origin: Coords, angle: number, distance = 
 }
 
 /**
- * @return Angle in degrees (0-360), always > 0
+ * @returns An angle in degrees (0-360), always > 0
  */
 export function calculateAngleInDegrees (origin: Coords, to: Coords): number {
   const angleInRadians = Math.atan2(to.y - origin.y, to.x - origin.x) + 0.5 * Math.PI
   return (angleInRadians >= 0 ? angleInRadians : (2 * Math.PI + angleInRadians)) * 180 / Math.PI
-}
-
-/**
- * @return Closest `Direction` angle
- */
-export function calculateDirection (origin: Coords, to: Coords): Direction {
-  return closestDirection(calculateAngleInDegrees(origin, to))
 }
 
 export function calculateCentroid (coords: Array<Coords>): Coords {
@@ -45,10 +42,26 @@ export function calculateCentroid (coords: Array<Coords>): Coords {
   }
 }
 
-export function closestDirection (degrees: number): Direction {
-  const direction = Math.floor(Math.abs(degrees) / 45) + (Math.abs(degrees) % 45 >= 22.5 ? 1 : 0)
-  return DirectionClockwise[direction >= 8 ? 0 : direction]
+/**
+ * @returns The closest `Direction` between `Direction.North` and the line (`origin`, `to`)
+ */
+function closestDirection (origin: Coords, to: Coords): Direction
+/**
+ * @returns The closest `Direction` corresponding to the provided angle in `degrees`
+ */
+function closestDirection (degrees: number): Direction
+function closestDirection (p1: Coords | number, p2?: Coords): Direction {
+  if (isCoords(p1) && isCoords(p2)) {
+    return closestDirection(calculateAngleInDegrees(p1, p2))
+  }
+  if (isNumber(p1)) {
+    const direction = Math.floor(Math.abs(p1) / 45) + (Math.abs(p1) % 45 >= 22.5 ? 1 : 0)
+    return toDirection(direction >= 8 ? 0 : direction)
+  }
+  throw new InvalidArgumentError(`closestDirection(${p1}, ${p2})`)
 }
+
+export { closestDirection }
 
 /**
  * note: identical coords are considered as adjacent
@@ -82,7 +95,7 @@ export function groupAdjacent (coords: Array<Coords>): Array<Array<Coords>> {
 
 /**
  * Prim's algorithm: starting from the first `coords`
- * @see https://en.wikipedia.org/wiki/Prim%27s_algorithm
+ * @see https://en.wikipedia.org/wiki/Prim%27s_algorithm Prim's algorithm
  */
 export function prim (coords: Array<Coords>): Array<Coords> {
   const vertices = [ ...coords ]

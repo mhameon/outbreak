@@ -4,14 +4,16 @@ import assert from 'assert'
 const testMatrix = [[ -3, -2, -1, 0 ], [ 0, 1, 2, 3 ]]
 
 describe('matrix', function () {
-  it('create (filled with 0)', function () {
-    const array = matrix.create({ width: 3, height: 2 }, 0)
-    assert.deepStrictEqual(array, [[ 0, 0, 0 ], [ 0, 0, 0 ]])
-  })
+  describe('create', function () {
+    it('filled with 0', function () {
+      const array = matrix.create({ width: 3, height: 2 }, 0)
+      assert.deepStrictEqual(array, [[ 0, 0, 0 ], [ 0, 0, 0 ]])
+    })
 
-  it('create (filled with function)', function () {
-    const array = matrix.create({ width: 3, height: 2 }, (x, y) => x + y)
-    assert.deepStrictEqual(array, [[ 0, 1, 2 ], [ 1, 2, 3 ]])
+    it('filled with function', function () {
+      const array = matrix.create({ width: 3, height: 2 }, (x, y) => x + y)
+      assert.deepStrictEqual(array, [[ 0, 1, 2 ], [ 1, 2, 3 ]])
+    })
   })
 
   it('min', function () {
