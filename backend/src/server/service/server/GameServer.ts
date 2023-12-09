@@ -3,7 +3,7 @@ import assert from 'assert'
 import config from 'config'
 import http from 'http'
 import type { AddressInfo } from 'net'
-import type { Express, RequestHandler, Request, Response, NextFunction } from 'express'
+import type { Express, RequestHandler } from 'express'
 import { Server } from 'socket.io'
 import type { Socket } from 'socket.io'
 import { registerSocketEventLogger } from './socketEventLogger'
@@ -187,7 +187,9 @@ export class GameServer {
 
   private registerPlayerActions (socket: Socket): void {
     socket
-      .on('player:join:game', (join: { requestedGameId?: GameId }, ack: (data: { gameId: Nullable<GameId> }) => void) => {
+      .on('player:join:game', (join: { requestedGameId?: GameId }, ack: (data: {
+        gameId: Nullable<GameId>
+      }) => void) => {
         // socket.on(event.game.join, (args) => {
         // Middleware for 'game:join' event. Error "catch" in socket.on('error', (err) => {}) handler
         // socket.use(([ event, ...args ], next) => {
@@ -255,9 +257,7 @@ export class GameServer {
     })
 
     // Handle Express session...
-    this.#io.use((socket, next) => {
-      session(socket.request as unknown as Request, {} as Response, next as NextFunction)
-    })
+    this.#io.engine.use(session)
 
     //FIXME: Avoid multi connection! 2 tabs with same (session cookie) give 2 differents socket id
 

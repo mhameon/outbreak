@@ -92,8 +92,8 @@ export class CityMapBuilder extends MapBuilder {
       )
     )
 
-    //this.map.add(Tile.Burning, line({ x: 0,y: 0 }, { x: 40,y: 25 }))
-    // this.map.add(Tile.Burning, line({ x: 3, y: 3 }, { x: 10, y: 13 }))
+    this.map.add(Tile.Burning, line({ x: 0, y: 0 }, { x: 40, y: 25 }))
+    this.map.add(Tile.Burning, line({ x: 3, y: 3 }, { x: 10, y: 13 }))
     // this.map.set([ Tile.Road, Tile.Walkable ], line({ x: 0, y: 0 }, {
     //   x: this.map.size.width - 1,
     //   y: this.map.size.height - 1
