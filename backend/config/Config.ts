@@ -4,9 +4,16 @@ import 'config'
 declare module 'config' {
   interface IConfig {
     server: {
-      port: number
+      ws: {
+        host: string
+        port: number
+      }
       http: {
         host: string
+        port: number
+        session: {
+          name: string
+        }
       }
       cli: {
         enabled: boolean

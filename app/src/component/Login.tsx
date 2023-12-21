@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { SessionContext } from '../context/SessionContext'
+import { Session, type SessionData } from '../context/SessionContext'
 import { useApi } from '../hook/useApi'
 
 const zombieHeroes = [
@@ -15,7 +15,7 @@ const randomZombieHero = zombieHeroes[Math.floor(Math.random() * zombieHeroes.le
 
 export function Login () {
   const api = useApi()
-  const { session, setSession } = useContext(SessionContext)
+  const session = useContext(Session)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -27,14 +27,14 @@ export function Login () {
     )
     console.log(data)
 
-    try {
-      const res = await api.post<{ name: string }>('/login', data)
-      setSession!({ name: res.name })
-      //navigate('/play')
-    } catch (e) {
-      console.warn(e)
+    const sessionData = await api.post<SessionData>('/login', data)
+    if (sessionData) {
+      session.set(sessionData)
+      navigate('/play')
     }
+
   }
+
   return <form onSubmit={onSubmit}>
     {api.loading ? 'Loading....' : ''}
     <pre>{JSON.stringify(location)}</pre>
@@ -48,6 +48,7 @@ export function Login () {
         // onChange={handleChange}
       />
       <button type="submit">Submit</button>
+      {!!api.error && <p>{api.error}</p>}
     </fieldset>
   </form>
 }

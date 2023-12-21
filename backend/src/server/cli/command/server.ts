@@ -1,6 +1,6 @@
-import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
+import { CommandLineInterface } from '#server/cli/CommandLineInterface'
 import config from 'config'
-import { GameServer, ServerStatus } from '#server/service/server/GameServer'
+import { GameServer, ServerStatus } from '#server/ws/GameServer'
 import util from 'util'
 
 const utilsOptions = {
@@ -13,7 +13,7 @@ const utilsOptions = {
 
 export function registerServerCommands (cli: CommandLineInterface, server: GameServer): void {
   cli
-    .registerCommand('server:start', 'Start server listening', (port: number = config.get('server.port')) => server.listen(port))
+    .registerCommand('server:start', 'Start server listening', (port: number = config.get('server.ws.port')) => server.listen(port))
     .registerCommand('server:stop', 'Stop server listening', () => server.close())
     .registerCommand('server:status', 'Display server status', () => printServerStatus(server.status))
 }

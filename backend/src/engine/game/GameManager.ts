@@ -4,25 +4,17 @@ import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
 import crypto from 'crypto'
 import { getLogger } from '#common/logger'
 import { EventEmitter } from '#common/TypedEventEmitter'
-import { GameManagerEvents } from '#engine/events'
+import { Game } from '#shared/types'
 
 const log = getLogger('GameManager')
 
-type Game = {
-  id: GameId
-  name: string
-  // players: any[]
-  turn: number
+export type GameManagerEvents = {
+  'game:created': Outbreak
+  'game:deleted': GameId
 }
 
 /**
  * Handle & Manage games (Outbreak)
- *
- * Emitted events:
- * | Name           | Handler signature    |
- * |----------------|----------------------|
- * | `game:created` | (outbreak: Outbreak) |
- * | `game:deleted` | (gameId: GameId)     |
  */
 export class GameManager extends EventEmitter<GameManagerEvents> {
   readonly #games: Map<GameId, Outbreak> = new Map()
@@ -59,7 +51,8 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
    * @throws {NotFoundError}
    */
   delete (gameId: GameId): void {
-    this.get(gameId)
+    const outbreak = this.get(gameId)
+    outbreak.removeAllListeners()
     this.#games.delete(gameId)
     this.emit('game:deleted', gameId)
     log.info('Deleted `%s`', gameId, { gameId })
@@ -71,7 +64,7 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
       list.push({
         id: gameId,
         name: game.name,
-        // players: game.players,
+        players: game.playerCount,
         turn: game.currentTurn,
       })
     })

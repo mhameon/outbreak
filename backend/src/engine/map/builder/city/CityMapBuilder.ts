@@ -30,7 +30,8 @@ export class CityMapBuilder extends MapBuilder {
     const world = noise.build(
       this.map.size,
       ({ perlin, x, y }) => perlin.octavate(2, x * .08, y * .08),
-      cap(-1, 10), normalize,
+      cap(-1, 10),
+      normalize,
     )
     //console.log(matrix.debug(world))
 
@@ -136,8 +137,8 @@ export class CityMapBuilder extends MapBuilder {
     )
     //entity.spawn(EntityType.Zombie, { x: 6, y: 29 })
 
-    entity.spawn(EntityType.Human, { x: 6, y: 5 })
-    entity.spawn(EntityType.Human, { x: 40, y: 15 })
+    // entity.spawn(EntityType.Human, { x: 6, y: 5 })
+    // entity.spawn(EntityType.Human, { x: 40, y: 15 })
 
     entity.spawn(EntityType.Sound, { x: 10, y: 10 }, { volume: 7 })
   }

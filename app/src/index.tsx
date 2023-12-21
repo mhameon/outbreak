@@ -4,14 +4,18 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { RouterProvider } from 'react-router-dom'
 import { SessionProvider } from './context/provider/SessionProvider'
 import { router } from './router'
+import { App } from './component/App'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 )
+
 root.render(
   <React.StrictMode>
     <SessionProvider>
-      <RouterProvider router={router}/>
+      <App>
+        <RouterProvider router={router}/>
+      </App>
     </SessionProvider>
   </React.StrictMode>
 )

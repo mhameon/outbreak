@@ -1,6 +1,7 @@
-import { Entity } from '#engine/outbreak/entities/types'
-import { Coords, GameId, Tile, Tileset } from '#engine/types'
-import { Outbreak } from '#engine/outbreak'
+import type { EntityManagerEvents } from '#engine/outbreak/entities/EntityManager'
+import type { OutbreakEvents } from './outbreak/Outbreak'
+import type { GameManagerEvents } from './game/GameManager'
+import type { WorldMapEvents } from './map/WorldMap'
 
 //-- Socket.io events --------------------------------------------------------------------------------------------------
 
@@ -18,24 +19,10 @@ export interface SocketData {
 }
 
 //-- Node EventEmitter events ------------------------------------------------------------------------------------------
-export type GameManagerEvents = {
-  'game:created': Outbreak
-  'game:deleted': GameId
-}
 
-export type OutbreakEvents = {
-  'game:turn:resolved': { gameId: GameId; turn: number }
-}
-
-type TileAddedEvent = {
-  [key in `tile:${Tile}:added`]: { at: Coords; originalTileset: Tileset }
-}
-
-export type WorldMapEvents = TileAddedEvent & {
-  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
-}
-
-export type EntityManagerEvents = {
-  'entity:spawned': Entity
-  'entity:moved': { entity: Entity; from: Coords }
+export type {
+  EntityManagerEvents,
+  GameManagerEvents,
+  OutbreakEvents,
+  WorldMapEvents,
 }

@@ -1,25 +1,28 @@
 import React, { PropsWithChildren, useState } from 'react'
-import { SessionContext, defaultSessionContextState, Session, SessionContextProps } from '../SessionContext'
-
+import { Session, defaultSessionContextState, SessionData, SessionContext } from '../SessionContext'
+import { useLocalStorage } from 'usehooks-ts'
+import { useApi } from '../../hook/useApi'
 
 export const SessionProvider = ({ children }: PropsWithChildren) => {
-  const [ { session }, setSession ] = useState(defaultSessionContextState)
+  const [ localSessionStorage, setLocalSessionStorage ] = useLocalStorage<SessionData | undefined>('session', undefined)
+  const [ session, setSession ] = useState(localSessionStorage ? { get: localSessionStorage } : defaultSessionContextState)
+  const api = useApi()
 
-  const userSession: SessionContextProps = {
-    session: { ...session },
-    setSession: (session: Session | void) => {
-      if (session) {
-        session.isAuthenticated = true
-        setSession({ session })
-        return
-      }
+  const context: SessionContext = {
+    get: session.get,
+    set: (session: SessionData) => {
+      session.isAuthenticated = true
+      setSession({ get: session })
+      setLocalSessionStorage(session)
+    },
+    logout: async () => {
       setSession(defaultSessionContextState)
+      setLocalSessionStorage(undefined)
+      await api.post('/logout')
     }
   }
 
-  //const value = useMemo(() => ({ session, setSession: initSession }), [ session, setSession ])
-
-  return <SessionContext.Provider value={userSession}>
+  return <Session.Provider value={context}>
     {children}
-  </SessionContext.Provider>
+  </Session.Provider>
 }

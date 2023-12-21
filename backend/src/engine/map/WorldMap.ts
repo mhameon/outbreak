@@ -5,24 +5,29 @@ import { Seeder } from '#engine/map/builder/MapBuilder'
 import { InvalidArgumentError, expect } from '#common/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
 import { Values, OneOrMany } from '#common/types'
-import { deleteInSet, toArray, toDegrees } from '#common/helpers'
+import { deleteInSet, toArray } from '#common/helpers'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { calculateDestination } from '#engine/math/geometry'
-import { WorldMapEvents } from '#engine/events'
 import { Size } from '#shared/types'
+import { Serializable } from '#engine/Serializable'
+import { PlayerId } from '#server/ws/GameServer'
+import { toDegrees } from '#engine/helpers'
+
+
+export type WorldMapEvents = {
+  [key in `tile:${Tile}:added`]: { at: Coords; originalTileset: Tileset }
+}
+& {
+  'tile:added': { tile: Tile; at: Coords; originalTileset: Tileset }
+}
 
 /**
  * A 2D map structure describing the game board
- *
- * Emitted events:
- * | Name                 | Handler signature                                      |
- * |----------------------|--------------------------------------------------------|
- * | `tile:added`         | ({ tile: Tile, at: Coords, originalTileset: Tileset }) |
- * | `tile:${Tile}:added` | (at: Coords, originalTileset: Tileset)                 |
  */
-export class WorldMap extends EventEmitter<WorldMapEvents> {
+export class WorldMap extends EventEmitter<WorldMapEvents> implements Serializable {
   static readonly defaultTile = Tile.Grass
   static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
+  static TEMPORARY_inc = 0
 
   readonly size: Size
   readonly seeder?: Seeder
@@ -34,7 +39,7 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
     super()
     this.size = size
     this.seeder = seeder
-    this.name = 'Unnamed map'
+    this.name = 'Unnamed map ' + (++WorldMap.TEMPORARY_inc)
   }
 
   /**
@@ -57,7 +62,7 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
         //const merge = addSanitizedTileset(existingTiles, tileset)
         const merge = getSanitizedTileset([ ...existingTiles, ...tileset ], true)
         if (merge.size) {
-          const newTiles = deleteInSet<Tileset>(merge, existingTiles)
+          const newTiles = deleteInSet(merge, existingTiles)
           this.tiles.set(index, getSanitizedTileset([ ...existingTiles, ...newTiles ], true))
           added += this.emitTileAdded(newTiles, here, existingTiles)
         }
@@ -105,20 +110,20 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
     return removed
   }
 
-  replace (wanted: Tile, substitute: Tile | null, at: OneOrMany<Coords>): void {
+  replace (tile: Tile, by: Tile | null, at: OneOrMany<Coords>): void {
     const coords = toArray<Coords>(at)
     const here = coords.pop()
     if (coords.length) {
-      this.replace(wanted, substitute, coords)
+      this.replace(tile, by, coords)
     }
 
     if (isCoords(here)) {
-      const tile = this.get(here)
-      if (tile.has(wanted)) {
-        tile.delete(wanted)
+      const tileset = this.get(here)
+      if (tileset.has(tile)) {
+        tileset.delete(tile)
         this.set([
-          ...(getSanitizedTileset(tile, true).size ? tile : WorldMap.emptyTileset),
-          ...(substitute ? [ substitute ] : []),
+          ...(getSanitizedTileset(tileset, true).size ? tileset : WorldMap.emptyTileset),
+          ...(by ? [ by ] : []),
         ], here)
       }
     }
@@ -170,9 +175,8 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
           direction as Values<typeof Direction>,
           this.get(calculateDestination(at, toDegrees(direction), 1))
         )
-      } catch (e) {
-        // Do nothing
-        expect(e, OutOfMapError)
+      } catch (error) {
+        expect(error, OutOfMapError)
       }
     }
     return around
@@ -222,9 +226,8 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
     try {
       const tileset = this.get(at)
       return toArray<Tile>(tiles).every(tile => tileset.has(tile))
-    } catch (e) {
-      // Do nothing
-      expect(e, OutOfMapError)
+    } catch (error) {
+      expect(error, OutOfMapError)
     }
     return false
   }
@@ -248,6 +251,10 @@ export class WorldMap extends EventEmitter<WorldMapEvents> {
     if (!this.contains(at)) {
       throw new OutOfMapError(at, this.size)
     }
+  }
+
+  serialize (playerId?: PlayerId): any { // FIXME
+
   }
 
   static index (at: Coords): Index {

@@ -1,4 +1,4 @@
-import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
+import { CommandLineInterface } from '#server/cli/CommandLineInterface'
 import { Outbreak } from '#engine/outbreak/index'
 import { Coords, RenderTile, Direction } from '#engine/types'
 import { stringifyTiles } from '#engine/map/WorldMapErrors'

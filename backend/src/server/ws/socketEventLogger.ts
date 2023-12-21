@@ -1,7 +1,7 @@
-import { Logger } from '#common/logger'
-import { Socket } from 'socket.io'
+import type { Logger } from '#common/logger'
+import type { Socket } from 'socket.io'
+import type { GameId } from '#engine/types'
 import { isGameId } from '#engine/guards'
-import { GameId } from '#engine/types'
 
 export function registerSocketEventLogger (socket: Socket, log: Logger): void {
   socket.onAny((event, ...args) => {

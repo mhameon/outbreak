@@ -1,8 +1,8 @@
-import { CommandLineInterface } from '#server/service/cli/CommandLineInterface'
+import { CommandLineInterface } from '#server/cli/CommandLineInterface'
 import { GameManager } from '#engine/game/GameManager'
 import { GameId } from '#engine/types'
 import { Outbreak } from '#engine/outbreak/index'
-import { registerGameControlCommands } from '#server/service/cli/command/game-control'
+import { registerGameControlCommands } from '#server/cli/command/game-control'
 import { Nullable } from '#shared/types'
 
 let currentGameId: Nullable<GameId> = null

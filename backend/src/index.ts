@@ -1,8 +1,9 @@
 import config from 'config'
-import { createGameServer, serverCLI } from '#server/service/index'
+import { createGameServer } from '#server/index'
+import { serverCLI } from '#server/cli/index'
 
-const { port, cli } = config.server
+const { ws, cli } = config.server
 
 createGameServer()
   .registerPlugin(serverCLI(cli.enabled))
-  .listen(port)
+  .listen(ws.port)

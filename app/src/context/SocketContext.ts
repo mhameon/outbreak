@@ -1,6 +1,6 @@
 import React, { createContext } from 'react'
-import { Socket } from 'socket.io-client'
-import { GameId, Nullable } from '../../../shared/types'
+import { GameId, Nullable, Game } from '../../../shared/types'
+import { Socket } from '../types'
 
 export enum ServerConnectionStatus {
   disconnected,
@@ -11,18 +11,27 @@ export enum ServerConnectionStatus {
 export type ConnectionStatus = {
   status: ServerConnectionStatus
   attempt?: number
+  room?: string
+} | {
+  status: ServerConnectionStatus.connected
+  attempt: never
+  room: string
 }
 
-export interface SocketContextState {
+export type SocketContextState = {
   socket?: Socket
   connection: ConnectionStatus
+  lobby?: {
+    games: Array<Game>
+  }
 }
 
 export const defaultSocketContextState: SocketContextState = {
   socket: undefined,
   connection: {
     status: ServerConnectionStatus.disconnected,
-    attempt: undefined
+    attempt: undefined,
+    room: undefined
   }
 }
 
@@ -31,28 +40,30 @@ type SocketContextAction =
   | { type: 'server:connect' }
   | { type: 'server:disconnect' }
   | { type: 'socket:connection:status' } & ConnectionStatus
-  | { type: 'player:join:game' }
-  | { type: 'player:leave:game' }
+  | { type: 'player:join:game', requestGameId?: Nullable<GameId> }
+  | { type: 'player:leave:game', gameId: GameId }
+  | { type: 'game:created', room: string, games: Array<Game> }
 
 export const SocketReducer = (state: SocketContextState, payload: SocketContextAction): SocketContextState => {
-  const { type, ...args } = payload
-  console.log('Message received - Action: ' + payload.type + ' - Payload: ', args)
+  console.log('SocketReducer: Type=' + payload.type, payload)
 
-  switch (type) {
+  const isOnline = isConnected(state.connection)
+
+  switch (payload.type) {
     case 'init:socket':
       return { ...state, socket: payload.socket }
 
     case 'server:connect' :
       if (state.socket) {
         state.socket.connect()
-        return { ...state, connection: { status: ServerConnectionStatus.connecting, attempt: undefined } }
+        return { ...state, connection: { status: ServerConnectionStatus.connecting } }
       }
       break
 
     case 'server:disconnect':
       if (state.socket) {
         state.socket.disconnect()
-        return { ...state, connection: { status: ServerConnectionStatus.disconnected, attempt: undefined } }
+        return { ...state, connection: { status: ServerConnectionStatus.disconnected } }
       }
       break
 
@@ -60,15 +71,37 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
       return { ...state, connection: { status: payload.status, attempt: payload.attempt } }
 
     case 'player:join:game':
-      if (state.connection.status === ServerConnectionStatus.connected) {
+      if (isConnected(state.connection)) {
         state.socket?.emit(
           'player:join:game',
-          undefined,
-          ({ gameId }: { gameId: Nullable<GameId> }) => console.log(gameId)
+          { requestedGameId: payload.requestGameId ?? null },
+          (gameId) => console.log(gameId)
         )
       }
       break
+
+    case 'player:leave:game':
+      if (isOnline) {
+        const gameId: GameId = 'game_something' // fixme get real current game
+        state.socket?.emit('player:leave:game', gameId, ({ ok }) => {
+          console.log(`player:leave:game "${gameId}": ${ok}`)
+        })
+      }
+      break
+
+    case 'game:created':
+      if (isOnline) {
+        //if (state.connection.room !== payload.room) {
+        return { ...state, connection: { ...state.connection, room: payload.room }, lobby: { games: payload.games } }
+        // } else {
+        //   console.warn(`already in ${payload.room}`)
+      } else {
+        //   console.warn(`already in ${payload.room}`)
+        // }
+      }
+      break
   }
+
   return state
 }
 
@@ -82,3 +115,7 @@ export const SocketContext = createContext<SocketContextProps>({
   dispatchSocketState: () => {
   }
 })
+
+export function isConnected (connection: ConnectionStatus) {
+  return connection.status === ServerConnectionStatus.connected
+}

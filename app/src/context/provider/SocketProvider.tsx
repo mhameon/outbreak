@@ -17,10 +17,29 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     dispatchSocketState({ type: 'init:socket', socket })
     registerListeners()
     setLoading(false)
+
+    return () => {
+      socket.io.removeAllListeners()
+    }
+
     // eslint-disable-next-line
   }, [])
 
   const registerListeners = () => {
+    socket.io.on('packet', ({ type, data }) => {
+      // called for each packet received
+      console.debug(`>>> receive [${type}]`, data)
+    })
+
+    // socket.io.engine.on('packetCreate', ({ type, data }) => {
+    //   // called for each packet sent
+    //   console.log('<<< send', { type, data })
+    // })
+
+    socket.on('game:created', (room, games) => {
+      dispatchSocketState({ type: 'game:created', room, games: games || [] })
+    })
+
     /** Connection / reconnection listeners */
     socket.io.on('reconnect', (attempt) => {
       dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.connected })
@@ -61,8 +80,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
       console.info('Reconnection failure.')
       dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
 
-      // FIXME
-      alert('We are unable to connect you to the chat service.  Please make sure your internet connection is stable or try again later.')
+      alert('We are unable to connect you to the game server. Please make sure your internet connection is stable or try again later.')
     })
 
     socket.on('connect', () => {
@@ -76,12 +94,6 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     })
 
     socket.on('disconnect', (reason: string) => {
-      // setRequestedGameId('')
-      // setConnection({
-      //   id: client.id,
-      //   gameId: null,
-      //   isConnected: client.connected,
-      // })
       dispatchSocketState({ type: 'socket:connection:status', status: ServerConnectionStatus.disconnected })
       console.log(`disconnected (${reason})`)
     })

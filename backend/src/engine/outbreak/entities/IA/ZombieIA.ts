@@ -12,7 +12,7 @@ import { expect } from '#common/Errors'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
 import { Node } from '#engine/math/pathfinding/types'
 import { byLightWeightFirst } from '#engine/math/pathfinding/utils'
-import { toDegrees } from '#common/helpers'
+import { toDegrees } from '#engine/helpers'
 
 export class ZombieIA {
   readonly log: Logger

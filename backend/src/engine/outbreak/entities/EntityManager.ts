@@ -6,7 +6,7 @@ import { Outbreak } from '#engine/outbreak/index'
 import { random } from '#engine/math'
 import { WorldMap } from '#engine/map/WorldMap'
 import { isCoords } from '#engine/guards'
-import { toArray, toDegrees } from '#common/helpers'
+import { toArray } from '#common/helpers'
 import { expect, NotFoundError } from '#common/Errors'
 import { calculateDestination, closestDirection } from '#engine/math/geometry'
 import { OutOfMapError } from '#engine/map/WorldMapErrors'
@@ -29,19 +29,17 @@ import {
   QueryableEntityAttribute,
   QUERYABLE_ENTITY_ATTRIBUTES, EntityQueryFilters, QueryableEntityAttributeType
 } from '#engine/outbreak/entities/types'
-import { EntityManagerEvents } from '#engine/events'
 import { Nullable } from '#shared/types'
 import { isEqual } from 'lodash'
+import { toDegrees } from '#engine/helpers'
+
+export type EntityManagerEvents = {
+  'entity:spawned': Entity
+  'entity:moved': { entity: Entity; from: Coords }
+}
 
 /**
  * Handle entities in an Outbreak and apply map constraints, lifecycle, etc.
- *
- * Emitted events:
- *
- * | Name               | Handler signature                  |
- * |--------------------|------------------------------------|
- * | `entity:spawned`   | (entity: Entity)                   |
- * | `entity:moved`     | ({ entity: Entity, from: Coords }) |
  */
 export class EntityManager extends EventEmitter<EntityManagerEvents> {
   readonly log: Logger
@@ -68,7 +66,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
       type,
     })
 
-    this.add(entity)
+    this.register(entity)
 
     this.log.debug('Entity spawned', { entity })
     this.emit('entity:spawned', entity)
@@ -101,12 +99,12 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
    */
   find<AnEntity extends Entity = Entity> (id: Array<EntityId>): Array<AnEntity>
   /**
-   * Find entities by querying "indexed" attributes
+   * Find entities by querying an "indexed" attributes
    * @see QueryableEntityAttribute
    */
   find<AnEntity extends Entity = Entity> (query: EntityQuery): Array<AnEntity>
   /**
-   * Find entities by querying "indexed" attributes then applying additional filtering
+   * Find entities by querying an "indexed" attributes then applying an additional filter
    * @see QueryableEntityAttribute
    */
   find<AnEntity extends Entity = Entity> (query: EntityQuery, filter: EntityQueryFilters): Array<AnEntity>
@@ -175,14 +173,14 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
       destination = calculateDestination(entity.at, toDegrees(to), 1)
       facing = to
     }
-    this.delete(entity)
+    this.unregister(entity)
     entity.at = destination
 
     if (hasFacingProperty(entity)) {
       entity.facing = facing
     }
 
-    this.add(entity)
+    this.register(entity)
     this.emit('entity:moved', { entity, from })
 
     return entity
@@ -205,7 +203,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return false
   }
 
-  private add (entity: Entity): Entity {
+  private register (entity: Entity): Entity {
     this.#entities.set(entity.id, entity)
     QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
       if (attribute in entity) {
@@ -226,7 +224,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     return entity
   }
 
-  private delete (entity: Entity): void {
+  private unregister (entity: Entity): void {
     this.#entities.delete(entity.id)
     QUERYABLE_ENTITY_ATTRIBUTES.forEach((attribute) => {
       if (attribute in entity) {

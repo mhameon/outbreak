@@ -1,20 +1,21 @@
 import { createContext } from 'react'
+import type { ClientSessionData } from '#shared/types'
 
-export type Session = {
-  name: string
-  isAuthenticated?: boolean
+export interface SessionData extends ClientSessionData {
+  isAuthenticated: boolean
 }
 
-export interface SessionContextProps {
-  session: Session
-  setSession?: (session: Session) => void
+export type SessionContext = {
+  get: SessionData
+  set: (session: SessionData) => void
+  logout: () => Promise<void>
 }
 
-export const defaultSessionContextState: SessionContextProps = {
-  session: {
+export const defaultSessionContextState: any = {
+  get: {
     name: 'Unknown',
     isAuthenticated: false
-  }
+  },
 }
 
-export const SessionContext = createContext<SessionContextProps>(defaultSessionContextState)
+export const Session = createContext<SessionContext>(defaultSessionContextState)

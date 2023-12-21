@@ -1,8 +1,15 @@
 {
   "server": {
-    "port": 8080,
+    "ws": {
+      "host": "http://localhost",
+      "port": 8080
+    },
     "http": {
-      "host": "http://localhost:3000"
+      "host": "http://localhost",
+      "port": 3000,
+      "session": {
+        "name": "outbreak.sid"
+      }
     },
     "cli": {
       "enabled": true

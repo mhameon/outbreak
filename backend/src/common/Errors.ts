@@ -43,6 +43,12 @@ export class NotFoundError extends CustomError {
   }
 }
 
+export class RuntimeError extends CustomError {
+  constructor (message ?: string) {
+    super(message ?? 'Something goes wrong')
+  }
+}
+
 export class UnexpectedError extends CustomError {
   constructor (error: unknown) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import axios, { Method as HttpMethod } from 'axios'
+import axios, { Method as HttpMethod, CanceledError } from 'axios'
 import { config } from '../config'
 
 const api = axios.create({
@@ -13,11 +13,11 @@ export const useApi = () => {
   const [ loading, setLoading ] = useState(false)
   const controllerRef = useRef(new AbortController())
 
-  function cancel () {
+  function abort () {
     controllerRef.current.abort()
   }
 
-  async function query<T = any> (method: HttpMethod, url: string, payload: unknown): Promise<T> {
+  async function query<T = any> (method: HttpMethod, url: string, payload?: Record<string, unknown>): Promise<T | undefined> {
     setLoading(true)
     setError('')
     setResponse(null)
@@ -32,22 +32,24 @@ export const useApi = () => {
       setResponse(response.data)
       return response.data
     } catch (error) {
-      if (error instanceof Error) {
+      if (error instanceof CanceledError) {
+        console.log('HTTP request aborted...')
+      } else if (error instanceof Error) {
         setError(error.message)
+        console.error(error)
       }
-      throw error
     } finally {
       setLoading(false)
     }
   }
 
-  async function get<T> (url: string, payload: Record<string, unknown> = {}) {
+  async function get<T> (url: string, payload?: Record<string, unknown>) {
     return query<T>('get', url, payload)
   }
 
-  async function post<T> (url: string, payload: Record<string, unknown> = {}) {
+  async function post<T> (url: string, payload?: Record<string, unknown>) {
     return query<T>('post', url, payload)
   }
 
-  return { cancel, response, error, loading, get, post }
+  return { abort, response, error, loading, get, post }
 }

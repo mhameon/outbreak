@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorldMap } from '#engine/map/WorldMap'
-import type { Coords, Matrix2d, Index, GameId } from '#engine/types'
-import { GAME_ID_PREFIX } from '#engine/types'
+import { Coords, Matrix2d, Index, GameId, GAME_ID_PREFIX } from '#engine/types'
 import { isObject, isNumber } from '#common/guards'
 import { EntityType } from '#engine/outbreak/entities/types'
 
-const isSomeEnum = <T extends { [n: number | string]: unknown }> (enumType: T) => (token: unknown): token is T[keyof T] => Object.values(enumType).includes(token as T[keyof T])
+const isSomeEnum = <T extends {
+  [n: number | string]: unknown
+}> (enumType: T) => (token: unknown): token is T[keyof T] => Object.values(enumType).includes(token as T[keyof T])
 
 export function isCoords (coords: unknown): coords is Coords {
   return isObject(coords) && isNumber(coords.x) && isNumber(coords.y)

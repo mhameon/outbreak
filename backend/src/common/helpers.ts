@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OneOrMany } from '#common/types'
+import { OneOrMany, Primitive } from '#common/types'
 import config from 'config'
-import { Direction, DirectionClockwise, DirectionInDegree } from '#engine/types'
-import { InvalidArgumentError } from '#common/Errors'
 
 type Functions = Array<(...args: any[]) => any>
-
 export const pipe = (value: any): any => (...pipeline: Functions) => {
   return pipeline.reduce((val, func) => func(val), value)
 }
@@ -25,31 +22,12 @@ export function toSet<T> (item: OneOrMany<T>): Set<T> {
 }
 
 /**
- * Convert a "clockwise index" to a `Direction`
- * @see Direction
+ * Returns a new Set based on `set` purged of all `without` items
  */
-export function toDirection (clockwiseIndex: number): Direction {
-  if (clockwiseIndex < 0 && clockwiseIndex > 7) {
-    throw new InvalidArgumentError('clockwiseIndex must be a number in [0, 7]')
-  }
-  return DirectionClockwise[clockwiseIndex]
-}
-
-/**
- * Convert a `Direction` to his value in degrees
- * @see Direction
- */
-export function toDegrees (facing: Direction): number {
-  return DirectionInDegree[facing]
-}
-
-/**
- * Returns a new Set based on `set` where all `without` items existing have been removed
- */
-export function deleteInSet<T extends Set<any>> (set: T, without: T): T {
-  const result = new Set(set) as T
-  without.forEach(it => result.delete(it))
-  return result
+export function deleteInSet<T extends Set<Primitive>> (set: T, without: T): T {
+  const purged = new Set(set) as T
+  without.forEach(it => purged.delete(it))
+  return purged
 }
 
 export function isEnv (env: 'development' | 'production' | 'testing'): boolean {

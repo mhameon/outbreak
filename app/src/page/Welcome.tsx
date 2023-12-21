@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { Login } from '../component/Login'
-import { SessionContext } from '../context/SessionContext'
+import { Session } from '../context/SessionContext'
 
 export function Welcome () {
-  const { session: user } = useContext(SessionContext)
+  const { get: user } = useContext(Session)
 
   if (user.isAuthenticated) {
     return <>
@@ -12,7 +12,7 @@ export function Welcome () {
   }
 
   return <>
-    <h1>Welcome screen</h1>
+    <h1>Please, login</h1>
     <Login/>
   </>
 }

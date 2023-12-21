@@ -3,7 +3,7 @@ import { Nullable } from '#shared/types'
 import { isNumber } from '#common/guards'
 import { isCoords } from '#engine/guards'
 import { InvalidArgumentError } from '#common/Errors'
-import { toDirection } from '#common/helpers'
+import { toDirection } from '#engine/helpers'
 
 /**
  * @param origin Coords

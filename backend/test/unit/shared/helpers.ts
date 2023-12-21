@@ -1,5 +1,6 @@
 import assert from 'assert'
-import { toArray, toSet } from '#common/helpers'
+import { toArray, toSet, pipe, deleteInSet } from '#common/helpers'
+import { Tile } from '#engine/types'
 
 describe('shared helpers', function () {
   const num = 12, obj = { obj: true }
@@ -32,6 +33,36 @@ describe('shared helpers', function () {
     it('should return Set<T> with Set<T>', function () {
       assert.deepStrictEqual(toSet(setNum), setNum)
       assert.deepStrictEqual(toSet(setObj), setObj)
+    })
+  })
+
+  describe('pipe', function () {
+    it('should run all functions in the pipe', function () {
+      const addOne = (value: number): number => value + 1
+      const sum = pipe(0)(addOne, addOne, addOne)
+      assert.strictEqual(sum, 3)
+    })
+  })
+
+  describe('deleteInSet', function () {
+    it('should purge strings', function () {
+      const set = deleteInSet(
+        new Set([ 'a', 'b', 'c' ]),
+        new Set([ 'b', 12 ])
+      )
+      assert.strictEqual(set.size, 2)
+      assert.strictEqual(set.has('a'), true)
+      assert.strictEqual(set.has('c'), true)
+    })
+
+    it('should purge Tileset', function () {
+      const set = deleteInSet(
+        new Set([ Tile.Burning, Tile.Building, Tile.Level3 ]),
+        new Set([ Tile.Burning ]),
+      )
+      assert.strictEqual(set.size, 2)
+      assert.strictEqual(set.has(Tile.Building), true)
+      assert.strictEqual(set.has(Tile.Level3), true)
     })
   })
 })

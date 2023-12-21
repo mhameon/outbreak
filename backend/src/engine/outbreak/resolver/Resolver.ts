@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Logger } from '#common/logger'
 import { Outbreak } from '#engine/outbreak/index'
 import { Resolvable } from './index'

@@ -5,24 +5,24 @@ import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
 import { Wind } from './environment/Wind'
-import { Player, PlayerId } from '#server/service/server/GameServer'
+import { Player, PlayerId } from '#server/ws/GameServer'
 import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
 import { EventEmitter } from '#common/TypedEventEmitter'
-import { OutbreakEvents } from '#engine/events'
 import assert from 'assert'
 import { NotFoundError } from '#common/Errors'
 import { WorldMap } from '#engine/map/WorldMap'
+import { Serializable } from '#engine/Serializable'
+import { EntityType } from '#engine/outbreak/entities/types'
+
+export type OutbreakEvents = {
+  'game:turn:resolved': { gameId: GameId; turn: number }
+}
 
 /**
  * An Outbreak represent a game
- *
- * Emitted events:
- * | Name                 | Handler signature                  |
- * |----------------------|------------------------------------|
- * | `game:turn:resolved` | ({ gameId: GameId, turn: number }) |
  */
-export class Outbreak extends EventEmitter<OutbreakEvents> {
+export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializable {
   static #renderer: Renderable
 
   readonly id: GameId
@@ -62,6 +62,10 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
     return this.#turn
   }
 
+  get playerCount (): number {
+    return this.#players.size
+  }
+
   resolveTurn (): number {
     this.log.profile('resolveTurn')
     this.log.info(`Resolving turn ${this.#turn}...`)
@@ -79,24 +83,37 @@ export class Outbreak extends EventEmitter<OutbreakEvents> {
     return Outbreak.#renderer.render(this)
   }
 
-  joinPlayer (player: Player): boolean {
+  join (player: Player): boolean {
     if (this.#turn === 0) {
+      this.entity.spawn(EntityType.Human, { x: 0, y: 0 })
+
       this.#players.set(player.id, player)
       return true
     }
 
-    this.log.warn('Game is already started', { playerId: player.id })
+    this.log.warn('Game has already started', { playerId: player.id })
     return false
+  }
+
+  leave (player: Player): boolean {
+    this.#players.delete(player.id)
+    return true
+
+    //return false
   }
 
   /**
    * Return game state saw by the Player
    */
-  getGameState (playerId: PlayerId): GameState {
-    assert(this.#players.has(playerId), new NotFoundError(playerId, 'Player'))
+  serialize (playerId?: PlayerId): GameState {
+    if (playerId) {
+      assert(this.#players.has(playerId), new NotFoundError(playerId, 'Player'))
+    }
 
-    // Todo create a gameStateBuilder to build the structure (+share things with clients to allow easier handle)
-
-    return { turn: this.currentTurn, size: this.map.size }
+    return {
+      id: this.id,
+      turn: this.currentTurn,
+      map: this.map.serialize(playerId),
+    }
   }
 }

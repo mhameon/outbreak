@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Root } from './page/Root'
 import { Welcome } from './page/Welcome'
-import { Client } from './component/socket/Client'
+import { Client } from './component/client/index'
 import React from 'react'
 import { Settings } from './page/Settings'
 

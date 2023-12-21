@@ -3,14 +3,14 @@ import Navbar from 'react-bootstrap/Navbar'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import React, { useContext } from 'react'
 import { NavLink } from 'react-router-dom'
-import { SessionContext } from '../context/SessionContext'
+import { Session } from '../context/SessionContext'
 import { Container } from 'react-bootstrap'
 
 export function NavigationBar () {
-  const { session } = useContext(SessionContext)
+  const session = useContext(Session)
+
 
   // fixme NavLink déconne avec le dropdown (tjs actif)
-
   return <Navbar
     collapseOnSelect
     bg="dark"
@@ -35,15 +35,17 @@ export function NavigationBar () {
           </Nav.Item>
         </Nav>
         <Nav>
-          {session.isAuthenticated
+          {session.get.isAuthenticated
             ? <NavDropdown
               id="nav-dropdown"
-              title={session.name}>
+              title={session.get.name}>
               <NavDropdown.Item
                 eventKey="settings"
                 to="/settings">Settings</NavDropdown.Item>
               <NavDropdown.Divider/>
-              <NavDropdown.Item eventKey="logout">Logout</NavDropdown.Item>
+              <NavDropdown.Item
+                eventKey="logout"
+                onClick={() => session.logout()}>Logout</NavDropdown.Item>
             </NavDropdown>
             : <Nav.Item>
               <Nav.Link eventKey="register">
