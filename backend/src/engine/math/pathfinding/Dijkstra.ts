@@ -60,7 +60,7 @@ export class Dijkstra {
       for (const next of this.neighbors(current)) {
         const nextIndex = WorldMap.index(next)
         if (!distance.has(nextIndex)) {
-          if (distance.get(currentIndex) as number < detectionArea) {
+          if ((distance.get(currentIndex) as number) < detectionArea) {
             // Todo weight "1" can be tweaked regarding this.world tiles
             distance.set(nextIndex, (distance.get(currentIndex) as number) + 1)
             predecessors.set(nextIndex, currentIndex)

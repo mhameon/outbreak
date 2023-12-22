@@ -10,14 +10,12 @@ const options: SessionOptions = {
   resave: false,
   saveUninitialized: false,
   cookie: {
+    httpOnly: true,
+    //sameSite: 'strict',
     //expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
-    secure: false,
+    secure: isEnv('production'),
   },
   //maxAge: ms
-}
-
-if (isEnv('production')) {
-  options.cookie = { secure: true } // https
 }
 
 const session = sessionMiddleware(options)
@@ -27,7 +25,7 @@ function isAuthenticated (req: Request, res: Response, next: NextFunction): void
     next()
     return
   }
-  res.status(403).json({ error: 'Forbidden' })
+  res.status(401).json({ error: 'Unauthorized' })
 }
 
 export {

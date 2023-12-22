@@ -1,7 +1,7 @@
 import config from 'config'
 import winston, { LogEntry } from 'winston'
 import { DEFAULT_LOG_FILE } from '#common/logger'
-import util from 'util'
+import util from 'node:util'
 import { isEnv } from '#common/helpers'
 
 export type LogMethod = winston.LeveledLogMethod
@@ -35,6 +35,19 @@ winston.addColors({
 })
 
 let logger: winston.Logger
+
+/**
+ * Get or set logger verbosity
+ */
+export function loggerVerbosity (level?: LogLevel): LogLevel {
+  if (!logger) {
+    return config.logger.level
+  }
+  if (level) {
+    logger.level = level
+  }
+  return logger.level as LogLevel
+}
 
 /**
  * Returns a ready to use logger based on Winston.
@@ -98,8 +111,10 @@ export function getLogger (label = 'default', metadata: Record<string, any> = {}
             const prefix = `${' '.padEnd(20)} │ ${' '.padEnd(17)} │ ${' '.padEnd(7)} │`
             const meta = metadata
               .map(([ key, value ], index) => {
+                const stringWithNewlines = (typeof value === 'string' && value.indexOf('\n') !== -1)
+
                 return `${prefix} ${(index + 1 < metadata.length) ? '├' : '└'}─ ${(key + ' ').padEnd(maxWith, '·')} ${util.inspect(value, {
-                  compact: true,
+                  compact: !stringWithNewlines,
                   //showHidden: true,
                   colors: true,
                   depth: 5,

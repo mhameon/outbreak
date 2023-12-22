@@ -1,21 +1,25 @@
 import type { ManagerOptions, SocketOptions } from 'socket.io-client'
 
 type Config = {
-  server: {
-    host: string
+  http: {
+    pathname: string
+    port: number
   },
-  socket: {
-    uri: string,
+  ws: {
+    host: string,
+    port: number
     options: Partial<ManagerOptions & SocketOptions>
   }
 }
 
 export const config: Config = {
-  server: {
-    host: 'http://localhost:8080/api'
+  http: {
+    pathname: 'api',
+    port: 8080,
   },
-  socket: {
-    uri: 'ws://localhost:8080',
+  ws: {
+    host: '',
+    port: 8080,
     options: {
       transports: [ 'websocket' ],
       withCredentials: true,

@@ -24,7 +24,7 @@ export function ConnectionButton (props: ConnectionButtonProps) {
         variant="primary"
         onClick={disconnect}>
         Connexion...
-        {attempt !== undefined ? `${attempt}/${config.socket.options.reconnectionAttempts}` : ''}
+        {attempt !== undefined ? `${attempt}/${config.ws.options.reconnectionAttempts}` : ''}
       </Button>
 
     default:

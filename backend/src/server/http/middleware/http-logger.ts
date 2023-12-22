@@ -7,6 +7,7 @@ const log = getLogger('http')
 export function httpLogger (req: Request, res: Response, next: NextFunction): void {
   req.logId = res.logId = randomBytes(16).toString('hex')
 
+
   log.http(`↘️  ${req.method} ${req.url}`, {
     logId: req.logId,
     ...(!!req.session && { sessionId: req.session?.id }),
@@ -22,7 +23,7 @@ export function httpLogger (req: Request, res: Response, next: NextFunction): vo
   res.send = interceptor(res, res.send)
 
   res.on('finish', () => {
-    const body = res.contentBody !== '{}' ? JSON.parse(res.contentBody) : false
+    const body = (res.contentBody && res.contentBody !== '{}') ? JSON.parse(res.contentBody) : false
 
     log.http(`↖️  ${res.statusCode} ${body?.error ?? ''}`, {
       logId: res.logId,

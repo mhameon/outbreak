@@ -7,15 +7,16 @@ import {
   ServerConnectionStatus,
 } from '../SocketContext'
 import { config } from '../../config'
+import { Socket } from '../../types'
 
 export const SocketProvider = ({ children }: PropsWithChildren) => {
-  const socket = useSocket(config.socket.uri, config.socket.options)
+  const socket = useSocket(`ws://${config.ws.host || window.location.hostname}:${config.ws.port}`, config.ws.options)
   const [ loading, setLoading ] = useState(true)
   const [ socketState, dispatchSocketState ] = useReducer(SocketReducer, defaultSocketContextState)
 
   useEffect(() => {
     dispatchSocketState({ type: 'init:socket', socket })
-    registerListeners()
+    registerListeners(socket)
     setLoading(false)
 
     return () => {
@@ -25,7 +26,7 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line
   }, [])
 
-  const registerListeners = () => {
+  function registerListeners (socket: Socket) {
     socket.io.on('packet', ({ type, data }) => {
       // called for each packet received
       console.debug(`>>> receive [${type}]`, data)

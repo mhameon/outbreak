@@ -25,6 +25,7 @@ export type GameState = {
 
 export interface Session {
   user: {
+    id: string
     name: string
   }
 }

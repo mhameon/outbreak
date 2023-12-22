@@ -12,6 +12,6 @@ export function clientErrorHandler (err: Error, req: Request, res: Response, nex
 
 export function errorHandler (err: Error, req: Request, res: Response, next: NextFunction): void {
   getLogger('errorHandler').error(err)
-  res.status(500)
+  res.status(500).send()
   //res.render('error', { error: err }) // todo returns html template
 }

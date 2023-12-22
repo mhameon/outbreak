@@ -12,7 +12,7 @@ export function SocketInfos (props: SocketInfosProps) {
     <h2>Socket IO Information:</h2>
     <p>
       Status: <strong>{connection.status !== undefined ? ServerConnectionStatus[connection.status] : 'Unknown'}</strong>
-      &nbsp;{connection.attempt !== undefined ? `${connection.attempt}/${config.socket.options.reconnectionAttempts}` : ''}<br/>
+      &nbsp;{connection.attempt !== undefined ? `${connection.attempt}/${config.ws.options.reconnectionAttempts}` : ''}<br/>
       Socket ID: <strong>{socket?.id}</strong><br/>
       Room: <strong>{connection.room}</strong>
     </p>

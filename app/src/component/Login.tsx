@@ -19,12 +19,10 @@ export function Login () {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const data: { login: string } = Object.fromEntries(
-      new FormData(event.currentTarget) as Iterable<[ string ]>
-    )
+    const data = Object.fromEntries(new FormData(event.currentTarget))
     console.log(data)
 
     const sessionData = await api.post<SessionData>('/login', data)
@@ -32,7 +30,6 @@ export function Login () {
       session.set(sessionData)
       navigate('/play')
     }
-
   }
 
   return <form onSubmit={onSubmit}>
@@ -48,7 +45,7 @@ export function Login () {
         // onChange={handleChange}
       />
       <button type="submit">Submit</button>
-      {!!api.error && <p>{api.error}</p>}
+      {!!api.error && <p>{api.error.message} ({api.error.code ?? 'unknown error'})</p>}
     </fieldset>
   </form>
 }

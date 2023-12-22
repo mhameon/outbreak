@@ -1,5 +1,5 @@
 import { session, cors, clientErrorHandler, errorHandler } from '#server/http/middleware'
-import { router } from '#server/http/routes'
+import { router } from '#server/http/middleware/router'
 import { GameServer } from '#server/ws/GameServer'
 import { GameManager } from '#engine/game/GameManager'
 import express from 'express'
