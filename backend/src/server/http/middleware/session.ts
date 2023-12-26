@@ -20,7 +20,7 @@ const options: SessionOptions = {
 
 const session = sessionMiddleware(options)
 
-function isAuthenticated (req: Request, res: Response, next: NextFunction): void {
+function auth (req: Request, res: Response, next: NextFunction): void {
   if (req.sessionID && !!req.session?.user) {
     next()
     return
@@ -30,5 +30,5 @@ function isAuthenticated (req: Request, res: Response, next: NextFunction): void
 
 export {
   session,
-  isAuthenticated
+  auth
 }

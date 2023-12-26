@@ -23,16 +23,17 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   }), [ session.get ])
 
   useEffect(() => {
-    get<SessionData>('/session', {}, true)
+    get<SessionData>('/session', {}, { throws: true })
       .then(data => {
         if (data) {
           context.set(data)
         }
       })
       .catch(e => {
-        if (e.code === 'ERR_NETWORK' || e.status === 401) {
+        if (e.code === 'ERR_NETWORK' || e.response?.status === 401) {
           setSession(defaultSessionContextState)
           setLocalSessionStorage(undefined)
+          // TODO error toast
         }
       })
   }, [])

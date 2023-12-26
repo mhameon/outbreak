@@ -17,7 +17,6 @@ export function Login () {
   const api = useApi()
   const session = useContext(Session)
   const navigate = useNavigate()
-  const location = useLocation()
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -34,7 +33,6 @@ export function Login () {
 
   return <form onSubmit={onSubmit}>
     {api.loading ? 'Loading....' : ''}
-    <pre>{JSON.stringify(location)}</pre>
     <fieldset>
       Nom
       <input

@@ -1,10 +1,9 @@
-import { session, cors, clientErrorHandler, errorHandler } from '#server/http/middleware'
 import { router } from '#server/http/middleware/router'
+import { session, cors, clientErrorHandler, errorHandler } from '#server/http/middleware'
 import { GameServer } from '#server/ws/GameServer'
 import { GameManager } from '#engine/game/GameManager'
 import express from 'express'
 import { RuntimeError } from '#common/Errors'
-import { httpLogger } from '#server/http/middleware/http-logger'
 
 let server: GameServer
 
@@ -27,7 +26,6 @@ export function createGameServer (): GameServer {
     .use(express.urlencoded({ extended: true }))
     .use(express.json())
     .use(session)
-    .use(httpLogger)
     .use(router)
     .use(clientErrorHandler)
     .use(errorHandler)

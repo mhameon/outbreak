@@ -16,6 +16,14 @@ const api = axios.create({
   baseURL: `${new URL(config.http.pathname, `${window.location.protocol}//${window.location.hostname}:${config.http.port}`)}`,
 })
 
+type Payload = Record<string, unknown>
+
+type Option = {
+  throws: boolean
+}
+
+const defaultOptions = { throws: false }
+
 export const useApi = () => {
   const [ response, setResponse ] = useState<any>(null)
   const [ error, setError ] = useState<NetworkError | null>(null)
@@ -26,7 +34,7 @@ export const useApi = () => {
     controllerRef.current.abort()
   }
 
-  async function query<T = any> (method: HttpMethod, url: string, payload?: Record<string, unknown>, throws = false): Promise<T | undefined> {
+  async function query<T = any> (method: HttpMethod, url: string, body?: Payload, option: Option = defaultOptions): Promise<T | undefined> {
     setLoading(true)
     setError(null)
     setResponse(null)
@@ -34,7 +42,7 @@ export const useApi = () => {
       const response = await api.request<T>({
         url,
         method,
-        data: payload,
+        ...(method === 'GET' ? { params: body } : { data: body }),
         signal: controllerRef.current.signal
       })
       setResponse(response.data)
@@ -51,7 +59,7 @@ export const useApi = () => {
         setError(err)
         console.error(error)
       }
-      if (throws) {
+      if (option.throws) {
         throw error
       }
     } finally {
@@ -59,12 +67,24 @@ export const useApi = () => {
     }
   }
 
-  async function get<T> (url: string, payload?: Record<string, unknown>, throws = false) {
-    return query<T>('get', url, payload, throws)
+  /**
+   * ```
+   * get('users', { id: 123 })
+   * ```
+   * Send `GET` request to `api/users?id=123`
+   */
+  async function get<T> (url: string, params?: Payload, option: Option = defaultOptions) {
+    return query<T>('get', url, params, option)
   }
 
-  async function post<T> (url: string, payload?: Record<string, unknown>, throws = false) {
-    return query<T>('post', url, payload, throws)
+  /**
+   * ```
+   * post('users', { email: user@example.com })
+   * ```
+   * Send `POST` request to `api/users` with `{ email: user@example.com }` as body
+   */
+  async function post<T> (url: string, body?: Payload, option: Option = defaultOptions) {
+    return query<T>('post', url, body, option)
   }
 
   return { abort, response, error, loading, get, post }
