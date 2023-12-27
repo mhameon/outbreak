@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { buildClientSession } from '#server/http/controller/auth/index'
+import { buildClientSession } from '#server/http/controller/auth/session'
 
 // TODO validation req.body.login
 //  use Joi?

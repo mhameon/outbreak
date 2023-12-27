@@ -11,11 +11,11 @@ export type SessionContext = {
   logout: () => Promise<void>
 }
 
-export const defaultSessionContextState: any = {
+export const defaultSessionContextState: { get: SessionData } = {
   get: {
     name: 'Unknown',
     isAuthenticated: false
   },
 }
 
-export const Session = createContext<SessionContext>(defaultSessionContextState)
+export const Session = createContext<SessionContext>(defaultSessionContextState as any)

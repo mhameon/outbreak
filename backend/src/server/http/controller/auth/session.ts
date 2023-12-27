@@ -1,5 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import { buildClientSession } from '#server/http/controller/auth/index'
+import type { SessionData } from 'express-session'
+import type { ClientSessionData } from '#shared/types'
+
+export const buildClientSession = (session: SessionData): ClientSessionData => ({
+  name: session.user.name
+})
 
 export function session (req: Request, res: Response, next: NextFunction): void {
   if (req.sessionID && !!req.session) {
@@ -8,4 +13,3 @@ export function session (req: Request, res: Response, next: NextFunction): void 
   }
   res.status(204).json({})
 }
-
