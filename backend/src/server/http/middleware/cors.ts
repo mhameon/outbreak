@@ -4,16 +4,20 @@ import { getLogger } from '#common/logger'
 import os from 'node:os'
 import { isEnv } from '#common/helpers'
 
-const ports = [ ...new Set([ config.server.http.port, config.server.ws.port ]) ] as const
+const protocol = isEnv('production') ? 'https' : 'http'
 const ips = [ ...Object.values(os.networkInterfaces()).flat().reduce<Set<string>>((ip, net) => {
   if (net?.family === 'IPv4') ip.add(net.address)
   return ip
 }, new Set()) ] as const
+const ports = [ ...new Set([ config.server.http.port, config.server.ws.port ]) ] as const
 
 export const allowedOrigins = [
   `${config.server.http.host}:${config.server.http.port}`,
   `${config.server.ws.host}:${config.server.ws.port}`,
-  ...(isEnv('production') ? [] : ips.flatMap(ip => ports.map(port => `http://${ip}:${port}`)))
+  ...(isEnv('production') ? [] : ips.flatMap(ip => ports.map(p => {
+    const port = p ? `:${p}` : ''
+    return `${protocol}://${ip}${port}`
+  })))
 ] as const
 
 getLogger('cors').info('CORS allowed origins', { allowedOrigins })

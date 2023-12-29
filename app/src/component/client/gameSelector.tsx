@@ -9,7 +9,6 @@ interface GameSelectorProps {
 }
 
 export const GameSelector: React.FC<GameSelectorProps> = (props) => {
-  //const { socketState: { lobby, socket, connection }, dispatchSocketState } = useContext(SocketContext)
   const context = useContext(SocketContext)
   const [ requestGame, setRequestGame ] = useState<Game>()
   console.log(requestGame)

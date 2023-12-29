@@ -1,16 +1,17 @@
-import { Coords, Tile, Index, Tileset, Around, InMapTileset, Direction } from '../types'
+import type { Coords, Index, Tileset, Around, InMapTileset } from '../types'
+import { Tile, Direction } from '../types'
 import { OutOfMapError } from './WorldMapErrors'
 import { isCoords, isIndex } from '../guards'
-import { Seeder } from '#engine/map/builder/MapBuilder'
+import type { Seeder } from '#engine/map/builder/MapBuilder'
 import { InvalidArgumentError, expect } from '#common/Errors'
 import { getSanitizedTileset } from '#engine/map/tilerules'
-import { Values, OneOrMany } from '#common/types'
+import type { Values, OneOrMany } from '#common/types'
 import { deleteInSet, toArray } from '#common/helpers'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { calculateDestination } from '#engine/math/geometry'
-import { Size } from '#shared/types'
-import { Serializable } from '#engine/Serializable'
-import { PlayerId } from '#server/ws/GameServer'
+import type { Size, SerializedMap } from '#shared/types'
+import type { Serializable } from '#engine/Serializable'
+import type { PlayerId } from '#server/ws/GameServer'
 import { toDegrees } from '#engine/helpers'
 
 
@@ -27,6 +28,8 @@ export type WorldMapEvents = {
 export class WorldMap extends EventEmitter<WorldMapEvents> implements Serializable {
   static readonly defaultTile = Tile.Grass
   static readonly emptyTileset: Tileset = new Set<Tile>([ WorldMap.defaultTile ])
+
+  // Todo remove when city name generator implemented
   static TEMPORARY_inc = 0
 
   readonly size: Size
@@ -253,7 +256,7 @@ export class WorldMap extends EventEmitter<WorldMapEvents> implements Serializab
     }
   }
 
-  serialize (playerId?: PlayerId): any { // FIXME
+  serialize (playerId?: PlayerId): SerializedMap { // FIXME
 
   }
 

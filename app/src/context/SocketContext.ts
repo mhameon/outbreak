@@ -42,7 +42,7 @@ type SocketContextAction =
   | { type: 'socket:connection:status' } & ConnectionStatus
   | { type: 'player:join:game', requestGameId?: Nullable<GameId> }
   | { type: 'player:leave:game', gameId: GameId }
-  | { type: 'game:created', room: string, games: Array<Game> }
+  | { type: 'games:update', room: string, games: Array<Game> }
 
 export const SocketReducer = (state: SocketContextState, payload: SocketContextAction): SocketContextState => {
   console.log('SocketReducer: Type=' + payload.type, payload)
@@ -89,7 +89,7 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
       }
       break
 
-    case 'game:created':
+    case 'games:update':
       if (isOnline) {
         //if (state.connection.room !== payload.room) {
         return { ...state, connection: { ...state.connection, room: payload.room }, lobby: { games: payload.games } }

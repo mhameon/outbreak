@@ -13,7 +13,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '#shared/io.even
 import type { SocketId } from 'socket.io-adapter'
 import { NotFoundError } from '#common/Errors'
 import { getLogger } from '#common/logger'
-import { Nullable, GameId, Voidable } from '#shared/types'
+import { type Nullable, type GameId, type Voidable, LOBBY } from '#shared/types'
 import { isGameId } from '#engine/guards'
 import { corsOptions } from '#server/http/middleware'
 
@@ -21,7 +21,6 @@ type Socket = SocketIO<ClientToServerEvents, ServerToClientEvents>
 
 export type Plugin<T> = ((server: GameServer) => Voidable<T>) | Voidable<T>
 
-const LOBBY = 'lobby' as const
 // Todo: continue typing
 // Fixme: must lives in another (shared) file
 export type PlayerId = string
@@ -77,17 +76,16 @@ export class GameServer {
     this.registerAuthentication(express.session)
     this.registerGameManager()
     this.#io.on('connection', (socket: Socket) => {
-      const req = socket.request
-      const sessionId = req.session.id
+      const session = socket.request.session
 
       // join unique room per session to easily get the socket by session id
-      socket.join(sessionId)
+      socket.join(session.id)
 
       // reload the session on each incoming packet to be able to use up to date `socket.request.session` in
       // each listener. DON'T FORGET to call `socket.request.session.save()` to apply session update.
       socket.use((__, next) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        req.session.reload((err: any) => {
+        session.reload((err: any) => {
           if (err) {
             this.log.error(err)
             socket.disconnect()
@@ -101,7 +99,7 @@ export class GameServer {
       const name = this.#clients.get(socket.id)?.player?.name
       this.log.http(
         '🟢 Here come a new challenger! Hello %s! %d client(s) connected', name, this.connectedClientCounter,
-        { socketId: socket.id, sessionId /*, handshake: socket.handshake*/ },
+        { socketId: socket.id, sessionId: session.id /*, handshake: socket.handshake*/ },
       )
 
       this.registerDisconnectionListeners(socket)
@@ -207,15 +205,15 @@ export class GameServer {
         }
       })
 
-      this.#io.in(LOBBY).emit('game:created', LOBBY, this.game.list())
+      this.#io.in(LOBBY).emit('games:update', LOBBY, this.game.list())
     })
     this.game.on('game:deleted', (_gameId) => {
-      this.#io.in(LOBBY).emit('game:created', LOBBY, this.game.list())
+      this.#io.in(LOBBY).emit('games:update', LOBBY, this.game.list())
     })
 
     this.#io.of('/').adapter.on('join-room', (room, id) => {
       if (room !== LOBBY) {
-        this.#io.to(id).emit('game:created', LOBBY, this.game.list())
+        this.#io.to(id).emit('games:update', LOBBY, this.game.list())
       }
     })
   }
@@ -274,32 +272,35 @@ export class GameServer {
       })
   }
 
+  /**
+   * Handle Express session
+   * @see https://socket.io/how-to/use-with-express-session
+   */
   private registerAuthentication (session: RequestHandler): void {
-    // Handle Express session... (https://socket.io/how-to/use-with-express-session)
     this.#io.engine.use(session)
     this.#io.use((socket, next) => {
-      const req = socket.request
+      const session = socket.request.session
 
       if (this.#isShuttingDown) {
         // Reject new connection when server is shutting down
         return next(new ConnectionRefusedError('Server is shutting down', this.log.info))
       }
-      if (!req.session || !req.session?.user) {
+      if (!session || !session?.user) {
         // Reject unauthenticated user
         return next(new ConnectionRefusedError('Unauthenticated user', this.log.error))
       }
-      // TODO prevent the same user with 2 different session to connect (check session.user.id vs. all connected sockets)
-      if (this.#io.sockets.adapter.rooms.has(req.session.id)) {
-        // Reject already connected user
+      if (this.#io.sockets.adapter.rooms.has(session.id)) {
+        // Reject duplicated session
         return next(new ConnectionRefusedError('Already connected', this.log.error))
       }
+      // TODO reject the same user with 2 different session to connect (check session.user.id vs. all connected sockets)
 
       // Fixme: identify player and set it here
-      if (req.session.user) {
+      if (session.user) {
         this.#clients.set(socket.id, {
           player: {
             id: socket.id,
-            name: req.session.user.name,
+            name: session.user.name,
           },
           socket: {
             id: socket.id,

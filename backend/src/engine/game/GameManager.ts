@@ -1,5 +1,5 @@
 import { NotFoundError } from '#common/Errors'
-import { GameId, GAME_ID_PREFIX } from '#engine/types'
+import { type GameId, GAME_ID_PREFIX } from '#shared/types'
 import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
 import crypto from 'crypto'
 import { getLogger } from '#common/logger'

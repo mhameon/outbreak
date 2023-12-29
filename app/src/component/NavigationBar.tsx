@@ -41,11 +41,15 @@ export function NavigationBar () {
               title={session.get.name}>
               <NavDropdown.Item
                 eventKey="settings"
-                to="/settings">Settings</NavDropdown.Item>
+              >
+                Settings
+              </NavDropdown.Item>
               <NavDropdown.Divider/>
               <NavDropdown.Item
                 eventKey="logout"
-                onClick={() => session.logout()}>Logout</NavDropdown.Item>
+                onClick={() => session.logout()}>
+                Logout
+              </NavDropdown.Item>
             </NavDropdown>
             : <Nav.Item>
               <Nav.Link eventKey="register">

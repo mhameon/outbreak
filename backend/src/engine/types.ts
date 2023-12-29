@@ -111,11 +111,6 @@ export type InMapTileset = { at: Coords; tileset: Tileset }
 
 export type Around = Map<Values<typeof Direction>, Tileset>
 
-// export const GAME_ID_PREFIX = 'game_'
-// export type GameId = `${typeof GAME_ID_PREFIX}${string}`
-export { GAME_ID_PREFIX } from '#shared/types'
-export type { GameId } from '#shared/types'
-
 export type Seed = number | string
 
 /** A matrix is an array of numbers of N dimensions */

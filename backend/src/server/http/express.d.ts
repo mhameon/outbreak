@@ -1,9 +1,9 @@
 import type { Session as CustomSessionData } from '#shared/types'
+import session from 'express-session'
 
 declare global {
   namespace Express {
     interface Request {
-      session: Express.Request.session & Express.session.Store
       logId: string
     }
 
@@ -21,7 +21,7 @@ declare module 'express-session' {
 
 declare module 'node:http' {
   interface IncomingMessage {
-    session: Express.Request.session & Express.session.Store
+    session: session.Session & session.SessionData
     sessionID: string
   }
 }

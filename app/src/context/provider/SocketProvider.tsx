@@ -37,8 +37,8 @@ export const SocketProvider = ({ children }: PropsWithChildren) => {
     //   console.log('<<< send', { type, data })
     // })
 
-    socket.on('game:created', (room, games) => {
-      dispatchSocketState({ type: 'game:created', room, games: games || [] })
+    socket.on('games:update', (room, games) => {
+      dispatchSocketState({ type: 'games:update', room, games: games || [] })
     })
 
     /** Connection / reconnection listeners */

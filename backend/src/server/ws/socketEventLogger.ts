@@ -1,6 +1,6 @@
 import type { Logger } from '#common/logger'
 import type { Socket } from 'socket.io'
-import type { GameId } from '#engine/types'
+import type { GameId } from '#shared/types'
 import { isGameId } from '#engine/guards'
 
 export function registerSocketEventLogger (socket: Socket, log: Logger): void {

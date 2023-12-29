@@ -11,6 +11,6 @@ export interface ServerToClientEvents {
   'server:shutdown': () => void
   'msg': (message: string) => void
 
-  'game:created': (room: string, games?: Array<Game>) => void
+  'games:update': (room: string, games?: Array<Game>) => void
   'game:state': (state: any) => void
 }

@@ -1,7 +1,7 @@
 import { isWorldMap } from '#engine/guards'
 import { WorldMap } from '../map/WorldMap'
 import { Outbreak } from '#engine/outbreak/index'
-import { GAME_ID_PREFIX } from '#engine/types'
+import { GAME_ID_PREFIX } from '#shared/types'
 
 export const STANDALONE_RENDER = `${GAME_ID_PREFIX}StandAloneRendering` as const
 

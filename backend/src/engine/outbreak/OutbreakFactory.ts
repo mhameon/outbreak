@@ -1,7 +1,8 @@
 import { Outbreak } from './Outbreak'
 import { CityMapBuilder } from '../map/builder/city/CityMapBuilder'
-import { GameId, Seed } from '../types'
-import { OutbreakOptions } from '#engine/outbreak/index'
+import type { GameId } from '#shared/types'
+import type { OutbreakOptions } from '#engine/outbreak/index'
+import type { Seed } from '#engine/types'
 
 // Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
 const defaultOptions: OutbreakOptions = {

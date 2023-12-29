@@ -1,12 +1,11 @@
 import { randomBytes } from 'node:crypto'
 import { getLogger } from '#common/logger'
-import { Request, Response, NextFunction, Send } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 
 const log = getLogger('http')
 
 export function httpLogger (req: Request, res: Response, next: NextFunction): void {
   req.logId = res.logId = randomBytes(16).toString('hex')
-
 
   log.http(`↘️  ${req.method} ${req.url}`, {
     logId: req.logId,
@@ -16,7 +15,6 @@ export function httpLogger (req: Request, res: Response, next: NextFunction): vo
     ...(Object.keys(req.params).length && { params: req.params }),
     //headers: req.headers,
   })
-
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -35,7 +33,7 @@ export function httpLogger (req: Request, res: Response, next: NextFunction): vo
   return next()
 }
 
-const interceptor = (res: Response, send: Send) => (content: string) => {
+const interceptor = (res: Response, send: Response['send']) => (content: string) => {
   res.contentBody = content
   res.send = send
   res.send(content)

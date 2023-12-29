@@ -1,5 +1,5 @@
 import path from 'path'
-import express, { Router, Response, Request } from 'express'
+import express, { Router, type Response, type Request } from 'express'
 import { auth } from '#server/http/middleware/index'
 import { login, logout, session } from '#server/http/controller/auth/index'
 import { httpLogger } from '#server/http/middleware/http-logger'
