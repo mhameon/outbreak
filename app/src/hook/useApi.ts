@@ -53,11 +53,11 @@ export const useApi = () => {
       } else if (error instanceof AxiosError) {
         const err = { code: error.code, message: error.message, status: error.response?.status }
         setError(err)
-        console.error(error)
+        console.error('useApi AxiosError', error)
       } else if (error instanceof Error) {
         const err = { message: error.message || 'Error' }
         setError(err)
-        console.error(error)
+        console.error('useApi Error', error)
       }
       if (option.throws) {
         throw error

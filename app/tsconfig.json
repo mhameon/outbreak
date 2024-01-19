@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "lib": [
       "dom",
       "dom.iterable",
@@ -19,17 +19,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "src",
-    "paths": {
-      "#types/*": [
-        "./types/*"
-      ],
-      "#shared/*": [
-        "../../shared/*"
-      ]
-    }
+    "baseUrl": "src"
   },
   "include": [
-    "src",
+    "src"
   ]
 }

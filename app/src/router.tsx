@@ -19,6 +19,10 @@ export const router = createBrowserRouter([
         element: <Client/>
       },
       {
+        path: 'play/:game',
+        element: <Client/>
+      },
+      {
         path: 'settings',
         element: <Settings/>
       }

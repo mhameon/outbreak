@@ -1,13 +1,14 @@
 import React from 'react'
 import { Container } from 'react-bootstrap'
-import { NavigationBar } from '../component/NavigationBar'
+import { ErrorBoundary } from '../component/common/ErrorBoundary'
+import { NavigationBar } from '../component/navigationBar'
 import { Outlet } from 'react-router-dom'
 
 export const Root = () => {
-  return <>
+  return <ErrorBoundary>
     <NavigationBar/>
     <Container>
       <Outlet/>
     </Container>
-  </>
+  </ErrorBoundary>
 }

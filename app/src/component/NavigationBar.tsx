@@ -15,6 +15,7 @@ export function NavigationBar () {
     collapseOnSelect
     bg="dark"
     expand="md"
+    fixed={'top'}
     variant="dark">
     <Container>
       <Navbar.Brand
