@@ -257,7 +257,11 @@ export class WorldMap extends EventEmitter<WorldMapEvents> implements Serializab
   }
 
   serialize (playerId?: PlayerId): SerializedMap { // FIXME
-
+    const map: any[] = []
+    this.tiles.forEach((tileset, coords) => {
+      map.push([ coords, [ ...tileset.values() ]])
+    })
+    return map
   }
 
   static index (at: Coords): Index {

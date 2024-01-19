@@ -5,7 +5,7 @@ import type { Resolvable } from './resolver'
 import { FireResolver, ZombieResolver } from './resolver'
 import { OutbreakOptions } from './'
 import { Wind } from './environment/Wind'
-import { Player, PlayerId } from '#server/ws/GameServer'
+import { LegacyPlayer, PlayerId } from '#server/ws/GameServer'
 import { EntityManager } from './entities/EntityManager'
 import type { Renderable } from '#engine/renderer/MapRenderer'
 import { EventEmitter } from '#common/TypedEventEmitter'
@@ -25,6 +25,12 @@ export type OutbreakEvents = {
 export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializable {
   static #renderer: Renderable
 
+  // events
+  static turn = {
+    is: { resolved: 'game:turn:resolved' },
+  } as const
+
+
   readonly id: GameId
   readonly log: Logger
   readonly map: WorldMap
@@ -35,7 +41,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializab
   readonly resolvers: Array<Resolvable>
 
   #turn = 0 // 0 means not started
-  #players = new Map<PlayerId, Player>()
+  #players = new Map<PlayerId, LegacyPlayer>()
 
   constructor (id: GameId, map: WorldMap, option?: OutbreakOptions) {
     super()
@@ -71,7 +77,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializab
     this.log.info(`Resolving turn ${this.#turn}...`)
 
     this.resolvers.forEach(resolver => resolver.resolve())
-    this.emit('game:turn:resolved', { gameId: this.id, turn: this.#turn })
+    this.emit(Outbreak.turn.is.resolved, { gameId: this.id, turn: this.#turn })
 
     this.log.profile('resolveTurn', { message: `Turn ${this.#turn} resolved`, level: 'info' })
     this.#turn++
@@ -83,7 +89,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializab
     return Outbreak.#renderer.render(this)
   }
 
-  join (player: Player): boolean {
+  join (player: LegacyPlayer): boolean {
     if (this.#turn === 0) {
       this.entity.spawn(EntityType.Human, { x: 0, y: 0 })
 
@@ -95,7 +101,7 @@ export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializab
     return false
   }
 
-  leave (player: Player): boolean {
+  leave (player: LegacyPlayer): boolean {
     this.#players.delete(player.id)
     return true
 

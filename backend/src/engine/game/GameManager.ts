@@ -1,7 +1,7 @@
 import { NotFoundError } from '#common/Errors'
 import { type GameId, GAME_ID_PREFIX } from '#shared/types'
 import { Outbreak, OutbreakFactory } from '#engine/outbreak/index'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { getLogger } from '#common/logger'
 import { EventEmitter } from '#common/TypedEventEmitter'
 import { Game } from '#shared/types'
@@ -17,6 +17,14 @@ export type GameManagerEvents = {
  * Handle & Manage games (Outbreak)
  */
 export class GameManager extends EventEmitter<GameManagerEvents> {
+  // events
+  static game = {
+    is: {
+      created: 'game:created',
+      deleted: 'game:deleted',
+    }
+  } as const
+
   readonly #games: Map<GameId, Outbreak> = new Map()
 
   private static buildGameId (): GameId {
@@ -28,7 +36,7 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
     const gameId = id ?? GameManager.buildGameId()
     const outbreak = OutbreakFactory.create(gameId)
     this.#games.set(gameId, outbreak)
-    this.emit('game:created', outbreak)
+    this.emit(GameManager.game.is.created, outbreak)
     return gameId
   }
 
@@ -54,7 +62,7 @@ export class GameManager extends EventEmitter<GameManagerEvents> {
     const outbreak = this.get(gameId)
     outbreak.removeAllListeners()
     this.#games.delete(gameId)
-    this.emit('game:deleted', gameId)
+    this.emit(GameManager.game.is.deleted, gameId)
     log.info('Deleted `%s`', gameId, { gameId })
   }
 

@@ -47,6 +47,14 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
   readonly #entities = new Map<EntityId, Entity>()
   readonly #entitiesByAttribute = new Map<QueryableEntityAttribute, Map<QueryableEntityAttributeSanitizedType, Set<EntityId>>>()
 
+  // event
+  static entity = {
+    has: {
+      spawned: 'entity:spawned',
+      moved: 'entity:moved'
+    }
+  } as const
+
   constructor (outbreak: Outbreak) {
     super()
     this.log = outbreak.log.child({ label: this.constructor.name })
@@ -69,7 +77,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     this.register(entity)
 
     this.log.debug('Entity spawned', { entity })
-    this.emit('entity:spawned', entity)
+    this.emit(EntityManager.entity.has.spawned, entity)
 
     return entity
   }
@@ -181,7 +189,7 @@ export class EntityManager extends EventEmitter<EntityManagerEvents> {
     }
 
     this.register(entity)
-    this.emit('entity:moved', { entity, from })
+    this.emit(EntityManager.entity.has.moved, { entity, from })
 
     return entity
   }

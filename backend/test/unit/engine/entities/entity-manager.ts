@@ -1,3 +1,4 @@
+import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 import { Outbreak } from '#engine/outbreak/index'
 import { WorldMap } from '#engine/map/WorldMap'
 import * as assert from 'assert'
@@ -16,8 +17,8 @@ function assertCreatureEqual (actual: Entity | null, expected: Entity): void {
 }
 
 const events = {
-  ['entity:spawned']: new Array<EntityManagerEvents['entity:spawned']>(),
-  ['entity:moved']: new Array<EntityManagerEvents['entity:moved']>()
+  [EntityManager.entity.has.spawned]: new Array<EntityManagerEvents['entity:spawned']>(),
+  [EntityManager.entity.has.moved]: new Array<EntityManagerEvents['entity:moved']>()
 }
 
 describe('EntityManager class', function () {
@@ -33,8 +34,8 @@ describe('EntityManager class', function () {
     map.set(Tile.Block, { x: 0, y: 1 })
     outbreak = new Outbreak('game_CreatureManagerTest', map)
 
-    outbreak.entity.on('entity:spawned', (creature) => {
-      events['entity:spawned'].push(creature)
+    outbreak.entity.on(EntityManager.entity.has.spawned, (creature) => {
+      events[EntityManager.entity.has.spawned].push(creature)
     })
     outbreak.entity.on('entity:moved', (payload) => {
       events['entity:moved'].push(payload)
@@ -44,12 +45,12 @@ describe('EntityManager class', function () {
     zombie2 = outbreak.entity.spawn(EntityType.Zombie, pos1)
     survivor = outbreak.entity.spawn(EntityType.Human, pos1)
 
-    assert.strictEqual(events['entity:spawned'].length, 3)
-    assert.deepStrictEqual(events['entity:spawned'], [ zombie, zombie2, survivor ])
+    assert.strictEqual(events[EntityManager.entity.has.spawned].length, 3)
+    assert.deepStrictEqual(events[EntityManager.entity.has.spawned], [ zombie, zombie2, survivor ])
   })
 
   afterEach(function () {
-    events['entity:spawned'] = []
+    events[EntityManager.entity.has.spawned] = []
     events['entity:moved'] = []
   })
 

@@ -1,4 +1,3 @@
-import { isObject } from '#common/guards'
 import { isEntityType, isCoords } from '#engine/guards'
 import {
   Zombie,
@@ -12,6 +11,7 @@ import {
   QUERYABLE_ENTITY_ATTRIBUTES,
   EntityQuery
 } from '#engine/outbreak/entities/types'
+import { isObject } from '#shared/guards'
 
 export const isEntityId = (id: unknown): id is EntityId => typeof id === 'string'
 

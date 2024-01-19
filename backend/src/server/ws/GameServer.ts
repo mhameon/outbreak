@@ -1,21 +1,22 @@
-import assert from 'assert'
-import config from 'config'
-import http from 'http'
-import type { AddressInfo } from 'net'
-import type { Express, RequestHandler } from 'express'
-import type { Socket as SocketIO } from 'socket.io'
-import { Server } from 'socket.io'
-import { registerSocketEventLogger } from './socketEventLogger'
-import { GameManager } from '#engine/game/GameManager'
-import { ConnectionRefusedError } from './ServerErrors'
-import type { InterServerEvents, SocketData } from '#engine/events'
-import type { ClientToServerEvents, ServerToClientEvents } from '#shared/io.events'
-import type { SocketId } from 'socket.io-adapter'
 import { NotFoundError } from '#common/Errors'
 import { getLogger } from '#common/logger'
-import { type Nullable, type GameId, type Voidable, LOBBY } from '#shared/types'
-import { isGameId } from '#engine/guards'
+import type { InterServerEvents, SocketData } from '#engine/events'
+import { GameManager } from '#engine/game/GameManager'
+import { Outbreak } from '#engine/outbreak/index'
 import { corsOptions } from '#server/http/middleware'
+import { isGameId } from '#shared/guards'
+import type { ClientToServerEvents, ServerToClientEvents } from '#shared/io.events'
+import type { GameId, Nullable, Room, Session, SocketId, Voidable } from '#shared/types'
+import { LOBBY } from '#shared/types'
+import config from 'config'
+import type { Express, RequestHandler } from 'express'
+import type { AddressInfo } from 'node:net'
+import assert from 'node:assert'
+import http from 'node:http'
+import type { Socket as SocketIO } from 'socket.io'
+import { Server } from 'socket.io'
+import { ConnectionRefusedError } from './ServerErrors'
+import { registerSocketEventLogger } from './socketEventLogger'
 
 type Socket = SocketIO<ClientToServerEvents, ServerToClientEvents>
 
@@ -25,13 +26,14 @@ export type Plugin<T> = ((server: GameServer) => Voidable<T>) | Voidable<T>
 // Fixme: must lives in another (shared) file
 export type PlayerId = string
 
-export type Player = {
+/** @deprecated */
+export type LegacyPlayer = {
   id: PlayerId // fixme we are using SocketId for now, but will player db id
   name?: string
 }
 
 export type ConnectedPlayer = {
-  player: Player
+  player: LegacyPlayer
   socket: SocketInformation
 }
 
@@ -45,7 +47,7 @@ export interface ServerStatus {
   started: boolean
   uptime: number
   rooms: Array<string>
-  clients: Array<{ id: string; rooms: string[]; connectedPlayer?: ConnectedPlayer }>
+  clients: Array<{ id: string; rooms: string[]; connectedPlayer?: ConnectedPlayer; session: Session }>
 }
 
 /**
@@ -59,7 +61,10 @@ export class GameServer {
   readonly #io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
 
   readonly game: GameManager // Todo replace with interface and implement it in GameManager
-  readonly #rooms = new Set<string>()
+
+  /** @deprecated */
+  readonly #rooms = new Set<Room>()
+  /** @deprecated */
   readonly #clients = new Map<SocketId, ConnectedPlayer>()
 
   #isShuttingDown = false
@@ -76,10 +81,8 @@ export class GameServer {
     this.registerAuthentication(express.session)
     this.registerGameManager()
     this.#io.on('connection', (socket: Socket) => {
+      registerSocketEventLogger(socket, this.log)
       const session = socket.request.session
-
-      // join unique room per session to easily get the socket by session id
-      socket.join(session.id)
 
       // reload the session on each incoming packet to be able to use up to date `socket.request.session` in
       // each listener. DON'T FORGET to call `socket.request.session.save()` to apply session update.
@@ -95,6 +98,16 @@ export class GameServer {
         })
       })
 
+      // join unique room per session to easily get the socket by session id
+      socket.join(session.id)
+
+      if (session.user) {
+        socket.request.session.player = {
+          room: LOBBY,
+          socket_id: socket.id
+        }
+        session.save(err => this.log.error(err))
+      }
 
       const name = this.#clients.get(socket.id)?.player?.name
       this.log.http(
@@ -103,7 +116,6 @@ export class GameServer {
       )
 
       this.registerDisconnectionListeners(socket)
-      registerSocketEventLogger(socket, this.log)
       this.registerPlayerActions(socket)
       this.joinRoom(socket, LOBBY)
     })
@@ -171,7 +183,8 @@ export class GameServer {
       clients.push({
         id,
         rooms: [ ...socket.rooms ].filter(r => r !== id),
-        connectedPlayer
+        connectedPlayer,
+        session: socket.request.session,
       })
     }
 
@@ -192,9 +205,51 @@ export class GameServer {
     this.#io.in(sessionId).disconnectSockets(true)
   }
 
+  /**
+   * Handle Express session
+   * @see https://socket.io/how-to/use-with-express-session
+   */
+  private registerAuthentication (session: RequestHandler): void {
+    this.#io.engine.use(session)
+    this.#io.use((socket, next) => {
+      const session = socket.request.session
+
+      if (this.#isShuttingDown) {
+        // Reject new connection when server is shutting down
+        return next(new ConnectionRefusedError('Server is shutting down', this.log.info))
+      }
+      if (!session || !session?.user) {
+        // Reject unauthenticated user
+        return next(new ConnectionRefusedError('Unauthenticated user', this.log.error))
+      }
+      if (this.#io.sockets.adapter.rooms.has(session.id)) {
+        // Reject duplicated session
+        return next(new ConnectionRefusedError('Already connected', this.log.error))
+      }
+      // TODO reject the same user with 2 different session to connect (check session.user.id vs. all connected sockets)
+
+      // Fixme: identify player and set it here
+      if (session.user) {
+
+        this.#clients.set(socket.id, {
+          player: {
+            id: socket.id,
+            name: session.user.name,
+          },
+          socket: {
+            id: socket.id,
+            room: null,
+            connectedAt: new Date()
+          }
+        })
+      }
+      next()
+    })
+  }
+
   private registerGameManager (): void {
-    this.game.on('game:created', (outbreak) => {
-      outbreak.on('game:turn:resolved', async ({ gameId, turn }) => {
+    this.game.on(GameManager.game.is.created, (outbreak) => {
+      outbreak.on(Outbreak.turn.is.resolved, async ({ gameId, turn }) => {
         const sockets = await this.#io.in(gameId).fetchSockets()
         for (const socket of sockets) {
           const client = this.#clients.get(socket.id)
@@ -207,7 +262,7 @@ export class GameServer {
 
       this.#io.in(LOBBY).emit('games:update', LOBBY, this.game.list())
     })
-    this.game.on('game:deleted', (_gameId) => {
+    this.game.on(GameManager.game.is.deleted, (_gameId) => {
       this.#io.in(LOBBY).emit('games:update', LOBBY, this.game.list())
     })
 
@@ -243,11 +298,11 @@ export class GameServer {
         const outbreak = this.game.get(gameId)
         if (outbreak.join(connectedPlayer.player)) {
           this.log.debug('join %s', gameId)
-
           this.leaveRoom(socket, LOBBY)
           this.joinRoom(socket, gameId)
           socket.emit('msg', `You joined the game ${socket.id}`)
           socket.to(gameId).emit('msg', `Player ${socket.id} has joined the game!`)
+          socket.emit('game:state', outbreak.serialize()) // fixme
 
           return ack({ gameId })
         } else {
@@ -270,47 +325,6 @@ export class GameServer {
 
         return ack({ ok: true })
       })
-  }
-
-  /**
-   * Handle Express session
-   * @see https://socket.io/how-to/use-with-express-session
-   */
-  private registerAuthentication (session: RequestHandler): void {
-    this.#io.engine.use(session)
-    this.#io.use((socket, next) => {
-      const session = socket.request.session
-
-      if (this.#isShuttingDown) {
-        // Reject new connection when server is shutting down
-        return next(new ConnectionRefusedError('Server is shutting down', this.log.info))
-      }
-      if (!session || !session?.user) {
-        // Reject unauthenticated user
-        return next(new ConnectionRefusedError('Unauthenticated user', this.log.error))
-      }
-      if (this.#io.sockets.adapter.rooms.has(session.id)) {
-        // Reject duplicated session
-        return next(new ConnectionRefusedError('Already connected', this.log.error))
-      }
-      // TODO reject the same user with 2 different session to connect (check session.user.id vs. all connected sockets)
-
-      // Fixme: identify player and set it here
-      if (session.user) {
-        this.#clients.set(socket.id, {
-          player: {
-            id: socket.id,
-            name: session.user.name,
-          },
-          socket: {
-            id: socket.id,
-            room: null,
-            connectedAt: new Date()
-          }
-        })
-      }
-      next()
-    })
   }
 
   private registerDisconnectionListeners (socket: Socket): void {
@@ -337,7 +351,7 @@ export class GameServer {
       })
   }
 
-  private joinRoom (client: Socket, room: string): boolean {
+  private joinRoom (client: Socket, room: Room): boolean {
     let isFirst = false
     if (!client.rooms.has(room)) {
       if (!this.#rooms.has(room)) {
@@ -351,16 +365,18 @@ export class GameServer {
       connectedPlayer.socket.room = room
       this.#clients.set(client.id, connectedPlayer)
 
+      client.request.session.room = room
+
       this.log.info('💚 Join room `%s`', room, { socketId: client.id, room, isFirst })
     }
     return isFirst
   }
 
-  private leaveRoom (client: Socket, room: string, onceLeaved ?: (wasLast: boolean) => void): void {
+  private leaveRoom (client: Socket, room: Room, onceLeaved ?: (wasLast: boolean) => void): void {
     let wasLast = false
-    if (client.rooms.has(room)
-    ) {
+    if (client.rooms.has(room)) {
       client.leave(room)
+      client.request.session.room = undefined
       const socketsInRoom = [ ...this.#io.sockets.sockets.values() ].filter(socket => socket.rooms.has(room))
       if (socketsInRoom.length === 0) {
         this.#rooms.delete(room)

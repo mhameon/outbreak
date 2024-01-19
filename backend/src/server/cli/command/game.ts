@@ -1,13 +1,13 @@
-import { CommandLineInterface } from '#server/cli/CommandLineInterface'
 import { GameManager } from '#engine/game/GameManager'
-import type { GameId, Nullable } from '#shared/types'
 import { Outbreak } from '#engine/outbreak/index'
 import { registerGameControlCommands } from '#server/cli/command/game-control'
+import { CommandLineInterface } from '#server/cli/CommandLineInterface'
+import type { GameId, Nullable } from '#shared/types'
 
 let currentGameId: Nullable<GameId> = null
 
 export function registerGameCommands (cli: CommandLineInterface, game: GameManager): void {
-  game.on('game:deleted', (gameId) => {
+  game.on(GameManager.game.is.deleted, (gameId) => {
     if (currentGameId === gameId) {
       console.log(`${gameId} deleted, automatically leave CLI interaction mode`)
       currentGameId = null

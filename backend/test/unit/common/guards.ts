@@ -1,5 +1,6 @@
 import assert from 'assert'
-import { isNumber, isObject } from '#common/guards'
+import { isNumber } from '#common/guards'
+import { isObject } from '#shared/guards'
 
 describe('Common type guards', function () {
   it('isObject', function () {

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isNumber } from '#common/guards'
+import { isObject } from '#shared/guards'
 import { WorldMap } from '#engine/map/WorldMap'
-import type { Coords, Matrix2d, Index } from '#engine/types'
-import { type GameId, GAME_ID_PREFIX } from '#shared/types'
-import { isObject, isNumber } from '#common/guards'
 import { EntityType } from '#engine/outbreak/entities/types'
+import type { Coords, Index, Matrix2d } from '#engine/types'
 
 const isSomeEnum = <T extends {
   [n: number | string]: unknown
@@ -31,10 +31,6 @@ export function isMatrix2d (arg: any): arg is Matrix2d {
 
 export function isWorldMap (arg: any): arg is WorldMap {
   return arg instanceof WorldMap
-}
-
-export function isGameId (name: unknown): name is GameId {
-  return typeof name === 'string' && name.startsWith(GAME_ID_PREFIX)
 }
 
 export const isEntityType = isSomeEnum(EntityType)
