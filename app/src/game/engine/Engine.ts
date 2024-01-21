@@ -1,10 +1,11 @@
 import * as THREE from 'three'
+import { AnimationControls } from './AnimationControls'
 import { Camera } from './Camera'
 import { Debug } from './Debug'
 import type { Animate } from './interface/Animate'
 import { Renderer } from './Renderer'
 import { Display } from './Display'
-import { World } from './world/World'
+import { World } from './World'
 
 export class Engine implements Animate {
   static #instance: Engine | null
@@ -19,6 +20,7 @@ export class Engine implements Animate {
   readonly debug = new Debug()
 
   #world?: World
+  #animation?: AnimationControls
 
   /**
    * Get the  Engine instance (or create it when `canvas` is provided for the first time)
@@ -58,6 +60,7 @@ export class Engine implements Animate {
 
   build (world: World): Engine {
     this.#world = world
+    this.#animation = new AnimationControls(this.#world)
     return this
   }
 
@@ -66,6 +69,13 @@ export class Engine implements Animate {
       throw new Error('you have to `build(new World)` first')
     }
     return this.#world
+  }
+
+  get animations (): AnimationControls {
+    if (!this.#animation) {
+      throw new Error('you have to `build(new World)` first')
+    }
+    return this.#animation
   }
 
   onResize () {
@@ -112,6 +122,7 @@ export class Engine implements Animate {
     this.display.destroy()
     this.debug.destroy()
     this.#world?.destroy()
+    this.#animation?.destroy()
 
     window.engine = null
     Engine.#instance = null

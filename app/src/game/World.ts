@@ -1,9 +1,8 @@
-import type { GameState } from '#shared/types'
-import { World as BaseWorld } from './engine/world/World'
+import { World as AbstractWorld } from './engine/World'
 import { Environment } from './world/Environment'
 import { Ground } from './world/Ground'
 
-export class World extends BaseWorld {
+export class World extends AbstractWorld {
   //environment: Environment
   ground: Ground
 
@@ -25,5 +24,8 @@ export class World extends BaseWorld {
           console.warn(`${event.type} unhandled CustomEvent`)
       }
     }
+  }
+
+  destroy () {
   }
 }

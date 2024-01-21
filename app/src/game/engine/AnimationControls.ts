@@ -1,8 +1,8 @@
-import type { DebugGUI } from '../Debug'
-import { App } from '../Engine'
+import type { DebugGUI } from './Debug'
+import { App } from './Engine'
 import { World } from './World'
 
-export class WorldAnimationController {
+export class AnimationControls {
   readonly world: World
   #debug?: DebugGUI
   #pausedElapsedTime: number = 0

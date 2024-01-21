@@ -9,7 +9,7 @@ export const Game: React.FC = () => {
     if (canvasRef.current) {
       App(canvasRef.current)
         .build(new World())
-        .world.animations.run()
+        .animations.run()
 
       document.addEventListener('game:state', App().world.onEvent)
 

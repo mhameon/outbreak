@@ -44,6 +44,17 @@ export type SocketContextAction =
   | { type: 'player:leave:game', gameId: GameId }
   | { type: 'games:update', room: string, games: Array<Game> }
 
+export interface SocketContextProps {
+  socketState: SocketContextState;
+  dispatchSocketState: React.Dispatch<SocketContextAction>;
+}
+
+export const SocketContext = createContext<SocketContextProps>({
+  socketState: defaultSocketContextState,
+  dispatchSocketState: () => {
+  }
+})
+
 export const SocketReducer = (state: SocketContextState, payload: SocketContextAction): SocketContextState => {
   console.log('SocketReducer: Type=' + payload.type, payload)
 
@@ -117,17 +128,6 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
 
   return state
 }
-
-export interface SocketContextProps {
-  socketState: SocketContextState;
-  dispatchSocketState: React.Dispatch<SocketContextAction>;
-}
-
-export const SocketContext = createContext<SocketContextProps>({
-  socketState: defaultSocketContextState,
-  dispatchSocketState: () => {
-  }
-})
 
 export function isConnected (connection: ConnectionStatus) {
   return connection.status === ServerConnectionStatus.connected

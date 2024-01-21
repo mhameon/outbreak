@@ -1,5 +1,4 @@
-import { type Animate, type Clock, implementsAnimate } from '../interface/Animate'
-import { WorldAnimationController } from './WorldAnimationController'
+import { type Animate, type Clock, implementsAnimate } from './interface/Animate'
 
 /**
  * Base class representing the 3D World handled by the Engine.
@@ -8,12 +7,7 @@ import { WorldAnimationController } from './WorldAnimationController'
  * @see Engine.build()
  */
 export abstract class World implements Animate {
-  readonly animations: WorldAnimationController
   animatedAttributes: Array<Animate> = []
-
-  protected constructor () {
-    this.animations = new WorldAnimationController(this)
-  }
 
   /**
    * Register all attributes that implements `Animate` interface
@@ -56,7 +50,5 @@ export abstract class World implements Animate {
     }
   }
 
-  destroy () {
-    this.animations.destroy()
-  }
+  abstract destroy (): void
 }
