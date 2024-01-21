@@ -7,7 +7,7 @@ import { App, Engine } from './Engine'
 type Position = { x: number, y: number, z: number }
 
 export class Camera implements Resizable, Animate {
-  readonly instance!: THREE.PerspectiveCamera
+  readonly instance: THREE.PerspectiveCamera
   readonly controls: OrbitControls
 
   constructor (at: Position) {
@@ -43,7 +43,7 @@ export class Camera implements Resizable, Animate {
     return controls
   }
 
-  onResize () {
+  resize () {
     this.instance.aspect = App().display.aspectRatio
     this.instance.updateProjectionMatrix()
   }

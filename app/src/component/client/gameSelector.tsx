@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
+//import { isGameId } from '#shared/guards'
 import { SocketContext, isConnected } from '../../context/SocketContext'
 import type { GameId, Game } from '#shared/types'
 import Button from 'react-bootstrap/Button'

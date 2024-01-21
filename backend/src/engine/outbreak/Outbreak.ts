@@ -119,7 +119,8 @@ export class Outbreak extends EventEmitter<OutbreakEvents> implements Serializab
     return {
       id: this.id,
       turn: this.currentTurn,
-      map: this.map.serialize(playerId),
+      size: this.map.size,
+      map: this.map.serialize(playerId)
     }
   }
 }

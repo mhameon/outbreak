@@ -2,12 +2,11 @@ import * as THREE from 'three'
 import { Camera } from './Camera'
 import { Debug } from './Debug'
 import type { Animate } from './interface/Animate'
-import type { Resizable } from './interface/Resizable'
 import { Renderer } from './Renderer'
 import { Display } from './Display'
 import { World } from './world/World'
 
-export class Engine implements Resizable, Animate {
+export class Engine implements Animate {
   static #instance: Engine | null
 
   readonly canvas: HTMLCanvasElement
@@ -21,6 +20,9 @@ export class Engine implements Resizable, Animate {
 
   #world?: World
 
+  /**
+   * Get the  Engine instance (or create it when `canvas` is provided for the first time)
+   */
   static getInstance (canvas?: HTMLCanvasElement): Engine {
     if (!Engine.#instance) {
       if (!canvas) {
@@ -31,9 +33,13 @@ export class Engine implements Resizable, Animate {
     return Engine.#instance
   }
 
+  /**
+   * Singleton
+   * @see Engine.getInstance
+   */
   private constructor (canvas: HTMLCanvasElement) {
-    // Singleton assignation has to be done here too. Otherwise, Display, Camera, Renderer, etc. can't access to an
-    // initialized instance of `Engine.getInstance()`.
+    // `Engine.#instance` assignation has to be done here too. Otherwise, objects created in the constructor
+    // and using `Engine.getInstance()` (like Display, Camera, Renderer...) can't access it.
     Engine.#instance = this
 
     this.canvas = canvas
@@ -42,12 +48,6 @@ export class Engine implements Resizable, Animate {
     this.display = new Display()
     this.camera = new Camera({ x: 0, y: 20, z: 30 })
     this.renderer = new Renderer()
-    //this.#world = new World()
-
-    // Pixelate effect
-    // this.debug?.gui?.add(this.display, 'pixelRatio').min(0.005).max(2).step(0.025).onChange(v => {
-    //   this.renderer.onResize()
-    // })
 
     this.display.addEventListener('onResize', this.onResize.bind(this))
 
@@ -63,14 +63,14 @@ export class Engine implements Resizable, Animate {
 
   get world (): World {
     if (!this.#world) {
-      throw new Error('no world')
+      throw new Error('you have to `build(new World)` first')
     }
     return this.#world
   }
 
   onResize () {
-    this.camera.onResize()
-    this.renderer.onResize()
+    this.camera.resize()
+    this.renderer.resize()
   }
 
   animate () {
@@ -90,8 +90,8 @@ export class Engine implements Resizable, Animate {
             value.dispose()
           }
         }
-        child.geometry.dispose()
         child.material.dispose()
+        child.geometry.dispose()
       }
 
       if ((child as any)?.dispose instanceof Function) {
@@ -116,12 +116,15 @@ export class Engine implements Resizable, Animate {
     window.engine = null
     Engine.#instance = null
 
-    const memory = this.renderer.instance.info.memory
-    const shaders = this.renderer.instance.info.programs
-    if (memory.geometries > 0 || memory.textures > 0 || shaders?.length) {
+    const { memory, programs } = this.renderer.instance.info
+    if (memory.geometries > 0 || memory.textures > 0 || programs?.length) {
       console.warn('Bad memory cleanup!', this.renderer.instance.info)
     }
   }
 }
 
-export const App = (canvas?: HTMLCanvasElement) => Engine.getInstance(canvas)
+/**
+ * Facade for `Engine.getInstance()`
+ * @see Engine.getInstance
+ */
+export const App = (...args: Parameters<typeof Engine.getInstance>) => Engine.getInstance(...args)

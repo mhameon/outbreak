@@ -11,7 +11,12 @@ export const Game: React.FC = () => {
         .build(new World())
         .world.animations.run()
 
+      document.addEventListener('game:state', App().world.onEvent)
+
       return () => {
+        // Fixme document.removeEventListener don't work
+        document.removeEventListener('game:state', App().world.onEvent)
+
         App().destroy()
       }
     }

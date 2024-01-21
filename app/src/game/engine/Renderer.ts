@@ -1,42 +1,48 @@
 import * as THREE from 'three'
-import { App } from './Engine'
+import { Engine } from './Engine'
 
+/**
+ * Wrap a `THREE.WebGLRenderer`, handle resizing and animation loop
+ * @see THREE.WebGLRenderer
+ */
 export class Renderer {
   readonly instance: THREE.WebGLRenderer
 
-  constructor () {
-    this.instance = this.#setInstance()
-  }
+  readonly #engine = Engine.getInstance()
+  readonly #canvas = this.#engine.canvas
+  readonly #stats = this.#engine.debug.stats
+  readonly #display = this.#engine.display
+  readonly #scene = this.#engine.scene
+  readonly #camera = this.#engine.camera.instance
 
-  #setInstance (): THREE.WebGLRenderer {
-    const instance = new THREE.WebGLRenderer({
-      canvas: App().canvas,
+  constructor () {
+    this.instance = new THREE.WebGLRenderer({
+      canvas: this.#canvas,
       antialias: true
     })
+    this.configure()
+    this.resize()
 
-    instance.outputColorSpace = THREE.SRGBColorSpace
-    instance.shadowMap.enabled = true
-    instance.shadowMap.type = THREE.PCFSoftShadowMap
+    this.instance.setAnimationLoop(() => {
+      this.#stats?.begin()
 
-    instance.setClearColor('#211d20')
-    instance.setSize(App().display.width, App().display.height)
-    instance.setPixelRatio(App().display.pixelRatio)
+      this.#engine.animate()
+      this.instance.render(this.#scene, this.#camera)
 
-    instance.setAnimationLoop(() => {
-      App().debug.stats?.begin()
-
-      App().animate()
-      instance.render(App().scene, App().camera.instance)
-
-      App().debug.stats?.end()
+      this.#stats?.end()
     })
-
-    return instance
   }
 
-  onResize () {
-    this.instance.setSize(App().display.width, App().display.height)
-    this.instance.setPixelRatio(App().display.pixelRatio)
+  configure () {
+    this.instance.setClearColor('#211d20')
+    this.instance.outputColorSpace = THREE.SRGBColorSpace
+    this.instance.shadowMap.enabled = true
+    this.instance.shadowMap.type = THREE.PCFSoftShadowMap
+  }
+
+  resize () {
+    this.instance.setSize(this.#display.width, this.#display.height)
+    this.instance.setPixelRatio(this.#display.pixelRatio)
   }
 
   destroy () {

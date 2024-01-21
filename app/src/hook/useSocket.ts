@@ -4,15 +4,15 @@ import type { ManagerOptions, SocketOptions } from 'socket.io-client'
 import { Socket } from '../types'
 
 export const useSocket = (url: string, options?: Partial<ManagerOptions & SocketOptions>): Socket => {
-  const { current: socket } = useRef<Socket>(io(url, options))
+  const socket = useRef<Socket>(io(url, options))
 
   useEffect(() => {
     return () => {
-      if (socket) {
-        socket.close()
+      if (socket.current) {
+        socket.current.close()
       }
     }
-  }, [ socket ])
+  }, [ socket.current ])
 
-  return socket
+  return socket.current
 }

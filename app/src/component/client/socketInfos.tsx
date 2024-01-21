@@ -8,7 +8,7 @@ export interface SocketInfosProps {
 
 export function SocketInfos (props: SocketInfosProps) {
   const session = useContext(Session)
-  const { socketState: { socket, connection }, dispatchSocketState } = useContext(SocketContext)
+  const { socketState: { socket, connection } } = useContext(SocketContext)
 
   return <>
     <h2>Socket IO Information:</h2>

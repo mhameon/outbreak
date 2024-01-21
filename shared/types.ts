@@ -24,6 +24,7 @@ export type SerializedMap = any
 export type GameState = {
   id: GameId
   turn: number
+  size: Size
   map: SerializedMap
 }
 

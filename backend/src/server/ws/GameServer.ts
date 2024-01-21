@@ -255,7 +255,7 @@ export class GameServer {
           const client = this.#clients.get(socket.id)
           if (client) {
             socket.emit('msg', `Turn ${turn + 1} will begin...`)
-            socket.emit('game:state', outbreak.serialize(client.player.id))
+            socket.emit('game:state', outbreak.serialize(client.player.id)) // fixme
           }
         }
       })

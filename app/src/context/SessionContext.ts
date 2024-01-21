@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { ClientSessionData } from '#shared/types'
+import type { ClientSessionData } from 'shared/types'
 
 export interface SessionData extends ClientSessionData {
   isAuthenticated: boolean
@@ -11,11 +11,11 @@ export type SessionContext = {
   logout: () => Promise<void>
 }
 
-export const defaultSessionContextState: { get: SessionData } = {
+export const defaultSessionContext: { get: SessionData } = {
   get: {
     name: 'Unknown',
     isAuthenticated: false
   },
 }
 
-export const Session = createContext<SessionContext>(defaultSessionContextState as any)
+export const Session = createContext<SessionContext>(defaultSessionContext as any)

@@ -1,3 +1,3 @@
 export interface Resizable {
-  onResize (): void
+  resize (): void
 }

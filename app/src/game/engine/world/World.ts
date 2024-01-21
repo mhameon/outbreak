@@ -15,6 +15,9 @@ export abstract class World implements Animate {
     this.animations = new WorldAnimationController(this)
   }
 
+  /**
+   * Register all attributes that implements `Animate` interface
+   */
   registerAnimations () {
     this.animatedAttributes = Object.getOwnPropertyNames(this).reduce<Animate[]>((animates, property) => {
       const instance = (this as any)[property]
@@ -23,6 +26,28 @@ export abstract class World implements Animate {
       }
       return animates
     }, [])
+  }
+
+  /**
+   * If you need an event listener, just override the `onEvent` method.
+   *
+   * In your own `World` (inheriting of abstract World base class):
+   * @example
+   *  onEvent (event: CustomEvent | MouseEvent) {
+   *    // Do something regarding type of event
+   *  }
+   *
+   * `onEvent()` can be triggered by using you own CustomEvent:
+   * @example
+   *   document.addEventListener('myCustomEventType', App().world.onEvent)
+   *   ...
+   *   document.dispatchEvent(new CustomEvent('myCustomEventType', { detail }))
+   *
+   * Or via a classic DOM or React event:
+   * @example
+   *   <canvas onMouseMove={ (e) => App().world.onEvent(e) } />
+   */
+  onEvent (event: any) {
   }
 
   animate (clock: Clock) {

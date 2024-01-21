@@ -1,11 +1,11 @@
 import React, { PropsWithChildren, useState, useEffect, useMemo } from 'react'
-import { Session, defaultSessionContextState, SessionData, SessionContext } from '../SessionContext'
+import { Session, defaultSessionContext, SessionData, SessionContext } from '../SessionContext'
 import { useLocalStorage } from 'usehooks-ts'
 import { useApi } from '../../hook/useApi'
 
 export const SessionProvider = ({ children }: PropsWithChildren) => {
   const [ localSessionStorage, setLocalSessionStorage ] = useLocalStorage<SessionData | undefined>('session', undefined)
-  const [ session, setSession ] = useState(localSessionStorage ? { get: localSessionStorage } : defaultSessionContextState)
+  const [ session, setSession ] = useState(localSessionStorage ? { get: localSessionStorage } : defaultSessionContext)
   const { get, post } = useApi()
 
   const context = useMemo<SessionContext>(() => ({
@@ -16,7 +16,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       setLocalSessionStorage(session)
     },
     logout: async () => {
-      setSession(defaultSessionContextState)
+      setSession(defaultSessionContext)
       setLocalSessionStorage(undefined)
       await post('/logout')
     }
@@ -31,7 +31,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       })
       .catch(e => {
         if (e.code === 'ERR_NETWORK' || e.response?.status === 401) {
-          setSession(defaultSessionContextState)
+          setSession(defaultSessionContext)
           setLocalSessionStorage(undefined)
           // TODO error toast
         }

@@ -1,5 +1,5 @@
 import React, { createContext } from 'react'
-import { GameId, Nullable, Game } from '../../../shared/types'
+import { GameId, Nullable, Game } from '#shared/types'
 import { Socket } from '../types'
 
 export enum ServerConnectionStatus {
@@ -35,7 +35,7 @@ export const defaultSocketContextState: SocketContextState = {
   }
 }
 
-type SocketContextAction =
+export type SocketContextAction =
   | { type: 'init:socket', socket: Socket }
   | { type: 'server:connect' }
   | { type: 'server:disconnect' }
@@ -50,37 +50,44 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
   const isOnline = isConnected(state.connection)
 
   switch (payload.type) {
-    case 'init:socket':
+    case 'init:socket': {
       return { ...state, socket: payload.socket }
+    }
 
-    case 'server:connect' :
+    case 'server:connect' : {
       if (state.socket) {
         state.socket.connect()
         return { ...state, connection: { status: ServerConnectionStatus.connecting } }
       }
       break
+    }
 
-    case 'server:disconnect':
+    case 'server:disconnect': {
       if (state.socket) {
         state.socket.disconnect()
         return { ...state, connection: { status: ServerConnectionStatus.disconnected } }
       }
       break
+    }
 
-    case 'socket:connection:status':
+    case 'socket:connection:status': {
       return { ...state, connection: { status: payload.status, attempt: payload.attempt } }
+    }
 
-    case 'player:join:game':
+    case 'player:join:game': {
       if (isConnected(state.connection)) {
         state.socket?.emit(
           'player:join:game',
           { requestedGameId: payload.requestGameId ?? null },
-          (gameId) => console.log(gameId)
+          (gameId) => {
+            console.log('server ack', gameId)
+          }
         )
       }
       break
+    }
 
-    case 'player:leave:game':
+    case 'player:leave:game': {
       if (isOnline) {
         const gameId: GameId = 'game_something' // fixme get real current game
         state.socket?.emit('player:leave:game', gameId, ({ ok }) => {
@@ -88,8 +95,9 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
         })
       }
       break
+    }
 
-    case 'games:update':
+    case 'games:update': {
       if (isOnline) {
         //if (state.connection.room !== payload.room) {
         return { ...state, connection: { ...state.connection, room: payload.room }, lobby: { games: payload.games } }
@@ -100,6 +108,11 @@ export const SocketReducer = (state: SocketContextState, payload: SocketContextA
         // }
       }
       break
+    }
+
+    default: {
+      throw Error('Unknown case', payload)
+    }
   }
 
   return state

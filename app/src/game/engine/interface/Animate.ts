@@ -10,6 +10,10 @@ export type { Clock }
  * @see Renderer
  */
 export interface Animate {
+  /**
+   * Called for your on each frame
+   * @see THREE.Renderer.setAnimationLoop
+   */
   animate: (clock: Clock) => void
 }
 
