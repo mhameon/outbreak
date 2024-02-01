@@ -1,4 +1,5 @@
-import { Tile, Direction, Coords, Index } from '#engine/types'
+import { Tile, Direction, Index } from '#engine/types'
+import type { Coords } from '#shared/types'
 
 export type EntityId = string
 

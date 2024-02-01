@@ -1,5 +1,5 @@
-import { Coords } from '#engine/types'
 import { calculateDestination, line } from '#engine/math/geometry'
+import type { Coords } from '#shared/types'
 
 
 export function explosion (at: Coords, intensity: number): Set<Coords> {

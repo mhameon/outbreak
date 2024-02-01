@@ -1,6 +1,6 @@
 import { CommandLineInterface } from '#server/cli/CommandLineInterface'
 import { Outbreak } from '#engine/outbreak/index'
-import { Coords, RenderTile, Direction } from '#engine/types'
+import { RenderTile, Direction } from '#engine/types'
 import { stringifyTiles } from '#engine/map/WorldMapErrors'
 import { AsciiMapRenderer } from '#engine/renderer/ascii/AsciiMapRenderer'
 import assert from 'assert'
@@ -8,7 +8,7 @@ import { InvalidArgumentError } from '#common/Errors'
 import { getRenderTile } from '#engine/map/tilerules'
 import { isZombie, hasFacingProperty } from '#engine/outbreak/entities/guards'
 import { Attitude, EntityType, EntityId } from '#engine/outbreak/entities/types'
-import { Nullable } from '#shared/types'
+import { type Coords, Nullable } from '#shared/types'
 
 export function registerGameControlCommands (cli: CommandLineInterface, getOutbreak: () => Nullable<Outbreak>): void {
   cli

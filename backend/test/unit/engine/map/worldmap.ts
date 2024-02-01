@@ -1,5 +1,6 @@
 import { WorldMap } from '#engine/map/WorldMap'
-import { Tile, Direction, Tileset, Coords } from '#engine/types'
+import { Tile, Direction, Tileset } from '#engine/types'
+import type { Coords } from '#shared/types'
 
 import * as assert from '../../../assert'
 import { InvalidArgumentError } from '#common/Errors'

@@ -1,4 +1,5 @@
-import { RenderTile, Coords } from '#engine/types'
+import { RenderTile } from '#engine/types'
+import type { Coords } from '#shared/types'
 import chalk from 'chalk'
 import { getRenderTile } from '#engine/map/tilerules'
 import { WorldMap } from '#engine/map/WorldMap'

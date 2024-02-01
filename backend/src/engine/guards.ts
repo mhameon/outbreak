@@ -3,7 +3,8 @@ import { isNumber } from '#common/guards'
 import { isObject } from '#shared/guards'
 import { WorldMap } from '#engine/map/WorldMap'
 import { EntityType } from '#engine/outbreak/entities/types'
-import type { Coords, Index, Matrix2d } from '#engine/types'
+import type { Index, Matrix2d } from '#engine/types'
+import type { Coords } from '#shared/types'
 
 const isSomeEnum = <T extends {
   [n: number | string]: unknown

@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { ClientSessionData } from 'shared/types'
+import type { ClientSessionData } from '#shared/types'
 
 export interface SessionData extends ClientSessionData {
   isAuthenticated: boolean

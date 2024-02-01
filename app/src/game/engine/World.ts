@@ -1,4 +1,6 @@
 import { type Animate, type Clock, implementsAnimate } from './interface/Animate'
+import { type Destroyable, implementsDestroyable } from './interface/Destroyable'
+import { fetchPropertiesOf, forEachPropertyOf } from './utils/object'
 
 /**
  * Base class representing the 3D World handled by the Engine.
@@ -6,26 +8,20 @@ import { type Animate, type Clock, implementsAnimate } from './interface/Animate
  *
  * @see Engine.build()
  */
-export abstract class World implements Animate {
-  animatedAttributes: Array<Animate> = []
+export abstract class World implements Animate, Destroyable {
+  animatedProperties: Array<Animate> = []
 
   /**
    * Register all attributes that implements `Animate` interface
    */
   registerAnimations () {
-    this.animatedAttributes = Object.getOwnPropertyNames(this).reduce<Animate[]>((animates, property) => {
-      const instance = (this as any)[property]
-      if (implementsAnimate(instance)) {
-        animates.push(instance)
-      }
-      return animates
-    }, [])
+    this.animatedProperties = Array.from(fetchPropertiesOf(this, implementsAnimate))
   }
 
   /**
-   * If you need an event listener, just override the `onEvent` method.
+   * If your World requires an event listener, just override the `onEvent` method.
    *
-   * In your own `World` (inheriting of abstract World base class):
+   * In your own `World` (inheriting this abstract World class):
    * @example
    *  onEvent (event: CustomEvent | MouseEvent) {
    *    // Do something regarding type of event
@@ -45,10 +41,13 @@ export abstract class World implements Animate {
   }
 
   animate (clock: Clock) {
-    for (const animatable of this.animatedAttributes) {
+    for (const animatable of this.animatedProperties) {
       animatable.animate(clock)
     }
   }
 
-  abstract destroy (): void
+  destroy () {
+    forEachPropertyOf(this, implementsDestroyable, call => call.destroy())
+    this.animatedProperties = []
+  }
 }

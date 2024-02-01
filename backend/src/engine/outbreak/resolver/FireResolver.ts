@@ -1,5 +1,6 @@
-import { Coords, Tile, Tileset } from '#engine/types'
+import { Tile, Tileset } from '#engine/types'
 import { calculateDestination } from '#engine/math/geometry'
+import type { Coords } from '#shared/types'
 import { Resolver } from './Resolver'
 import { random } from '#engine/math'
 

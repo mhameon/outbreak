@@ -1,19 +1,21 @@
+import { Core } from './Core'
 import type { DebugGUI } from './Debug'
-import { App } from './Engine'
+import type { Destroyable } from './interface/Destroyable'
 import { World } from './World'
 
-export class AnimationControls {
+export class AnimationControls extends Core implements Destroyable {
   readonly world: World
-  #debug?: DebugGUI
+  #debugPanel?: DebugGUI
   #pausedElapsedTime: number = 0
 
   constructor (world: World) {
+    super()
     this.world = world
-    this.#setDebug()
+    this.#setDebugPanel()
   }
 
-  #setDebug () {
-    this.#debug = App().debug.addFolder(this)
+  #setDebugPanel () {
+    this.#debugPanel = this.debug.addFolder(this)
 
     const vcr = {
       run: () => {
@@ -29,26 +31,30 @@ export class AnimationControls {
     }
 
     const button = {
-      run: this.#debug?.add(vcr, 'run'),
-      pause: this.#debug?.add(vcr, 'pause')
+      run: this.#debugPanel?.add(vcr, 'run'),
+      pause: this.#debugPanel?.add(vcr, 'pause')
     }
-    button[App().clock.running ? 'pause' : 'run']?.disable()
+    button[this.clock.running ? 'pause' : 'run']?.disable()
   }
 
   run () {
     this.world.registerAnimations()
 
-    App().clock.start()
-    App().clock.elapsedTime = this.#pausedElapsedTime
+    this.clock.start()
+    this.clock.elapsedTime = this.#pausedElapsedTime
+    this.camera.controls.enabled = true
+    this.renderer.instance.setAnimationLoop(() => this.renderer.tick())
   }
 
   pause () {
-    this.#pausedElapsedTime = App().clock.elapsedTime
-    App().clock.stop()
+    this.#pausedElapsedTime = this.clock.elapsedTime
+    this.clock.stop()
+    this.camera.controls.enabled = false
+    this.renderer.instance.setAnimationLoop(null)
   }
 
   destroy () {
-    this.#debug?.destroy()
+    this.#debugPanel?.destroy()
   }
 
 }

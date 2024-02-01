@@ -1,6 +1,5 @@
 import { Values } from '#common/types'
-
-export type Coords = { x: number; y: number }
+import type { Coords } from '#shared/types'
 
 /**
  * ```

@@ -7,17 +7,19 @@ export const Game: React.FC = () => {
 
   useEffect(() => {
     if (canvasRef.current) {
-      App(canvasRef.current)
-        .build(new World())
-        .animations.run()
+      const app = App(canvasRef.current).build(new World())
+      app.animations.run()
 
-      document.addEventListener('game:state', App().world.onEvent)
+      const handler = (e: any) => {
+        console.log(e)
+        app.world.onEvent(e)
+      }
+      document.addEventListener('game:state', handler)
 
       return () => {
         // Fixme document.removeEventListener don't work
-        document.removeEventListener('game:state', App().world.onEvent)
-
-        App().destroy()
+        document.removeEventListener('game:state', handler)
+        app.destroy()
       }
     }
   }, [])
@@ -25,5 +27,15 @@ export const Game: React.FC = () => {
   return <canvas
     ref={canvasRef}
     id="webgl"
+    // onClick={() => {
+    //   try {
+    //     App().destroy()
+    //   } catch (e) {
+    //     if (canvasRef.current) {
+    //       const app = App(canvasRef.current).build(new World())
+    //       app.animations.run()
+    //     }
+    //   }
+    // }}
   />
 }

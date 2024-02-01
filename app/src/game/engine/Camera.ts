@@ -1,12 +1,16 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Animate, Clock } from './interface/Animate'
+import type { Destroyable } from './interface/Destroyable'
 import type { Resizable } from './interface/Resizable'
-import { App, Engine } from './Engine'
+import { Engine } from './Engine'
 
 type Position = { x: number, y: number, z: number }
 
-export class Camera implements Resizable, Animate {
+export class Camera implements Resizable, Animate, Destroyable {
+  readonly #engine = Engine.getInstance()
+  readonly #screen = this.#engine.display
+
   readonly instance: THREE.PerspectiveCamera
   readonly controls: OrbitControls
 
@@ -18,18 +22,24 @@ export class Camera implements Resizable, Animate {
   #createCamera ({ x, y, z }: Position): THREE.PerspectiveCamera {
     const instance = new THREE.PerspectiveCamera(
       35,
-      App().display.aspectRatio,
+      this.#screen.aspectRatio,
       .1,
       100
     )
     instance.position.set(x, y, z)
-    App().scene.add(instance)
+    instance.far = 100_000_000
+
+
+    const helper = new THREE.CameraHelper(instance)
+
+    this.#engine.scene.add(instance, helper)
 
     return instance
   }
 
   #createControls (): OrbitControls {
-    const controls = new OrbitControls(this.instance, App().canvas)
+    //type OrbitControlsConfig = Partial<ClassProperties<OrbitControls>>
+    const controls = new OrbitControls(this.instance, this.#engine.canvas)
     controls.enableDamping = true
 
     controls.listenToKeyEvents(window)
@@ -44,7 +54,7 @@ export class Camera implements Resizable, Animate {
   }
 
   resize () {
-    this.instance.aspect = App().display.aspectRatio
+    this.instance.aspect = this.#screen.aspectRatio
     this.instance.updateProjectionMatrix()
   }
 
@@ -54,5 +64,9 @@ export class Camera implements Resizable, Animate {
 
   destroy () {
     this.controls.dispose()
+    this.instance.remove()
+
+    delete (this as any).instance
+    delete (this as any).controls
   }
 }

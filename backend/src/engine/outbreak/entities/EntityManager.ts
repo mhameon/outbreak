@@ -1,5 +1,4 @@
 import { EventEmitter } from '#common/TypedEventEmitter'
-import type { Coords } from '#engine/types'
 import { Direction } from '#engine/types'
 import type { Logger } from '#common/logger'
 import { Outbreak } from '#engine/outbreak/index'
@@ -29,7 +28,7 @@ import {
   QueryableEntityAttribute,
   QUERYABLE_ENTITY_ATTRIBUTES, EntityQueryFilters, QueryableEntityAttributeType
 } from '#engine/outbreak/entities/types'
-import { Nullable } from '#shared/types'
+import { type Coords, Nullable } from '#shared/types'
 import { isEqual } from 'lodash'
 import { toDegrees } from '#engine/helpers'
 

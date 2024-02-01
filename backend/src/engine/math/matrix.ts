@@ -1,9 +1,9 @@
 import { isMatrix2d } from '#engine/guards'
-import { Coords, Matrix, Matrix2d } from '#engine/types'
+import { Matrix, Matrix2d } from '#engine/types'
 import { validate } from '#common/validator'
 import chalk from 'chalk'
 import { color, Gradient } from '#engine/math/color'
-import { Size } from '#shared/types'
+import { type Coords, Size } from '#shared/types'
 import { isNumber } from '#common/guards'
 
 type MatrixEntry = Matrix | number

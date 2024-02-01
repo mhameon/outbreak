@@ -1,8 +1,13 @@
+import type { Coords } from '#shared/types'
 import assert from 'assert'
-import type { Tile, Coords } from '#engine/types'
+import type { Tile } from '#engine/types'
 import type { WorldMapEvents } from '#engine/events'
 
-export function deepTileAddedEqual (actual: Array<WorldMapEvents['tile:added']>, expected: Array<{ tile: Tile; at: Coords; originalTileset: Array<Tile> }>): void {
+export function deepTileAddedEqual (actual: Array<WorldMapEvents['tile:added']>, expected: Array<{
+  tile: Tile
+  at: Coords
+  originalTileset: Array<Tile>
+}>): void {
   assert.ok(actual.length === expected.length)
   expected.forEach((event, index) => {
     assert.strictEqual(event.tile, expected[index].tile)

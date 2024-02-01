@@ -1,10 +1,11 @@
 import { matrix, NoiseFactory, random } from '#engine/math'
 import MapBuilder from '#engine/map/builder/MapBuilder'
 import { WorldMap } from '#engine/map/WorldMap'
-import { Tile, BuildingLevel, Coords } from '#engine/types'
+import { Tile, BuildingLevel } from '#engine/types'
 import { line, groupAdjacent, calculateCentroid, prim } from '#engine/math/geometry'
 import { EntityManager } from '#engine/outbreak/entities/EntityManager'
 import { EntityType } from '#engine/outbreak/entities/types'
+import type { Coords } from '#shared/types'
 
 const { normalize, cap } = matrix
 

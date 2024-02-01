@@ -55,3 +55,5 @@ export interface ClientSessionData {
   name: Session['user']['name']
   room?: Session['room']
 }
+
+export type Coords = { x: number; y: number }

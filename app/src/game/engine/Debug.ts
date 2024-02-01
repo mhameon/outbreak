@@ -1,23 +1,32 @@
 import { GUI as DebugGUI } from 'three/examples/jsm/libs/lil-gui.module.min'
 import Stats from 'three/examples/jsm/libs/stats.module'
-import { isObject } from './utils'
+import type { Destroyable } from './interface/Destroyable'
+import { isObject } from './utils/object'
 
 export { DebugGUI }
 
-export class Debug {
+export class Debug implements Destroyable {
   gui?: DebugGUI
-  readonly stats?: Stats
-  readonly enabled = process.env.NODE_ENV === 'development'
+  #stats?: Stats
+  static readonly enabled = process.env.NODE_ENV === 'development'
 
   constructor () {
-    if (this.enabled) {
+    if (Debug.enabled) {
       this.gui = new DebugGUI()
 
-      this.stats = new Stats()
-      this.stats.showPanel(0)
-      document.body.appendChild(this.stats.dom)
-      this.stats.dom.className = 'stats-js'
+      this.#stats = new Stats()
+      this.#stats.showPanel(0)
+      this.#stats.dom.className = 'stats-js'
+      document.body.appendChild(this.#stats.dom)
     }
+  }
+
+  get enabled () {
+    return Debug.enabled
+  }
+
+  get stats (): Stats | undefined {
+    return this.#stats
   }
 
   addFolder (label?: string | Object): DebugGUI | undefined {
@@ -31,9 +40,11 @@ export class Debug {
   destroy () {
     if (this.gui) {
       this.gui.destroy()
+      this.gui = undefined
     }
-    if (this.stats?.dom) {
-      document.body.removeChild(this.stats.dom)
+    if (this.#stats?.dom) {
+      document.body.removeChild(this.#stats.dom)
+      this.#stats = undefined
     }
   }
 }

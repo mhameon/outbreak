@@ -1,4 +1,4 @@
-import { Coords } from '#engine/types'
+import type { Coords } from '#shared/types'
 
 export type Node = {
   at: Coords

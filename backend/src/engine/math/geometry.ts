@@ -1,5 +1,5 @@
-import { Coords, Direction } from '#engine/types'
-import { Nullable } from '#shared/types'
+import { Direction } from '#engine/types'
+import { type Coords, Nullable } from '#shared/types'
 import { isNumber } from '#common/guards'
 import { isCoords } from '#engine/guards'
 import { InvalidArgumentError } from '#common/Errors'

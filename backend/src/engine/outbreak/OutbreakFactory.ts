@@ -6,7 +6,7 @@ import type { Seed } from '#engine/types'
 
 // Todo OutbreakFactory.create will take options (map theme, size range: small, medium, big, max players?...
 const defaultOptions: OutbreakOptions = {
-  size: { width: 100, height: 20 },
+  size: { width: 50, height: 50 },
   wind: { angle: 45, force: 6 }
 }
 

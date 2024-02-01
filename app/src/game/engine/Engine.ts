@@ -1,17 +1,27 @@
 import * as THREE from 'three'
 import { AnimationControls } from './AnimationControls'
 import { Camera } from './Camera'
+import type { CoreComponents } from './Core'
 import { Debug } from './Debug'
-import type { Animate } from './interface/Animate'
+import { type Animate } from './interface/Animate'
+import { type Destroyable, implementsDestroyable } from './interface/Destroyable'
 import { Renderer } from './Renderer'
 import { Display } from './Display'
+import { disposeRecursively } from './utils/dispose'
+import { deleteAttributes, forEachPropertyOf } from './utils/object'
 import { World } from './World'
 
-export class Engine implements Animate {
+/**
+ * Root class that manage Three.js application
+ *
+ * @todo
+ *  - Loaders (textures & models)
+ *  - workers?
+ */
+export class Engine implements CoreComponents, Animate, Destroyable {
   static #instance: Engine | null
 
   readonly canvas: HTMLCanvasElement
-
   readonly clock = new THREE.Clock(false)
   readonly scene = new THREE.Scene()
   readonly display: Display
@@ -22,13 +32,16 @@ export class Engine implements Animate {
   #world?: World
   #animation?: AnimationControls
 
+  #resizeHandler = this.onResize.bind(this)
+
   /**
-   * Get the  Engine instance (or create it when `canvas` is provided for the first time)
+   * Get the `Engine` instance
+   * @throws {Error} when the instance doesn't exist (call it with `canvas` parameter first)
    */
   static getInstance (canvas?: HTMLCanvasElement): Engine {
     if (!Engine.#instance) {
       if (!canvas) {
-        throw new Error('missing `canvas` parameter')
+        throw new Error('can\'t access to an uninitialized instance of Engine')
       }
       Engine.#instance = new Engine(canvas)
     }
@@ -40,19 +53,23 @@ export class Engine implements Animate {
    * @see Engine.getInstance
    */
   private constructor (canvas: HTMLCanvasElement) {
-    // `Engine.#instance` assignation has to be done here too. Otherwise, objects created in the constructor
-    // and using `Engine.getInstance()` (like Display, Camera, Renderer...) can't access it.
+    // `Engine.#instance` assignation has to be done here too. Otherwise, Core objects created in the constructor
+    // and using `Engine.getInstance()` internally will throw.
     Engine.#instance = this
 
     this.canvas = canvas
 
-    // this.resources = new Resources(sources)
     this.display = new Display()
-    this.camera = new Camera({ x: 0, y: 20, z: 30 })
+    this.display.addEventListener('onResize', this.#resizeHandler)
+
+    this.camera = new Camera({ x: 0, y: 20, z: 30 }) // todo do not do that here
+
     this.renderer = new Renderer()
-
-    this.display.addEventListener('onResize', this.onResize.bind(this))
-
+    window.addEventListener('beforeunload', (e) => {
+      console.log(e)
+      //e.preventDefault()
+      this.destroy()
+    })
     if (this.debug.enabled) {
       window.engine = this
     }
@@ -66,14 +83,14 @@ export class Engine implements Animate {
 
   get world (): World {
     if (!this.#world) {
-      throw new Error('you have to `build(new World)` first')
+      throw new Error('you have to `build(new World())` first')
     }
     return this.#world
   }
 
   get animations (): AnimationControls {
     if (!this.#animation) {
-      throw new Error('you have to `build(new World)` first')
+      throw new Error('you have to `build(new World())` first')
     }
     return this.#animation
   }
@@ -85,52 +102,27 @@ export class Engine implements Animate {
 
   animate () {
     this.camera.animate(this.clock)
-    this.world?.animate(this.clock)
+    this.#world?.animate(this.clock)
   }
 
   destroy () {
-    this.display.removeEventListener('onResize', this.onResize.bind(this))
+    this.display.removeEventListener('onResize', this.#resizeHandler)
 
-    this.scene.traverse(child => {
-      // noinspection SuspiciousTypeOfGuard
-      if (child instanceof THREE.Mesh) {
-        for (const attr in child.material) {
-          const value = child.material[attr]
-          if (value?.dispose instanceof Function) {
-            value.dispose()
-          }
-        }
-        child.material.dispose()
-        child.geometry.dispose()
-      }
-
-      if ((child as any)?.dispose instanceof Function) {
-        (child as any).dispose()
-      }
-    })
-
-    // todo cleanup textures
-    // for(const texture in this.resources.items){
-    //   if(this.resources.items[texture]?.dispose instanceof Function){
-    //     console.log(texture)
-    //     this.resources.items[texture].dispose()
-    //   }
-    // }
-
-    this.camera.destroy()
-    this.renderer.destroy()
-    this.display.destroy()
-    this.debug.destroy()
-    this.#world?.destroy()
-    this.#animation?.destroy()
-
-    window.engine = null
-    Engine.#instance = null
-
+    disposeRecursively(this.scene)
     const { memory, programs } = this.renderer.instance.info
     if (memory.geometries > 0 || memory.textures > 0 || programs?.length) {
       console.warn('Bad memory cleanup!', this.renderer.instance.info)
     }
+
+    forEachPropertyOf(this, implementsDestroyable, call => call.destroy())
+    this.#world?.destroy()
+    deleteAttributes([ 'camera', 'canvas', 'clock', 'debug', 'display', 'renderer', 'scene' ], this)
+
+    this.#world = undefined
+    this.#animation = undefined
+
+    window.engine = null
+    Engine.#instance = null
   }
 }
 

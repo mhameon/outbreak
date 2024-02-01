@@ -1,19 +1,22 @@
 import { EventDispatcher } from 'three'
+import type { Destroyable } from './interface/Destroyable'
 
 export interface DisplayEventMap {
   onResize: {}
 }
 
-export class Display extends EventDispatcher<DisplayEventMap> {
+export class Display extends EventDispatcher<DisplayEventMap> implements Destroyable {
   #width!: number
   #height!: number
   #aspectRatio!: number
   #pixelRatio!: number
 
+  #resizeHandler = this.#onResize.bind(this)
+
   constructor () {
     super()
     this.#setSize()
-    window.addEventListener('resize', this.#onResize.bind(this))
+    window.addEventListener('resize', this.#resizeHandler)
   }
 
   #setSize () {
@@ -49,6 +52,6 @@ export class Display extends EventDispatcher<DisplayEventMap> {
   }
 
   destroy () {
-    window.removeEventListener('resize', this.#onResize.bind(this))
+    window.removeEventListener('resize', this.#resizeHandler)
   }
 }
