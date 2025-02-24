@@ -1,4 +1,4 @@
-import { deleteAttributes } from './engine/utils/object'
+import { deleteAttributesOf } from './engine/utils/object'
 import { World as AbstractWorld } from './engine/World'
 import { Environment } from './world/Environment'
 import { City } from './world/City'
@@ -32,6 +32,6 @@ export class World extends AbstractWorld {
 
   destroy () {
     super.destroy()
-    deleteAttributes([ 'environment' ], this)
+    deleteAttributesOf(this, 'environment')
   }
 }

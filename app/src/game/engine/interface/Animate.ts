@@ -17,4 +17,4 @@ export interface Animate {
   animate (clock: Clock): void
 }
 
-export const implementsAnimate = (o: unknown): o is Animate => isObject(o) && 'animate' in o
+export const implementsAnimate = (instance: unknown): instance is Animate => isObject(instance) && 'animate' in instance

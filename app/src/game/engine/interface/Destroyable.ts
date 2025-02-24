@@ -4,4 +4,4 @@ export interface Destroyable {
   destroy (): void
 }
 
-export const implementsDestroyable = (o: unknown): o is Destroyable => isObject(o) && 'destroy' in o
+export const implementsDestroyable = (instance: unknown): instance is Destroyable => isObject(instance) && 'destroy' in instance

@@ -21,21 +21,24 @@ export abstract class World implements Animate, Destroyable {
   /**
    * If your World requires an event listener, just override the `onEvent` method.
    *
-   * In your own `World` (inheriting this abstract World class):
-   * @example
+   * @example In your own `World` class (inheriting this abstract World class)
+   * ```
    *  onEvent (event: CustomEvent | MouseEvent) {
    *    // Do something regarding type of event
    *  }
+   * ```
    *
-   * `onEvent()` can be triggered by using you own CustomEvent:
-   * @example
+   * @example `onEvent()` can be triggered by using you own CustomEvent
+   * ```
    *   document.addEventListener('myCustomEventType', App().world.onEvent)
    *   ...
    *   document.dispatchEvent(new CustomEvent('myCustomEventType', { detail }))
+   * ```
    *
-   * Or via a classic DOM or React event:
-   * @example
+   * @example or via a classic DOM or React event
+   * ```
    *   <canvas onMouseMove={ (e) => App().world.onEvent(e) } />
+   * ```
    */
   onEvent (event: any) {
   }

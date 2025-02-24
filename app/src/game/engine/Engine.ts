@@ -8,8 +8,14 @@ import { type Destroyable, implementsDestroyable } from './interface/Destroyable
 import { Renderer } from './Renderer'
 import { Display } from './Display'
 import { disposeRecursively } from './utils/dispose'
-import { deleteAttributes, forEachPropertyOf } from './utils/object'
+import { deleteAttributesOf, forEachPropertyOf } from './utils/object'
 import { World } from './World'
+
+/**
+ * Facade for `Engine.getInstance()`
+ * @see Engine.getInstance
+ */
+export const App = (...args: Parameters<typeof Engine.getInstance>) => Engine.getInstance(...args)
 
 /**
  * Root class that manage Three.js application
@@ -29,6 +35,7 @@ export class Engine implements CoreComponents, Animate, Destroyable {
   readonly renderer: Renderer
   readonly debug = new Debug()
 
+  // `#world` and `#animation` are instantiated by `Engine.build(world: World)` call
   #world?: World
   #animation?: AnimationControls
 
@@ -113,10 +120,9 @@ export class Engine implements CoreComponents, Animate, Destroyable {
     if (memory.geometries > 0 || memory.textures > 0 || programs?.length) {
       console.warn('Bad memory cleanup!', this.renderer.instance.info)
     }
-
     forEachPropertyOf(this, implementsDestroyable, call => call.destroy())
     this.#world?.destroy()
-    deleteAttributes([ 'camera', 'canvas', 'clock', 'debug', 'display', 'renderer', 'scene' ], this)
+    deleteAttributesOf(this, [ 'camera', 'canvas', 'clock', 'debug', 'display', 'renderer', 'scene' ])
 
     this.#world = undefined
     this.#animation = undefined
@@ -125,9 +131,3 @@ export class Engine implements CoreComponents, Animate, Destroyable {
     Engine.#instance = null
   }
 }
-
-/**
- * Facade for `Engine.getInstance()`
- * @see Engine.getInstance
- */
-export const App = (...args: Parameters<typeof Engine.getInstance>) => Engine.getInstance(...args)

@@ -6,11 +6,12 @@ export const Game: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (canvasRef.current) {
-      const app = App(canvasRef.current).build(new World())
+    const canvas = canvasRef.current
+    if (canvas) {
+      const app = App(canvas).build(new World())
       app.animations.run()
 
-      const handler = (e: any) => {
+      const handler = (e: Event) => {
         console.log(e)
         app.world.onEvent(e)
       }

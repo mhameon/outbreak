@@ -12,8 +12,8 @@ export class Environment extends Core {
   constructor () {
     super()
 
-    // const fog = new THREE.Fog('#262837', 1, 300)
-    // this.scene.fog = fog
+    const fog = new THREE.Fog('#262837', 1, 300)
+    this.scene.fog = fog
     this.scene.background = new THREE.Color('#262837')
 
     this.setSunLight()

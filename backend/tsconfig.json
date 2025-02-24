@@ -1,40 +1,39 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "target": "ES2020",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "incremental": true,
     "lib": [
       "ES2020"
     ],
-    "allowSyntheticDefaultImports": true,
     "module": "CommonJS",
-    "strict": true,
-    "outDir": "./build",
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "incremental": true,
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "moduleResolution": "Node",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "importHelpers": true,
     "noErrorTruncation": true,
-    "baseUrl": ".",
+    "outDir": "./build",
     "paths": {
+      "#common/*": [
+        "./src/common/*"
+      ],
       "#engine/*": [
         "./src/engine/*"
       ],
       "#server/*": [
         "./src/server/*"
       ],
-      "#common/*": [
-        "./src/common/*"
-      ],
       "#shared/*": [
         "../shared/*"
       ]
-    }
+    },
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2020"
   },
   "include": [
     "src",

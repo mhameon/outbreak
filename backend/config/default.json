@@ -16,7 +16,7 @@
     }
   },
   "logger": {
-    "level": "http",
+    "level": "silly",
     "exception": true
   }
 }

@@ -84,7 +84,7 @@ export class GameServer {
       registerSocketEventLogger(socket, this.log)
       const session = socket.request.session
 
-      // reload the session on each incoming packet to be able to use up to date `socket.request.session` in
+      // reload the session on each incoming packet to have an up to date `socket.request.session` in
       // each listener. DON'T FORGET to call `socket.request.session.save()` to apply session update.
       socket.use((__, next) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
