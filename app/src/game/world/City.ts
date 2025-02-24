@@ -27,7 +27,7 @@ export class City extends Core {
   }
 
   setMap ({ id, turn, size, map }: { id: GameId, turn: number, size: Size, map: SerializedMap }) {
-    this.#ground = new Ground(size)
+    this.#ground = new Ground(size) // todo singleton
     this.city.add(this.#ground?.mesh)
 
     map.forEach(([ index, tileset ]) => {
