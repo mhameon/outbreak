@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from 'react-bootstrap'
 import { ErrorBoundary } from '../component/common/ErrorBoundary'
-import { NavigationBar } from '../component/navigationBar'
+import { NavigationBar } from '../component/NavigationBar'
 import { Outlet } from 'react-router-dom'
 
 export const Root = () => {
